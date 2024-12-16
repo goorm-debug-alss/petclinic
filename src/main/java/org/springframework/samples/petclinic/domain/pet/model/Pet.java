@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.domain.pet;
+package org.springframework.samples.petclinic.domain.pet.model;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.CascadeType;
@@ -29,57 +33,34 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import org.springframework.samples.petclinic.domain.owner.Visit;
+import org.springframework.samples.petclinic.domain.owner.model.Owner;
+import org.springframework.samples.petclinic.domain.visit.model.Visit;
+import org.springframework.samples.petclinic.model.BaseEntity;
 
-/**
- * Simple business object representing a pet.
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @author Wick Dynex
- */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@SuperBuilder
 @Entity
 @Table(name = "pets")
-public class Pet extends NamedEntity {
+public class Pet extends BaseEntity {
+	@Column(length = 15, nullable = false)
+	private String name;
 
-	@Column(name = "birth_date")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
 	@ManyToOne
 	@JoinColumn(name = "type_id")
-	private PetType type;
+	private PetType typeId;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "pet_id")
-	@OrderBy("visit_date ASC")
-	private final Set<Visit> visits = new LinkedHashSet<>();
+	@ManyToOne
+	@JoinColumn(name = "owner_id")
+	private Owner ownerId;
 
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
-
-	public LocalDate getBirthDate() {
-		return this.birthDate;
-	}
-
-	public PetType getType() {
-		return this.type;
-	}
-
-	public void setType(PetType type) {
-		this.type = type;
-	}
-
-	public Collection<Visit> getVisits() {
-		return this.visits;
-	}
-
-	public void addVisit(Visit visit) {
-		getVisits().add(visit);
-	}
-
+//	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//	@JoinColumn(name = "pet_id")
+//	private final Set<Visit> visits = new LinkedHashSet<>();
 }
