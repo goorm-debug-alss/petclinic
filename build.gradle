@@ -47,9 +47,7 @@ dependencies {
   runtimeOnly "org.webjars.npm:bootstrap:${webjarsBootstrapVersion}"
   runtimeOnly "org.webjars.npm:font-awesome:${webjarsFontawesomeVersion}"
   runtimeOnly 'com.github.ben-manes.caffeine:caffeine'
-  runtimeOnly 'com.h2database:h2'
   runtimeOnly 'com.mysql:mysql-connector-j'
-  runtimeOnly 'org.postgresql:postgresql'
   developmentOnly 'org.springframework.boot:spring-boot-devtools'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.boot:spring-boot-testcontainers'
@@ -58,6 +56,9 @@ dependencies {
   testImplementation 'org.testcontainers:mysql'
   checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${springJavaformatCheckstyleVersion}"
   checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
+
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
