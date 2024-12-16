@@ -21,6 +21,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Simple JavaBean domain object with an id property. Used as a base class for objects
@@ -29,23 +33,14 @@ import jakarta.persistence.MappedSuperclass;
  * @author Ken Krebs
  * @author Juergen Hoeller
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 @MappedSuperclass
 public class BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public boolean isNew() {
-		return this.id == null;
-	}
-
 }
