@@ -13,16 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.domain.pet;
+package org.springframework.samples.petclinic.domain.vet.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import org.springframework.samples.petclinic.model.BaseEntity;
 
-/**
- * @author Juergen Hoeller Can be Cat, Dog, Hamster...
- */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@SuperBuilder
 @Entity
-@Table(name = "types")
-public class PetType extends NamedEntity {
-
+@Table(name = "specialties")
+public class Specialty extends BaseEntity {
+	@Column(nullable = false)
+	private String name;
 }

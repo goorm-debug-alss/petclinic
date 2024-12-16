@@ -13,31 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.domain.vet;
+package org.springframework.samples.petclinic.domain.pet.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import org.springframework.samples.petclinic.model.BaseEntity;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-
-/**
- * Simple domain object representing a list of veterinarians. Mostly here to be used for
- * the 'vets' {@link org.springframework.web.servlet.view.xml.MarshallingView}.
- *
- * @author Arjen Poutsma
- */
-@XmlRootElement
-public class Vets {
-
-	private List<Vet> vets;
-
-	@XmlElement
-	public List<Vet> getVetList() {
-		if (vets == null) {
-			vets = new ArrayList<>();
-		}
-		return vets;
-	}
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@SuperBuilder
+@Entity
+@Table(name = "types")
+public class PetType extends BaseEntity {
+	@Column(nullable = false)
+	private String name;
 }
