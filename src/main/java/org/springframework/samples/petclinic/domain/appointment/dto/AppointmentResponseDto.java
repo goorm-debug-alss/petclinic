@@ -9,10 +9,17 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class AppointmentResponseDto {
-	private Integer id;
-	private LocalDate apptDate;
-	private ApptStatus status;
-	private String symptoms;
-	private String petName;
-	private String vetName;
+	private Result result;
+	private Body body;
+
+	@Data
+	@Builder
+	public static class Body {
+		private Integer id;
+		private LocalDate apptDate;
+		private ApptStatus status;
+		private String symptoms;
+		private String petName;
+		private String vetName;
+	}
 }
