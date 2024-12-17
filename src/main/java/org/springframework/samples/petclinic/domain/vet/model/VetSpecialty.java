@@ -16,13 +16,16 @@
 package org.springframework.samples.petclinic.domain.vet.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.samples.petclinic.model.BaseEntity;
-import org.springframework.samples.petclinic.speciality.model.Specialty;
 
-@Getter
-@Setter
+import java.math.BigDecimal;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
