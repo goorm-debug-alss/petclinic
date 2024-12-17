@@ -13,8 +13,8 @@ import org.springframework.samples.petclinic.domain.vet.model.VetSpecialty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -54,5 +54,22 @@ public class VetService {
 		});
 
 		return vetConvert.toResponse(savedVet);
+	}
+
+	// 수의사 전체 조회
+	public List<VetResponseDto> findAll() {
+		var vetList = vetRepository.findAllByOrderById();
+		return Optional.ofNullable(vetList)
+			.orElse(Collections.emptyList())
+			.stream()
+			.map(vetConvert::toResponse)
+			.collect(Collectors.toList());
+	}
+
+	// 특정 수의사 조회
+	public VetResponseDto findById(int vetId) {
+		var vet = vetRepository.findById(vetId)
+			.orElseThrow(() -> new RuntimeException("해당 수의사를 찾을 수 없습니다"));
+		return vetConvert.toResponse(vet);
 	}
 }
