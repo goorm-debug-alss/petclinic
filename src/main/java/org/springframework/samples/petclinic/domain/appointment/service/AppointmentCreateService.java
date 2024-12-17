@@ -3,6 +3,8 @@ package org.springframework.samples.petclinic.domain.appointment.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentRequestDto;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
+import org.springframework.samples.petclinic.domain.appointment.dto.Result;
+import org.springframework.samples.petclinic.domain.appointment.dto.StatusCode;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.garbage.GarbagePetRepository;
@@ -23,6 +25,7 @@ public class AppointmentCreateService {
 
 	/**
 	 * 예약 생성 로직을 처리하는 메소드입니다.
+	 *
 	 * @param dto 예약 생성 요청 데이터를 담고 있는 DTO
 	 * @return 생성된 예약 정보를 포함하는 응답 DTO
 	 * @throws IllegalAccessException 유효하지 않은 petId 또는 vetId가 전달될 경우 발생
@@ -37,6 +40,7 @@ public class AppointmentCreateService {
 
 	/**
 	 * 데이터베이스에서 Pet 엔티티를 조회하거나, 존재하지 않을 경우 예외를 던집니다.
+	 *
 	 * @param dto 요청 DTO
 	 * @return 조회된 Pet 엔티티
 	 * @throws IllegalAccessException petId가 유효하지 않을 경우 발생
@@ -50,6 +54,7 @@ public class AppointmentCreateService {
 
 	/**
 	 * 데이터베이스에서 Vet 엔티티를 조회하거나, 존재하지 않을 경우 예외를 던집니다.
+	 *
 	 * @param dto 요청 DTO
 	 * @return 조회된 Vet 엔티티
 	 * @throws IllegalAccessException vetId가 유효하지 않을 경우 발생
@@ -63,6 +68,7 @@ public class AppointmentCreateService {
 
 	/**
 	 * 요청 데이터를 바탕으로 Appointment 엔티티를 생성합니다.
+	 *
 	 * @param dto 요청 DTO
 	 * @param pet 조회된 Pet 엔티티
 	 * @param vet 조회된 Vet 엔티티
@@ -81,6 +87,7 @@ public class AppointmentCreateService {
 
 	/**
 	 * Appointment 엔티티를 데이터베이스에 저장하고 저장된 결과를 반환합니다.
+	 *
 	 * @param appointment 생성된 Appointment 엔티티
 	 * @return 저장된 Appointment 엔티티
 	 */
@@ -90,20 +97,37 @@ public class AppointmentCreateService {
 	}
 
 	/**
-	 * 저장된 Appointment 엔티티 정보를 기반으로 응답 DTO를 생성합니다.
+	 * 저장된 Appointment 엔티티와 관련된 정보를 기반으로 응답 DTO를 생성합니다.
+	 *
 	 * @param savedAppointment 저장된 Appointment 엔티티
-	 * @param pet 조회된 Pet 엔티티
-	 * @param vet 조회된 Vet 엔티티
-	 * @return 응답 DTO
+	 * @param pet 예약과 연결된 Pet 엔티티 (펫의 이름을 응답에 포함)
+	 * @param vet 예약과 연결된 Vet 엔티티 (수의사의 이름을 응답에 포함)
+	 * @return 생성된 예약 정보와 성공 결과를 포함하는 응답 DTO
+	 *
+	 * <p>
+	 * 이 메서드는 두 가지 주요 부분으로 응답 DTO를 구성합니다:
+	 * - {@link Result}: 요청 처리 결과 코드 및 설명 (예: 성공 상태)
+	 * - {@link AppointmentResponseDto.Body}: 예약 ID, 펫 이름, 수의사 이름, 예약 날짜, 상태, 증상 등 예약 세부 정보
+	 * </p>
 	 */
 	private static AppointmentResponseDto builderResponseDto(Appointment savedAppointment, Pet pet, Vet vet) {
-		return AppointmentResponseDto.builder()
+		Result result = Result.builder()
+			.resultCode(StatusCode.SUCCESS.getCode())
+			.resultDescription(StatusCode.SUCCESS.getDescription())
+			.build();
+
+		AppointmentResponseDto.Body body = AppointmentResponseDto.Body.builder()
 			.id(savedAppointment.getId())
+			.petName(pet.getName())
+			.vetName(vet.getName())
 			.apptDate(savedAppointment.getApptDate())
 			.status(savedAppointment.getStatus())
 			.symptoms(savedAppointment.getSymptoms())
-			.petName(pet.getName())
-			.vetName(vet.getName())
+			.build();
+
+		return AppointmentResponseDto.builder()
+			.result(result)
+			.body(body)
 			.build();
 	}
 }

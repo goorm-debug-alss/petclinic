@@ -72,9 +72,9 @@ public class AppointmentCreateServiceTest {
 
 		// Then
 		assertThat(savedAppointment).isNotNull();
-		assertThat(savedAppointment.getPetName()).isEqualTo(pet.getName());
-		assertThat(savedAppointment.getVetName()).isEqualTo(vet.getName());
-		assertThat(savedAppointment.getSymptoms()).isEqualTo(requestDto.getSymptoms());
+		assertThat(savedAppointment.getBody().getPetName()).isEqualTo(pet.getName());
+		assertThat(savedAppointment.getBody().getVetName()).isEqualTo(vet.getName());
+		assertThat(savedAppointment.getBody().getSymptoms()).isEqualTo(requestDto.getSymptoms());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class AppointmentCreateServiceTest {
 
 		// when & then
 		assertThrows(IllegalAccessException.class, () ->
-			appointmentCreateService.createAppointment(requestDto));
+				appointmentCreateService.createAppointment(requestDto));
 
 		verify(petRepository).findById(requestDto.getPetId());
 		verify(vetRepository, never()).findById(anyInt());
@@ -101,7 +101,7 @@ public class AppointmentCreateServiceTest {
 
 		// when & then
 		assertThrows(IllegalAccessException.class, () ->
-			appointmentCreateService.createAppointment(requestDto));
+				appointmentCreateService.createAppointment(requestDto));
 
 		verify(petRepository).findById(requestDto.getPetId());
 		verify(vetRepository).findById(requestDto.getVetId());
@@ -110,36 +110,36 @@ public class AppointmentCreateServiceTest {
 
 	private void createTestAppointmentRequestDto() {
 		requestDto = AppointmentRequestDto.builder()
-			.petId(1)
-			.vetId(1)
-			.apptDate(LocalDate.now())
-			.status(ApptStatus.valueOf("COMPLETE"))
-			.symptoms("Coughing")
-			.build();
+				.petId(1)
+				.vetId(1)
+				.apptDate(LocalDate.now())
+				.status(ApptStatus.valueOf("COMPLETE"))
+				.symptoms("Coughing")
+				.build();
 	}
 
 	private void createTestPet() {
 		pet = Pet.builder()
-			.id(1)
-			.name("구름")
-			.build();
+				.id(1)
+				.name("구름")
+				.build();
 	}
 
 	private void createTestAppointment() {
 		appointment = Appointment.builder()
-			.id(1)
-			.apptDate(requestDto.getApptDate())
-			.status(requestDto.getStatus())
-			.symptoms(requestDto.getSymptoms())
-			.petId(pet)
-			.vetId(vet)
-			.build();
+				.id(1)
+				.apptDate(requestDto.getApptDate())
+				.status(requestDto.getStatus())
+				.symptoms(requestDto.getSymptoms())
+				.petId(pet)
+				.vetId(vet)
+				.build();
 	}
 
 	private void createTestVet() {
 		vet = Vet.builder()
-			.id(1)
-			.name("구름수의사")
-			.build();
+				.id(1)
+				.name("구름수의사")
+				.build();
 	}
 }
