@@ -32,33 +32,66 @@ ext.webjarsFontawesomeVersion = "4.7.0"
 ext.webjarsBootstrapVersion = "5.3.3"
 
 dependencies {
-  // Workaround for AOT issue (https://github.com/spring-projects/spring-framework/pull/33949) -->
+  // Reactor Core: 비동기 데이터 처리 라이브러리
   implementation 'io.projectreactor:reactor-core'
 
+  // Spring Boot Starter: 캐시 기능
   implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+  // Spring Boot Starter: JPA (데이터베이스와의 ORM 처리)
   implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+  // Spring Boot Starter: Thymeleaf (템플릿 엔진)
   implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+  // Spring Boot Starter: Web (웹 애플리케이션 개발)
   implementation 'org.springframework.boot:spring-boot-starter-web'
+
+  // Spring Boot Starter: Validation (Bean 유효성 검사)
   implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+  // JSR-107 캐시 표준 API
   implementation 'javax.cache:cache-api'
+
+  // XML 바인딩 지원 (Jakarta XML Bind)
   implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
+
+  // Spring Boot Actuator: 애플리케이션 모니터링 및 관리
   runtimeOnly 'org.springframework.boot:spring-boot-starter-actuator'
+
+  // WebJars: 정적 파일 관리 (locator-lite, bootstrap, font-awesome)
   runtimeOnly "org.webjars:webjars-locator-lite:${webjarsLocatorLiteVersion}"
   runtimeOnly "org.webjars.npm:bootstrap:${webjarsBootstrapVersion}"
   runtimeOnly "org.webjars.npm:font-awesome:${webjarsFontawesomeVersion}"
+
+  // Caffeine: 고성능 캐시 라이브러리
   runtimeOnly 'com.github.ben-manes.caffeine:caffeine'
+
+  // MySQL 데이터베이스 드라이버
   runtimeOnly 'com.mysql:mysql-connector-j'
+
+  // Spring DevTools: 개발 시 리로딩 지원
   developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+  // Spring Boot Starter Test: 테스트 지원
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+  // TestContainers: Docker 기반 통합 테스트 지원
   testImplementation 'org.springframework.boot:spring-boot-testcontainers'
   testImplementation 'org.springframework.boot:spring-boot-docker-compose'
   testImplementation 'org.testcontainers:junit-jupiter'
   testImplementation 'org.testcontainers:mysql'
+
+  // CheckStyle: 코드 품질 검사
   checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${springJavaformatCheckstyleVersion}"
   checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"
 
+  // Lombok: 코드 축약 라이브러리 (컴파일 시 애노테이션 처리)
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok'
+
+  // Swagger: API 문서화 도구
+  implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0' // Spring MVC용 Swagger UI
 }
 
 tasks.named('test') {
