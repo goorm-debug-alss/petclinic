@@ -19,7 +19,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.samples.petclinic.model.BaseEntity;
-import org.springframework.samples.petclinic.speciality.model.Specialty;
+import org.springframework.samples.petclinic.domain.speciality.model.Specialty;
 
 @Getter
 @Setter

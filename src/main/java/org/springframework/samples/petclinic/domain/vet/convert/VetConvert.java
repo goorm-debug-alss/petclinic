@@ -3,7 +3,7 @@ package org.springframework.samples.petclinic.domain.vet.convert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-import org.springframework.samples.petclinic.speciality.service.SpecialityService;
+import org.springframework.samples.petclinic.domain.speciality.service.SpecialityService;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,13 +1,13 @@
 package org.springframework.samples.petclinic.domain.vet.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.samples.petclinic.speciality.SpecialityRepository;
+import org.springframework.samples.petclinic.domain.speciality.SpecialityRepository;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.VetSpecialityRepository;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.convert.VetConvert;
-import org.springframework.samples.petclinic.speciality.model.Specialty;
+import org.springframework.samples.petclinic.domain.speciality.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.domain.vet.model.VetSpecialty;
 import org.springframework.stereotype.Service;

@@ -1,8 +1,8 @@
-package org.springframework.samples.petclinic.speciality.service;
+package org.springframework.samples.petclinic.domain.speciality.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.domain.vet.VetSpecialityRepository;
-import org.springframework.samples.petclinic.speciality.model.Specialty;
+import org.springframework.samples.petclinic.domain.speciality.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.model.VetSpecialty;
 import org.springframework.stereotype.Service;
 

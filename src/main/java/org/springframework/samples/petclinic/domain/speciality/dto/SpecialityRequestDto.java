@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.speciality.dto;
+package org.springframework.samples.petclinic.domain.speciality.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
