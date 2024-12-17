@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface VetSpecialityRepository extends JpaRepository<VetSpecialty, Integer> {
 	List<VetSpecialty> findVetSpecialtiesByVetId_Id(int vetId);
+
+	void deleteAllByVetId_Id(int vetId);
 }
