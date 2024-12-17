@@ -5,6 +5,8 @@ import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentR
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.dto.Result;
 import org.springframework.samples.petclinic.domain.appointment.dto.StatusCode;
+import org.springframework.samples.petclinic.domain.appointment.exception.PetNotFoundException;
+import org.springframework.samples.petclinic.domain.appointment.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.garbage.GarbagePetRepository;
@@ -33,9 +35,11 @@ public class AppointmentCreateService {
 	public AppointmentResponseDto createAppointment(AppointmentRequestDto dto) throws IllegalAccessException {
 		Pet pet = getPetByIdOrThrow(dto);
 		Vet vet = getVetByIdOrThrow(dto);
+
 		Appointment appointment = createAppointmentEntity(dto, pet, vet);
 		Appointment savedAppointment = getSavedAppointment(appointment);
-		return builderResponseDto(savedAppointment, pet, vet);
+
+		return createAppointmentResponse(savedAppointment, pet, vet);
 	}
 
 	/**
@@ -43,28 +47,24 @@ public class AppointmentCreateService {
 	 *
 	 * @param dto 요청 DTO
 	 * @return 조회된 Pet 엔티티
-	 * @throws IllegalAccessException petId가 유효하지 않을 경우 발생
-	 */
-	private Pet getPetByIdOrThrow(AppointmentRequestDto dto) throws IllegalAccessException {
-		Pet pet = petRepository.findById(dto.getPetId())
-			.orElseThrow(() -> new IllegalAccessException("Pet not found"));
-		return pet;
+	 * @throws PetNotFoundException petId가 유효하지 않을 경우 발생
+     */
+	private Pet getPetByIdOrThrow(AppointmentRequestDto dto) {
+        return petRepository.findById(dto.getPetId())
+                .orElseThrow(() -> new PetNotFoundException("Pet not found"));
 	}
-
 
 	/**
 	 * 데이터베이스에서 Vet 엔티티를 조회하거나, 존재하지 않을 경우 예외를 던집니다.
 	 *
 	 * @param dto 요청 DTO
 	 * @return 조회된 Vet 엔티티
-	 * @throws IllegalAccessException vetId가 유효하지 않을 경우 발생
-	 */
-	private Vet getVetByIdOrThrow(AppointmentRequestDto dto) throws IllegalAccessException {
-		Vet vet = vetRepository.findById(dto.getVetId())
-			.orElseThrow(() -> new IllegalAccessException("Vet not found"));
-		return vet;
+	 * @throws VetNotFoundException vetId가 유효하지 않을 경우 발생
+     */
+	private Vet getVetByIdOrThrow(AppointmentRequestDto dto) {
+        return vetRepository.findById(dto.getVetId())
+                .orElseThrow(() -> new VetNotFoundException("Vet not found"));
 	}
-
 
 	/**
 	 * 요청 데이터를 바탕으로 Appointment 엔티티를 생성합니다.
@@ -75,14 +75,13 @@ public class AppointmentCreateService {
 	 * @return 생성된 Appointment 엔티티
 	 */
 	private static Appointment createAppointmentEntity(AppointmentRequestDto dto, Pet pet, Vet vet) {
-		Appointment appointment = Appointment.builder()
-			.apptDate(dto.getApptDate())
-			.status(dto.getStatus())
-			.symptoms(dto.getSymptoms())
-			.petId(pet)
-			.vetId(vet)
-			.build();
-		return appointment;
+        return Appointment.builder()
+            .apptDate(dto.getApptDate())
+            .status(dto.getStatus())
+            .symptoms(dto.getSymptoms())
+            .petId(pet)
+            .vetId(vet)
+            .build();
 	}
 
 	/**
@@ -92,42 +91,66 @@ public class AppointmentCreateService {
 	 * @return 저장된 Appointment 엔티티
 	 */
 	private Appointment getSavedAppointment(Appointment appointment) {
-		Appointment savedAppointment = appointmentRepository.save(appointment);
-		return savedAppointment;
+        return appointmentRepository.save(appointment);
+	}
+
+
+	/**
+	 * 저장된 Appointment 데이터를 바탕으로 AppointmentResponseDto를 생성합니다.
+	 *
+	 * @param savedAppointment 저장된 Appointment 엔티티
+	 * @param pet 예약과 연결된 Pet 엔티티
+	 * @param vet 예약과 연결된 Vet 엔티티
+	 * @return AppointmentResponseDto 객체
+	 */
+	private static AppointmentResponseDto createAppointmentResponse(Appointment savedAppointment, Pet pet, Vet vet) {
+		Result result = buildSuccessResult();
+		AppointmentResponseDto.Body body = buildAppointmentBody(savedAppointment, pet, vet);
+		return buildAppointmentResponse(result, body);
 	}
 
 	/**
-	 * 저장된 Appointment 엔티티와 관련된 정보를 기반으로 응답 DTO를 생성합니다.
+	 * 성공 상태의 Result 객체를 생성합니다.
+	 *
+	 * @return 성공 상태를 나타내는 Result 객체
+	 */
+	private static Result buildSuccessResult() {
+		return Result.builder()
+				.resultCode(StatusCode.SUCCESS.getCode())
+				.resultDescription(StatusCode.SUCCESS.getDescription())
+				.build();
+	}
+
+	/**
+	 * 저장된 Appointment 데이터를 기반으로 Body 객체를 생성합니다.
 	 *
 	 * @param savedAppointment 저장된 Appointment 엔티티
-	 * @param pet 예약과 연결된 Pet 엔티티 (펫의 이름을 응답에 포함)
-	 * @param vet 예약과 연결된 Vet 엔티티 (수의사의 이름을 응답에 포함)
-	 * @return 생성된 예약 정보와 성공 결과를 포함하는 응답 DTO
-	 *
-	 * <p>
-	 * 이 메서드는 두 가지 주요 부분으로 응답 DTO를 구성합니다:
-	 * - {@link Result}: 요청 처리 결과 코드 및 설명 (예: 성공 상태)
-	 * - {@link AppointmentResponseDto.Body}: 예약 ID, 펫 이름, 수의사 이름, 예약 날짜, 상태, 증상 등 예약 세부 정보
-	 * </p>
+	 * @param pet 예약과 연결된 Pet 엔티티
+	 * @param vet 예약과 연결된 Vet 엔티티
+	 * @return 생성된 Body 객체
 	 */
-	private static AppointmentResponseDto builderResponseDto(Appointment savedAppointment, Pet pet, Vet vet) {
-		Result result = Result.builder()
-			.resultCode(StatusCode.SUCCESS.getCode())
-			.resultDescription(StatusCode.SUCCESS.getDescription())
-			.build();
+	private static AppointmentResponseDto.Body buildAppointmentBody(Appointment savedAppointment, Pet pet, Vet vet) {
+		return AppointmentResponseDto.Body.builder()
+				.id(savedAppointment.getId())
+				.petName(pet.getName())
+				.vetName(vet.getName())
+				.apptDate(savedAppointment.getApptDate())
+				.status(savedAppointment.getStatus())
+				.symptoms(savedAppointment.getSymptoms())
+				.build();
+	}
 
-		AppointmentResponseDto.Body body = AppointmentResponseDto.Body.builder()
-			.id(savedAppointment.getId())
-			.petName(pet.getName())
-			.vetName(vet.getName())
-			.apptDate(savedAppointment.getApptDate())
-			.status(savedAppointment.getStatus())
-			.symptoms(savedAppointment.getSymptoms())
-			.build();
-
+	/**
+	 * Result와 Body 객체를 조합하여 최종 ResponseDto를 생성합니다.
+	 *
+	 * @param result API 응답의 상태 정보를 담은 Result 객체
+	 * @param body 예약 정보를 담은 Body 객체
+	 * @return 조립된 AppointmentResponseDto 객체
+	 */
+	private static AppointmentResponseDto buildAppointmentResponse(Result result, AppointmentResponseDto.Body body) {
 		return AppointmentResponseDto.builder()
-			.result(result)
-			.body(body)
-			.build();
+				.result(result)
+				.body(body)
+				.build();
 	}
 }
