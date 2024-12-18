@@ -73,6 +73,20 @@ public class VetService {
 		return vetConvert.toResponse(vet);
 	}
 
+	// 전문 분야별 수의사 조회
+	public List<VetResponseDto> findBySpecialtyId(int specialtyId) {
+		var vetSpecialties = vetSpecialityRepository.findVetIdsBySpecialtyId_Id(specialtyId);
+		var vetIds = vetSpecialties.stream()
+			.map(vs -> vs.getVetId().getId())
+			.collect(Collectors.toList());
+		var vetList = vetRepository.findAllById(vetIds);
+		return Optional.of(vetList)
+			.orElse(Collections.emptyList())
+			.stream()
+			.map(vetConvert::toResponse)
+			.collect(Collectors.toList());
+	}
+
 	// 수의사 삭제
 	public void delete(int vetId) {
 		vetRepository.deleteById(vetId);
