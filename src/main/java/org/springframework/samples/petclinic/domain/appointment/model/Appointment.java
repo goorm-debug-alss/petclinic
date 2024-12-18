@@ -8,7 +8,7 @@ import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointment")
@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class Appointment extends BaseEntity {
 
 	@Column(name = "appt_date", nullable = false)
-	private LocalDate apptDate;
+	private LocalDateTime apptDateTime;
 
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
@@ -36,8 +36,8 @@ public class Appointment extends BaseEntity {
 	@JoinColumn(name = "vet_id", nullable = false)
 	private Vet vetId;
 
-	public void updateAppointment(LocalDate apptDate, ApptStatus status, String symptoms, Pet petId, Vet vetId) {
-		this.apptDate = apptDate;
+	public void updateAppointment(LocalDateTime apptDateTime, ApptStatus status, String symptoms, Pet petId, Vet vetId) {
+		this.apptDateTime = apptDateTime;
 		this.status = status;
 		this.symptoms = symptoms;
 		this.petId = petId;

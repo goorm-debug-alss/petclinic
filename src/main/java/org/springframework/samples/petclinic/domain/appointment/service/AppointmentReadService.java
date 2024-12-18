@@ -45,7 +45,7 @@ public class AppointmentReadService {
 		return appointmentRepository.findAll().stream()
 			.map(appointment -> AppointmentResponseDto.Body.builder()
 				.id(appointment.getId())
-				.apptDate(appointment.getApptDate())
+				.apptDateTime(appointment.getApptDateTime())
 				.status(appointment.getStatus())
 				.symptoms(appointment.getSymptoms())
 				.petName(appointment.getPetId().getName())
@@ -105,7 +105,7 @@ public class AppointmentReadService {
 	private static AppointmentResponseDto.Body convertToBody(Appointment appointment) {
 		return AppointmentResponseDto.Body.builder()
 			.id(appointment.getId())
-			.apptDate(appointment.getApptDate())
+			.apptDateTime(appointment.getApptDateTime())
 			.status(appointment.getStatus())
 			.symptoms(appointment.getSymptoms())
 			.petName(appointment.getPetId().getName())

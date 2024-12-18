@@ -21,7 +21,7 @@ import org.springframework.samples.petclinic.domain.appointment.service.Appointm
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,7 +135,7 @@ public class AppointmentUpdateServiceTest {
 
 	private AppointmentRequestDto createTestAppointmentRequestDto() {
 		return AppointmentRequestDto.builder()
-			.apptDate(LocalDate.now())
+			.apptDateTime(LocalDateTime.now())
 			.status(ApptStatus.COMPLETE)
 			.symptoms("감기")
 			.petId(1)
@@ -146,7 +146,7 @@ public class AppointmentUpdateServiceTest {
 	private Appointment createTestAppointment() {
 		return Appointment.builder()
 			.id(1)
-			.apptDate(LocalDate.now())
+			.apptDateTime(LocalDateTime.now())
 			.status(ApptStatus.COMPLETE)
 			.symptoms("감기")
 			.build();
