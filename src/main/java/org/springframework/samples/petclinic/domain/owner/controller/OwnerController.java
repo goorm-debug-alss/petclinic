@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
+import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerService;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +34,12 @@ class OwnerController {
 	public ResponseEntity<TokenResponseDto> tokens() {
 		TokenResponseDto tokenResponseDto = ownerService.tokens();
 		return ResponseEntity.ok(tokenResponseDto);
+	}
+
+	// 정보 수정
+	@PutMapping("/update/{id}")
+	public ResponseEntity updateProfile(@PathVariable Integer id, @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
+		ownerService.updateProfile(id, updateProfileRequestDto);
+		return ResponseEntity.ok().build();
 	}
 }
