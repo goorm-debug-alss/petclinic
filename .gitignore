@@ -10,8 +10,13 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+<<<<<<< HEAD
 ### application.properties ###
 application.properties
+=======
+# Ignore application.properties
+src/main/resources/application.properties
+>>>>>>> 1ae21a2e6b3b47b0d193f730b1f7ef9349fbbd7d
 
 ### STS ###
 .attach_pid*

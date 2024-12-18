@@ -32,6 +32,8 @@ ext.webjarsFontawesomeVersion = "4.7.0"
 ext.webjarsBootstrapVersion = "5.3.3"
 
 dependencies {
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
   // Reactor Core: 비동기 데이터 처리 라이브러리
   implementation 'io.projectreactor:reactor-core'
 
