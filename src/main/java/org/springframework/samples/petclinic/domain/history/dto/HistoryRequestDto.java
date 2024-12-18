@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.domain.history.model.dto;
+package org.springframework.samples.petclinic.domain.history.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,15 +1,12 @@
-package org.springframework.samples.petclinic.domain.history.model.dto;
+package org.springframework.samples.petclinic.domain.history.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class HistoryResponseDto {
 
 	private Result result;
