@@ -3,11 +3,14 @@ package domain.appointment.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentRequestDto;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
+import org.springframework.samples.petclinic.domain.appointment.exception.PetNotFoundException;
+import org.springframework.samples.petclinic.domain.appointment.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
@@ -27,9 +30,10 @@ import static org.mockito.Mockito.*;
 
 /**
  * AppointmentCreateServiceTest
- *
- * 이 클래스는 AppointmentCreateService의 기능을 테스트하기 위한 단위 테스트 클래스입니다.
+ * <p>
+ * 이 클래스는 AppointmentCreateService 기능을 테스트하기 위한 단위 테스트 클래스입니다.
  */
+@ExtendWith(MockitoExtension.class)
 public class AppointmentCreateServiceTest {
 
 	@InjectMocks
@@ -50,9 +54,8 @@ public class AppointmentCreateServiceTest {
 	private Appointment appointment;
 
 	@BeforeEach
-	@DisplayName("테스트 데이터 및 Mock 객체 초기화")
+	@DisplayName("테스트 데이터")
 	void setUp() {
-		MockitoAnnotations.openMocks(this);
 		createTestAppointmentRequestDto();
 		createTestPet();
 		createTestVet();
@@ -84,7 +87,7 @@ public class AppointmentCreateServiceTest {
 		when(petRepository.findById(requestDto.getPetId())).thenReturn(Optional.empty());
 
 		// when & then
-		assertThrows(IllegalAccessException.class, () ->
+		assertThrows(PetNotFoundException.class, () ->
 				appointmentCreateService.createAppointment(requestDto));
 
 		verify(petRepository).findById(requestDto.getPetId());
@@ -100,7 +103,7 @@ public class AppointmentCreateServiceTest {
 		when(vetRepository.findById(requestDto.getVetId())).thenReturn(Optional.empty());
 
 		// when & then
-		assertThrows(IllegalAccessException.class, () ->
+		assertThrows(VetNotFoundException.class, () ->
 				appointmentCreateService.createAppointment(requestDto));
 
 		verify(petRepository).findById(requestDto.getPetId());
