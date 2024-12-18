@@ -11,6 +11,9 @@ import org.springframework.samples.petclinic.domain.visit.repository.VisitReposi
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -64,7 +67,7 @@ public class VisitService {
 			.build();
 
 		VisitResponseDto.Body body = VisitResponseDto.Body.builder()
-			.petId(visit.getPetId().getId())
+			.visitId(visit.getId())
 			.visitDate(visit.getVisitDate())
 			.description(visit.getDescription())
 			.petName(visit.getPetId().getName())
@@ -72,7 +75,37 @@ public class VisitService {
 
 		return VisitResponseDto.builder()
 			.result(result)
-			.body(body)
+			.body(List.of(body))
+			.build();
+	}
+
+	/**
+	 * 특정 반려동물의 방문 내역 전체 조회
+	 *
+	 * @param petId 반려동물 ID
+	 * @return 방문 내역 목록 응답 DTO
+	 */
+	public VisitResponseDto getVisitsByPetId(int petId) {
+
+		Pet pet = petRepository.findById(petId)
+			.orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+		List<VisitResponseDto.Body> visits = visitRepository.findAllByPetId(pet)
+			.stream()
+			.map(visit -> VisitResponseDto.Body.builder()
+				.visitId(visit.getId())
+				.petName(pet.getName())
+				.visitDate(visit.getVisitDate())
+				.description(visit.getDescription())
+				.build())
+			.collect(Collectors.toList());
+
+		return VisitResponseDto.builder()
+			.result(VisitResponseDto.Result.builder()
+				.resultCode(StatusCode.SUCCESS.getCode())
+				.resultDescription(StatusCode.SUCCESS.getDescription())
+				.build())
+			.body(visits)
 			.build();
 	}
 }

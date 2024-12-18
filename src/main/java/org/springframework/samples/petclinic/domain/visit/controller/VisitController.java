@@ -22,4 +22,17 @@ class VisitController {
 		VisitResponseDto response = visitService.createVisit(requestDto);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
+
+
+	/**
+	 * 특정 반려동물의 방문 내역 전체 조회
+	 *
+	 * @param petId 반려동물 ID
+	 * @return 방문 내역 목록
+	 */
+	@GetMapping("/{petId}")
+	public ResponseEntity<VisitResponseDto> getVisitsByPetId(@PathVariable int petId) {
+		VisitResponseDto response = visitService.getVisitsByPetId(petId);
+		return ResponseEntity.ok(response);
+	}
 }
