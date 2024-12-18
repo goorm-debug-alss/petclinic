@@ -40,4 +40,13 @@ public class OwnerService {
 		// JWT Token 반환
 		return tokenService.issueToken(owner.getId());
 	}
+
+	public TokenResponseDto tokens() {
+		// context에서 ownerId 가져오기
+		var requestContext = RequestContextHolder.getRequestAttributes();
+		var ownerId = requestContext.getAttribute("ownerId", RequestAttributes.SCOPE_REQUEST);
+
+		// JWT Token 반환
+		return tokenService.issueToken((Integer) ownerId);
+	}
 }

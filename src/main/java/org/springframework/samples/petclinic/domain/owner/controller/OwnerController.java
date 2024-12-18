@@ -27,4 +27,11 @@ class OwnerController {
 		TokenResponseDto tokenResponseDto = ownerService.login(loginRequestDto);
 		return ResponseEntity.ok(tokenResponseDto);
 	}
+
+	// 토큰 재발급
+	@GetMapping("/tokens")
+	public ResponseEntity<TokenResponseDto> tokens() {
+		TokenResponseDto tokenResponseDto = ownerService.tokens();
+		return ResponseEntity.ok(tokenResponseDto);
+	}
 }
