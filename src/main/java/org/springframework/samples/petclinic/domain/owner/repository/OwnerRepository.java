@@ -9,4 +9,6 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	Boolean existsByUserId(String userId);
 
 	Optional<Owner> findByUserId(String userId);
+
+	Optional<Owner> findById(Integer id);
 }
