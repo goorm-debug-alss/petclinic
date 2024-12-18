@@ -25,7 +25,7 @@ class VetController {
 	}
 
 	// 전체 수의사 조회
-	@GetMapping
+	@GetMapping("/all")
 	public ResponseEntity<List<VetResponseDto>> getAll() {
 		var response = vetService.findAll();
 		return ResponseEntity.ok(response);
@@ -35,6 +35,15 @@ class VetController {
 	@GetMapping("/{vet-id}")
 	public ResponseEntity<VetResponseDto> getVet(@PathVariable("vet-id") int vetId) {
 		var response = vetService.findById(vetId);
+		return ResponseEntity.ok(response);
+	}
+
+	// 분야별 수의사 조회
+	@GetMapping
+	public ResponseEntity<List<VetResponseDto>> getVetsBySpecialityId(
+		@RequestParam(value = "speciality") int specialityId
+	) {
+		var response = vetService.findBySpecialtyId(specialityId);
 		return ResponseEntity.ok(response);
 	}
 
