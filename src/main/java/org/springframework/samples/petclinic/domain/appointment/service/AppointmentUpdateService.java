@@ -97,7 +97,7 @@ public class AppointmentUpdateService {
 	 */
 	private static void updateAppointmentFields(AppointmentRequestDto dto, Appointment appointment, Pet pet, Vet vet) {
 		appointment.updateAppointment(
-			dto.getApptDate(),
+			dto.getApptDateTime(),
 			dto.getStatus(),
 			dto.getSymptoms(),
 			pet,
@@ -132,7 +132,7 @@ public class AppointmentUpdateService {
 				.id(updatedAppointment.getId())
 				.petName(appointment.getPetId().getName())
 				.vetName(appointment.getVetId().getName())
-				.apptDate(updatedAppointment.getApptDate())
+				.apptDateTime(updatedAppointment.getApptDateTime())
 				.status(updatedAppointment.getStatus())
 				.symptoms(updatedAppointment.getSymptoms())
 				.build())
