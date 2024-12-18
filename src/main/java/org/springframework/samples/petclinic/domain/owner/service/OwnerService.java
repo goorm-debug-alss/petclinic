@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.domain.owner.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
+import org.springframework.samples.petclinic.domain.owner.dto.UpdatePasswordRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
@@ -61,6 +62,19 @@ public class OwnerService {
 		Optional.ofNullable(updateProfileRequestDto.getAddress()).ifPresent(owner::setAddress);
 		Optional.ofNullable(updateProfileRequestDto.getTelephone()).ifPresent(owner::setTelephone);
 		Optional.ofNullable(updateProfileRequestDto.getCity()).ifPresent(owner::setCity);
+
+		ownerRepository.save(owner);
+	}
+
+	public void updatePassword(Integer id, UpdatePasswordRequestDto updatePasswordRequestDto) {
+		Owner owner = ownerRepository.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + id));
+
+		if(!owner.getPassword().equals(updatePasswordRequestDto.getCurrentPassword())) {
+			throw new IllegalArgumentException("Password is not correct");
+		}
+
+		owner.setPassword(updatePasswordRequestDto.getNewPassword());
 
 		ownerRepository.save(owner);
 	}

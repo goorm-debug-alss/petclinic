@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
+import org.springframework.samples.petclinic.domain.owner.dto.UpdatePasswordRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerService;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
@@ -40,6 +41,13 @@ class OwnerController {
 	@PutMapping("/update/{id}")
 	public ResponseEntity updateProfile(@PathVariable Integer id, @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
 		ownerService.updateProfile(id, updateProfileRequestDto);
+		return ResponseEntity.ok().build();
+	}
+
+	// 비밀번호 변경
+	@PutMapping("/update/password/{id}")
+	public ResponseEntity updatePassword(@PathVariable Integer id, @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto) {
+		ownerService.updatePassword(id, updatePasswordRequestDto);
 		return ResponseEntity.ok().build();
 	}
 }
