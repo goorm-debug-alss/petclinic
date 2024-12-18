@@ -1,29 +1,35 @@
 package org.springframework.samples.petclinic.domain.pet.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.samples.petclinic.domain.owner.model.Owner;
+import org.springframework.samples.petclinic.model.BaseEntity;
 
-@Entity
-@Getter
-@Setter
+import java.time.LocalDate;
+
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@SuperBuilder
+@Entity
 @Table(name = "pets")
-public class Pet {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	@Column(name = "name", nullable = false, length = 50)
+public class Pet extends BaseEntity {
+	@Column(length = 15, nullable = false)
 	private String name;
 
-	@Column(name = "birth_date")
-	private String birthDate;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate birthDate;
 
-	@Column(name = "type_id", nullable = false)
-	private Integer typeId;
+	@ManyToOne
+	@JoinColumn(name = "type_id")
+	private PetType typeId;
 
-	@Column(name = "owner_id", nullable = false)
+	@JoinColumn(name = "owner_id")
 	private Integer ownerId;
 }

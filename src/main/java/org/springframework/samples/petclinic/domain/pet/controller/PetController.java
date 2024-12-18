@@ -24,7 +24,7 @@ public class PetController {
 
 	// 단일 Pet 조회
 	@GetMapping("/{petId}")
-	public ResponseEntity<PetResponseDto> getPetById(@PathVariable Long petId) {
+	public ResponseEntity<PetResponseDto> getPetById(@PathVariable Integer petId) {
 		return ResponseEntity.ok(petService.getPetById(petId));
 	}
 
@@ -36,13 +36,13 @@ public class PetController {
 
 	// Pet 수정
 	@PutMapping("/{petId}")
-	public ResponseEntity<PetResponseDto> updatePet(@PathVariable Long petId, @RequestBody PetRequestDto request) {
+	public ResponseEntity<PetResponseDto> updatePet(@PathVariable Integer petId, @RequestBody PetRequestDto request) {
 		return ResponseEntity.ok(petService.updatePet(petId, request));
 	}
 
 	// Pet 삭제
 	@DeleteMapping("/{petId}")
-	public ResponseEntity<Void> deletePet(@PathVariable Long petId) {
+	public ResponseEntity<Void> deletePet(@PathVariable Integer petId) {
 		petService.deletePet(petId);
 		return ResponseEntity.noContent().build();
 	}
