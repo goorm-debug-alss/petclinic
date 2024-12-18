@@ -10,4 +10,6 @@ public interface VetRepository extends JpaRepository<Vet, Integer> {
 	List<Vet> findAllByOrderById();
 
 	Optional<Vet> findById(int id);
+
+	List<Vet> findAllByIdIn(List<Integer> ids);
 }
