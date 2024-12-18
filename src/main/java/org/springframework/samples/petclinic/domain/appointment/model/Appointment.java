@@ -36,7 +36,7 @@ public class Appointment extends BaseEntity {
 	@JoinColumn(name = "vet_id", nullable = false)
 	private Vet vetId;
 
-	public Appointment(LocalDate apptDate, ApptStatus status, String symptoms, Pet petId, Vet vetId) {
+	public void updateAppointment(LocalDate apptDate, ApptStatus status, String symptoms, Pet petId, Vet vetId) {
 		this.apptDate = apptDate;
 		this.status = status;
 		this.symptoms = symptoms;
