@@ -16,6 +16,12 @@ import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 예약 생성 서비스를 제공하는 클래스입니다.
+ * <p>
+ * 이 클래스는 예약 생성에 필요한 비즈니스 로직을 처리하며,
+ * 데이터베이스와의 상호작용을 통해 예약 데이터를 저장합니다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -30,9 +36,8 @@ public class AppointmentCreateService {
 	 *
 	 * @param dto 예약 생성 요청 데이터를 담고 있는 DTO
 	 * @return 생성된 예약 정보를 포함하는 응답 DTO
-	 * @throws IllegalAccessException 유효하지 않은 petId 또는 vetId가 전달될 경우 발생
 	 */
-	public AppointmentResponseDto createAppointment(AppointmentRequestDto dto) throws IllegalAccessException {
+	public AppointmentResponseDto createAppointment(AppointmentRequestDto dto) {
 		Pet pet = getPetByIdOrThrow(dto);
 		Vet vet = getVetByIdOrThrow(dto);
 
@@ -48,10 +53,10 @@ public class AppointmentCreateService {
 	 * @param dto 요청 DTO
 	 * @return 조회된 Pet 엔티티
 	 * @throws PetNotFoundException petId가 유효하지 않을 경우 발생
-     */
+	 */
 	private Pet getPetByIdOrThrow(AppointmentRequestDto dto) {
-        return petRepository.findById(dto.getPetId())
-                .orElseThrow(() -> new PetNotFoundException("Pet not found"));
+		return petRepository.findById(dto.getPetId())
+			.orElseThrow(() -> new PetNotFoundException("Pet not found"));
 	}
 
 	/**
@@ -60,10 +65,10 @@ public class AppointmentCreateService {
 	 * @param dto 요청 DTO
 	 * @return 조회된 Vet 엔티티
 	 * @throws VetNotFoundException vetId가 유효하지 않을 경우 발생
-     */
+	 */
 	private Vet getVetByIdOrThrow(AppointmentRequestDto dto) {
-        return vetRepository.findById(dto.getVetId())
-                .orElseThrow(() -> new VetNotFoundException("Vet not found"));
+		return vetRepository.findById(dto.getVetId())
+			.orElseThrow(() -> new VetNotFoundException("Vet not found"));
 	}
 
 	/**
@@ -75,13 +80,13 @@ public class AppointmentCreateService {
 	 * @return 생성된 Appointment 엔티티
 	 */
 	private static Appointment createAppointmentEntity(AppointmentRequestDto dto, Pet pet, Vet vet) {
-        return Appointment.builder()
-            .apptDate(dto.getApptDate())
-            .status(dto.getStatus())
-            .symptoms(dto.getSymptoms())
-            .petId(pet)
-            .vetId(vet)
-            .build();
+		return Appointment.builder()
+			.apptDate(dto.getApptDate())
+			.status(dto.getStatus())
+			.symptoms(dto.getSymptoms())
+			.petId(pet)
+			.vetId(vet)
+			.build();
 	}
 
 	/**
@@ -91,7 +96,7 @@ public class AppointmentCreateService {
 	 * @return 저장된 Appointment 엔티티
 	 */
 	private Appointment getSavedAppointment(Appointment appointment) {
-        return appointmentRepository.save(appointment);
+		return appointmentRepository.save(appointment);
 	}
 
 
@@ -116,9 +121,9 @@ public class AppointmentCreateService {
 	 */
 	private static Result buildSuccessResult() {
 		return Result.builder()
-				.resultCode(StatusCode.SUCCESS.getCode())
-				.resultDescription(StatusCode.SUCCESS.getDescription())
-				.build();
+			.resultCode(StatusCode.SUCCESS.getCode())
+			.resultDescription(StatusCode.SUCCESS.getDescription())
+			.build();
 	}
 
 	/**
@@ -131,13 +136,13 @@ public class AppointmentCreateService {
 	 */
 	private static AppointmentResponseDto.Body buildAppointmentBody(Appointment savedAppointment, Pet pet, Vet vet) {
 		return AppointmentResponseDto.Body.builder()
-				.id(savedAppointment.getId())
-				.petName(pet.getName())
-				.vetName(vet.getName())
-				.apptDate(savedAppointment.getApptDate())
-				.status(savedAppointment.getStatus())
-				.symptoms(savedAppointment.getSymptoms())
-				.build();
+			.id(savedAppointment.getId())
+			.petName(pet.getName())
+			.vetName(vet.getName())
+			.apptDate(savedAppointment.getApptDate())
+			.status(savedAppointment.getStatus())
+			.symptoms(savedAppointment.getSymptoms())
+			.build();
 	}
 
 	/**
@@ -149,8 +154,8 @@ public class AppointmentCreateService {
 	 */
 	private static AppointmentResponseDto buildAppointmentResponse(Result result, AppointmentResponseDto.Body body) {
 		return AppointmentResponseDto.builder()
-				.result(result)
-				.body(body)
-				.build();
+			.result(result)
+			.body(body)
+			.build();
 	}
 }

@@ -32,7 +32,6 @@ ext.webjarsFontawesomeVersion = "4.7.0"
 ext.webjarsBootstrapVersion = "5.3.3"
 
 dependencies {
-
   // Reactor Core: 비동기 데이터 처리 라이브러리
   implementation 'io.projectreactor:reactor-core'
 
@@ -94,6 +93,10 @@ dependencies {
   // Swagger: API 문서화 도구
   implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0' // Spring MVC용 Swagger UI
 
+  // JWT
+  implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+  runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+  runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 }
 
 tasks.named('test') {

@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
  * 예약 조회와 관련된 서비스 클래스입니다.
  * <p>
  * 예약 정보를 데이터베이스에서 조회하여 반환합니다.
- * </p>
  * */
 @Service
 @RequiredArgsConstructor
@@ -93,7 +92,7 @@ public class AppointmentReadService {
 	 * @throws IllegalArgumentException 유효하지 않은 예약 ID가 전달될 경우 발생
 	 */
 	private Appointment findAppointmentById(Integer appointmentId) {
-		return appointmentRepository.findById(Long.valueOf(appointmentId))
+		return appointmentRepository.findById((appointmentId))
 			.orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
 	}
 
