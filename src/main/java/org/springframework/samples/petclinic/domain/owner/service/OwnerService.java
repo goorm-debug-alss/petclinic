@@ -90,4 +90,16 @@ public class OwnerService {
 				.build())
 			.collect(Collectors.toList());
 	}
+
+	public OwnerResponseDto findById(Integer id) {
+		Owner owner = ownerRepository.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + id));
+
+		return OwnerResponseDto.builder()
+			.name(owner.getName())
+			.address(owner.getAddress())
+			.telephone(owner.getTelephone())
+			.city(owner.getCity())
+			.build();
+	}
 }

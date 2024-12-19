@@ -55,4 +55,10 @@ class OwnerController {
 	public ResponseEntity<List<OwnerResponseDto>> findAll() {
 		return ResponseEntity.ok(ownerService.findAll());
 	}
+
+	// 개별 주인 조회
+	@GetMapping("/{id}")
+	public ResponseEntity<OwnerResponseDto> findById(@PathVariable Integer id) {
+		return ResponseEntity.ok(ownerService.findById(id));
+	}
 }
