@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/vets")
-class VetController {
+public class VetController {
 
 	private final VetService vetService;
 
