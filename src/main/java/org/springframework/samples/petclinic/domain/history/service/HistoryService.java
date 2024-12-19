@@ -163,10 +163,13 @@ public class HistoryService {
 	 * @param historyId 삭제할 진료 내역 ID
 	 */
 	public void deleteHistory(int historyId) {
+
+		//진료내역 존재 여부 확인
 		if (!historyRepository.existsById(historyId)) {
 			throw new IllegalArgumentException("History not found with id: " + historyId);
 		}
 
+		//진료내역 삭제
 		historyRepository.deleteById(historyId);
 	}
 }
