@@ -1,10 +1,8 @@
 package org.springframework.samples.petclinic.domain.owner.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
-import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
-import org.springframework.samples.petclinic.domain.owner.dto.UpdatePasswordRequestDto;
-import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
+import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
+import org.springframework.samples.petclinic.domain.owner.dto.*;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
@@ -13,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,5 +77,17 @@ public class OwnerService {
 		owner.setPassword(updatePasswordRequestDto.getNewPassword());
 
 		ownerRepository.save(owner);
+	}
+
+	public List<OwnerResponseDto> findAll() {
+		var ownerList = ownerRepository.findAll();
+		return ownerList.stream()
+			.map(owner -> OwnerResponseDto.builder()
+				.name(owner.getName())
+				.address(owner.getAddress())
+				.telephone(owner.getTelephone())
+				.city(owner.getCity())
+				.build())
+			.collect(Collectors.toList());
 	}
 }
