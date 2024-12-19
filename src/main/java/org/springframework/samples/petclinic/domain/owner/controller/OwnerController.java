@@ -2,13 +2,12 @@ package org.springframework.samples.petclinic.domain.owner.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
-import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
-import org.springframework.samples.petclinic.domain.owner.dto.UpdatePasswordRequestDto;
-import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
+import org.springframework.samples.petclinic.domain.owner.dto.*;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerService;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -49,5 +48,17 @@ class OwnerController {
 	public ResponseEntity updatePassword(@PathVariable Integer id, @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto) {
 		ownerService.updatePassword(id, updatePasswordRequestDto);
 		return ResponseEntity.ok().build();
+	}
+
+	// 목록 조회
+	@GetMapping
+	public ResponseEntity<List<OwnerResponseDto>> findAll() {
+		return ResponseEntity.ok(ownerService.findAll());
+	}
+
+	// 개별 주인 조회
+	@GetMapping("/{id}")
+	public ResponseEntity<OwnerResponseDto> findById(@PathVariable Integer id) {
+		return ResponseEntity.ok(ownerService.findById(id));
 	}
 }
