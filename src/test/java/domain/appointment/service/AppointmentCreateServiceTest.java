@@ -15,9 +15,9 @@ import org.springframework.samples.petclinic.domain.appointment.model.Appointmen
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentCreateService;
-import org.springframework.samples.petclinic.domain.appointment.garbage.GarbagePetRepository;
-import org.springframework.samples.petclinic.domain.appointment.garbage.GarbageVetRepository;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
+import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
+import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
 import java.time.LocalDateTime;
@@ -43,10 +43,10 @@ public class AppointmentCreateServiceTest {
 	private AppointmentRepository appointmentRepository;
 
 	@Mock
-	private GarbagePetRepository petRepository;
+	private PetRepository petRepository;
 
 	@Mock
-	private GarbageVetRepository vetRepository;
+	private VetRepository vetRepository;
 
 	private AppointmentRequestDto requestDto;
 	private Pet pet;
@@ -64,7 +64,7 @@ public class AppointmentCreateServiceTest {
 
 	@Test
 	@DisplayName("예약 생성 성공 - 모든 조건이 충족될 때")
-	void createAppointment_Success() throws IllegalAccessException {
+	void createAppointment_Success() {
 		// given
 		when(petRepository.findById(requestDto.getPetId())).thenReturn(Optional.of(pet));
 		when(vetRepository.findById(requestDto.getVetId())).thenReturn(Optional.of(vet));

@@ -9,9 +9,9 @@ import org.springframework.samples.petclinic.domain.appointment.exception.PetNot
 import org.springframework.samples.petclinic.domain.appointment.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
-import org.springframework.samples.petclinic.domain.appointment.garbage.GarbagePetRepository;
-import org.springframework.samples.petclinic.domain.appointment.garbage.GarbageVetRepository;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
+import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
+import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AppointmentCreateService {
 
 	private final AppointmentRepository appointmentRepository;
-	private final GarbagePetRepository petRepository;
-	private final GarbageVetRepository vetRepository;
+	private final PetRepository petRepository;
+	private final VetRepository vetRepository;
 
 	/**
 	 * 예약 생성 로직을 처리하는 메소드입니다.
