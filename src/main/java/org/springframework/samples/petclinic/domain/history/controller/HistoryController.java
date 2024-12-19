@@ -50,4 +50,17 @@ public class HistoryController {
 		HistoryResponseDto response = historyService.updateHistory(historyId,request);
 		return ResponseEntity.ok(response);
 	}
+
+	/**
+	 * 진료 내역 삭제
+	 *
+	 * @param historyId 삭제할 진료 내역 ID
+	 * @return 삭제 결과 메시지
+	 */
+	@DeleteMapping("/{historyId}")
+	public ResponseEntity<?> deleteHistory(@PathVariable int historyId) {
+		historyService.deleteHistory(historyId);
+		return ResponseEntity.ok("History deleted successfully.");
+	}
+
 }

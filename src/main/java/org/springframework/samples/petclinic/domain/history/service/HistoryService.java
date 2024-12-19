@@ -156,4 +156,17 @@ public class HistoryService {
 
 		return historyResponseDto;
 	}
+
+	/**
+	 * 진료 내역 삭제
+	 *
+	 * @param historyId 삭제할 진료 내역 ID
+	 */
+	public void deleteHistory(int historyId) {
+		if (!historyRepository.existsById(historyId)) {
+			throw new IllegalArgumentException("History not found with id: " + historyId);
+		}
+
+		historyRepository.deleteById(historyId);
+	}
 }
