@@ -15,7 +15,7 @@ import org.springframework.samples.petclinic.domain.appointment.service.Appointm
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,8 +41,8 @@ public class AppointmentReadServiceTest {
 	@DisplayName("모든 예약 정보 조회 성공")
 	void getAllAppointments_Success() {
 		// given
-		Appointment appointment1 = createMockAppointment(1, "구름이", "수의사", "감기", LocalDate.now());
-		Appointment appointment2 = createMockAppointment(2, "구르미", "수의사", "몸살", LocalDate.now());
+		Appointment appointment1 = createMockAppointment(1, "구름이", "수의사", "감기", LocalDateTime.now());
+		Appointment appointment2 = createMockAppointment(2, "구르미", "수의사", "몸살", LocalDateTime.now());
 		when(appointmentRepository.findAll()).thenReturn(List.of(appointment1, appointment2));
 
 		// when
@@ -57,7 +57,7 @@ public class AppointmentReadServiceTest {
 	@DisplayName("예약 ID로 예약 조회 성공")
 	void getAppointmentById_Success() {
 		// given
-		Appointment appointment = createMockAppointment(1, "구름이", "수의사", "감기", LocalDate.now());
+		Appointment appointment = createMockAppointment(1, "구름이", "수의사", "감기", LocalDateTime.now());
 		when(appointmentRepository.findById(1)).thenReturn(Optional.of(appointment));
 
 		// when
@@ -81,7 +81,7 @@ public class AppointmentReadServiceTest {
 		verify(appointmentRepository, times(1)).findById(1);
 	}
 
-	private Appointment createMockAppointment(Integer id, String petName, String vetName, String symptoms, LocalDate date) {
+	private Appointment createMockAppointment(Integer id, String petName, String vetName, String symptoms, LocalDateTime dateTime) {
 		Pet pet = new Pet();
 		pet.setName(petName);
 
@@ -93,7 +93,7 @@ public class AppointmentReadServiceTest {
 			.petId(Pet.builder().name(petName).build())
 			.vetId(Vet.builder().name(vetName).build())
 			.symptoms(symptoms)
-			.apptDate(date)
+			.apptDateTime(dateTime)
 			.build();
 	}
 }
