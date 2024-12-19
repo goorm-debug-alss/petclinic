@@ -38,4 +38,16 @@ public class HistoryController {
 		HistoryResponseDto response = historyService.getHistoriesByPetId(petId);
 		return ResponseEntity.ok(response);
 	}
+
+	/**
+	 * 새로운 진료 내역 추가
+	 *
+	 * @param request 요청 본문으로 전달된 진료 내역
+	 * @return 추가된 진료 내역
+	 */
+	@PutMapping("/{historyId}")
+	public ResponseEntity<?> addHistory(@PathVariable int historyId,@RequestBody HistoryRequestDto request) {
+		HistoryResponseDto response = historyService.updateHistory(historyId,request);
+		return ResponseEntity.ok(response);
+	}
 }

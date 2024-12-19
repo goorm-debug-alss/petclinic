@@ -124,4 +124,36 @@ public class HistoryService {
 			.build();
 	}
 
+	/**
+	 * 진료 내역 수정
+	 *
+	 * @param historyId 수정할 진료내역 ID
+	 * @param request 수정할 내역 요청 데이터
+	 * @return HistoryResponseDto 수정된 진료 정보 반환
+	 */
+	public HistoryResponseDto updateHistory(int historyId, HistoryRequestDto request) {
+		// 존재 여부 확인
+		History history = historyRepository.findById(historyId)
+			.orElseThrow(() -> new IllegalArgumentException("History not found"));
+
+		Vet vet = vetRepository.findById(request.getVetId())
+			.orElseThrow(() -> new IllegalArgumentException("Vet not found"));
+
+		Visit visit = visitRepository.findById(request.getVisitId())
+			.orElseThrow(() -> new IllegalArgumentException("Visit not found"));
+
+		// 업데이트 내용 반영
+		history.setSymptoms(request.getSymptoms());
+		history.setContent(request.getContent());
+		history.setVetId(vet);
+		history.setVisitId(visit);
+
+		//업데이트 내용 저장
+		History updateEntity = historyRepository.save(history);
+
+		//응답 DTO 생성
+		HistoryResponseDto historyResponseDto = buildResponseDto(updateEntity);
+
+		return historyResponseDto;
+	}
 }
