@@ -81,7 +81,7 @@ public class AppointmentCreateService {
 	 */
 	private static Appointment createAppointmentEntity(AppointmentRequestDto dto, Pet pet, Vet vet) {
         return Appointment.builder()
-            .apptDate(dto.getApptDate())
+            .apptDateTime(dto.getApptDateTime())
             .status(dto.getStatus())
             .symptoms(dto.getSymptoms())
             .petId(pet)
@@ -139,7 +139,7 @@ public class AppointmentCreateService {
 				.id(savedAppointment.getId())
 				.petName(pet.getName())
 				.vetName(vet.getName())
-				.apptDate(savedAppointment.getApptDate())
+				.apptDateTime(savedAppointment.getApptDateTime())
 				.status(savedAppointment.getStatus())
 				.symptoms(savedAppointment.getSymptoms())
 				.build();

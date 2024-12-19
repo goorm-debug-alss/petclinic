@@ -20,7 +20,7 @@ import org.springframework.samples.petclinic.domain.appointment.garbage.GarbageV
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -115,7 +115,7 @@ public class AppointmentCreateServiceTest {
 		requestDto = AppointmentRequestDto.builder()
 				.petId(1)
 				.vetId(1)
-				.apptDate(LocalDate.now())
+				.apptDateTime(LocalDateTime.now())
 				.status(ApptStatus.valueOf("COMPLETE"))
 				.symptoms("Coughing")
 				.build();
@@ -131,7 +131,7 @@ public class AppointmentCreateServiceTest {
 	private void createTestAppointment() {
 		appointment = Appointment.builder()
 				.id(1)
-				.apptDate(requestDto.getApptDate())
+				.apptDateTime(requestDto.getApptDateTime())
 				.status(requestDto.getStatus())
 				.symptoms(requestDto.getSymptoms())
 				.petId(pet)
