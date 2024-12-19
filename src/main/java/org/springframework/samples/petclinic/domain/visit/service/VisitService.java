@@ -2,11 +2,12 @@ package org.springframework.samples.petclinic.domain.visit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
+import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
 import org.springframework.samples.petclinic.domain.visit.enums.StatusCode;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
-import org.springframework.samples.petclinic.domain.visit.tempRepository.TempPetRepository;
+
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public class VisitService {
 
     private final VisitRepository visitRepository;
-    private final TempPetRepository petRepository; //테스트용 임시저장소
+    private final PetRepository petRepository;
 
     /**
      * 방문 내역 생성
