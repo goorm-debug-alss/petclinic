@@ -38,4 +38,29 @@ public class HistoryController {
 		HistoryResponseDto response = historyService.getHistoriesByPetId(petId);
 		return ResponseEntity.ok(response);
 	}
+
+	/**
+	 * 진료 내역 수정
+	 *
+	 * @param request 수정할 진료내역 요청 DTO
+	 * @return 수정된 진료 내역
+	 */
+	@PutMapping("/{historyId}")
+	public ResponseEntity<?> updateHistory(@PathVariable int historyId,@RequestBody HistoryRequestDto request) {
+		HistoryResponseDto response = historyService.updateHistory(historyId,request);
+		return ResponseEntity.ok(response);
+	}
+
+	/**
+	 * 진료 내역 삭제
+	 *
+	 * @param historyId 삭제할 진료 내역 ID
+	 * @return 삭제 결과 메시지
+	 */
+	@DeleteMapping("/{historyId}")
+	public ResponseEntity<?> deleteHistory(@PathVariable int historyId) {
+		historyService.deleteHistory(historyId);
+		return ResponseEntity.ok("History deleted successfully.");
+	}
+
 }
