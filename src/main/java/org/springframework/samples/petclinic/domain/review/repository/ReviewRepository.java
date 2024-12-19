@@ -21,6 +21,10 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
 	// 특정 Owner의 모든 리뷰 조회
 	List<Review> findByOwnerId_Id(Integer ownerId);
+
+	// 특정 Vet의 모든 리뷰 조회
+	List<Review> findByVetId_Id(Integer vetId);
+
 }
 
 
