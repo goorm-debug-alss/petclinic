@@ -18,9 +18,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 /**
- * AppointmentDeleteServiceTest
- * <p>
- * 이 클래스는 AppointmentDeleteServiceTest 기능을 테스트하기 위한 단위 테스트 클래스입니다.
+ * AppointmentDeleteServiceTest 단위 테스트
  */
 @ExtendWith(MockitoExtension.class)
 public class AppointmentDeleteServiceTest {
