@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentR
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.exception.PetNotFoundException;
 import org.springframework.samples.petclinic.domain.appointment.exception.VetNotFoundException;
+import org.springframework.samples.petclinic.domain.appointment.mapper.AppointmentHelper;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
@@ -29,9 +30,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 /**
- * AppointmentCreateServiceTest
- * <p>
- * 이 클래스는 AppointmentCreateService 기능을 테스트하기 위한 단위 테스트 클래스입니다.
+ * AppointmentCreateService 단위 테스트
  */
 @ExtendWith(MockitoExtension.class)
 public class AppointmentCreateServiceTest {
@@ -47,6 +46,8 @@ public class AppointmentCreateServiceTest {
 
 	@Mock
 	private VetRepository vetRepository;
+
+	private AppointmentHelper appointmentHelper = new AppointmentHelper();
 
 	private AppointmentRequestDto requestDto;
 	private Pet pet;
