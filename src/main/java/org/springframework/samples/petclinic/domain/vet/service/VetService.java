@@ -28,6 +28,19 @@ public class VetService {
 	// 수의사 등록
 	@Transactional
 	public VetResponseDto register(VetRequestDto vetRequestDto) {
+
+		if (vetRequestDto == null) {
+			throw new NullPointerException("요청데이터가 비어 있습니다.");
+		}
+
+		if (vetRequestDto.getName() == null || vetRequestDto.getName().isBlank()) {
+			throw new NullPointerException("이름은 필수값입니다.");
+		}
+
+		if (vetRequestDto.getSpecialties() == null || vetRequestDto.getSpecialties().isEmpty()) {
+			throw new NullPointerException("전문분야는 필수값입니다.");
+		}
+
 		Vet vet = new Vet();
 		vet.setName(vetRequestDto.getName());
 		Vet savedVet = vetRepository.save(vet);
