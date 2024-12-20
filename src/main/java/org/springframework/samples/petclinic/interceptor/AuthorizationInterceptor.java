@@ -35,7 +35,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         }
 
         // header 검증
-        var token = request.getHeader("authorization-token");
+        var token = request.getHeader("Authorization");
         if(token == null) {
 			throw new IllegalAccessException("Token is Null");
         }
