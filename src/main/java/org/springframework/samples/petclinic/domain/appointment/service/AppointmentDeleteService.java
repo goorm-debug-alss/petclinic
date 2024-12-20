@@ -8,9 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 예약 삭제 서비스를 제공하는 클래스입니다.
- * <p>
- * 특정 예약 ID를 기반으로 데이터베이스에서 예약 정보를 삭제합니다.
+ * 예약 삭제 서비스
+ * - 예약 ID를 기반으로 데이터를 삭제
  */
 @Service
 @RequiredArgsConstructor
@@ -19,7 +18,7 @@ public class AppointmentDeleteService {
 	private final AppointmentRepository appointmentRepository;
 
 	/**
-	 * 특정 ID를 기반으로 예약 정보를 삭제합니다.
+	 * 특정 ID를 기반으로 예약 정보를 삭제
 	 *
 	 * @param appointmentId 삭제할 예약의 ID
 	 * @throws AppointmentNotFoundException 예약 ID가 데이터베이스에 없을 경우 발생

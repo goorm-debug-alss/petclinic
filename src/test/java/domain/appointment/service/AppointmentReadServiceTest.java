@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.dto.ResultResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.exception.AppointmentNotFoundException;
+import org.springframework.samples.petclinic.domain.appointment.mapper.AppointmentHelper;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentReadService;
@@ -24,15 +25,15 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 /**
- * AppointmentReadServiceTest
- * <p>
- * 이 클래스는 AppointmentReadService 기능을 테스트하기 위한 단위 테스트 클래스입니다.
+ * AppointmentReadService 단위 테스트
  */
 @ExtendWith(MockitoExtension.class)
 public class AppointmentReadServiceTest {
 
 	@Mock
 	private AppointmentRepository appointmentRepository;
+
+	private AppointmentHelper appointmentHelper = new AppointmentHelper();
 
 	@InjectMocks
 	private AppointmentReadService appointmentReadService;
@@ -41,12 +42,12 @@ public class AppointmentReadServiceTest {
 	@DisplayName("모든 예약 정보 조회 성공")
 	void getAllAppointments_Success() {
 		// given
-		Appointment appointment1 = createMockAppointment(1, "구름이", "수의사", "감기", LocalDateTime.now());
-		Appointment appointment2 = createMockAppointment(2, "구르미", "수의사", "몸살", LocalDateTime.now());
+		Appointment appointment1 = createMockAppointment(1, "구름이", "감기", LocalDateTime.now());
+		Appointment appointment2 = createMockAppointment(2, "구르미", "몸살", LocalDateTime.now());
 		when(appointmentRepository.findAll()).thenReturn(List.of(appointment1, appointment2));
 
 		// when
-		ResultResponseDto<AppointmentResponseDto.Body> result = appointmentReadService.getAllAppointments();
+		ResultResponseDto<AppointmentResponseDto.Body> result = appointmentReadService.findALlAppointments();
 
 		// then
 		assertThat(result.getBody()).hasSize(2);
@@ -57,11 +58,11 @@ public class AppointmentReadServiceTest {
 	@DisplayName("예약 ID로 예약 조회 성공")
 	void getAppointmentById_Success() {
 		// given
-		Appointment appointment = createMockAppointment(1, "구름이", "수의사", "감기", LocalDateTime.now());
+		Appointment appointment = createMockAppointment(1, "구름이", "감기", LocalDateTime.now());
 		when(appointmentRepository.findById(1)).thenReturn(Optional.of(appointment));
 
 		// when
-		AppointmentResponseDto.Body response = appointmentReadService.getAppointmentById(1);
+		AppointmentResponseDto.Body response = appointmentReadService.findAppointmentById(1);
 
 		// then
 		assertThat(response.getId()).isEqualTo(1);
@@ -77,21 +78,15 @@ public class AppointmentReadServiceTest {
 		when(appointmentRepository.findById(1)).thenReturn(Optional.empty());
 
 		// when & then
-		assertThrows(AppointmentNotFoundException.class, () -> appointmentReadService.getAppointmentById(1));
+		assertThrows(AppointmentNotFoundException.class, () -> appointmentReadService.findAppointmentById(1));
 		verify(appointmentRepository, times(1)).findById(1);
 	}
 
-	private Appointment createMockAppointment(Integer id, String petName, String vetName, String symptoms, LocalDateTime dateTime) {
-		Pet pet = new Pet();
-		pet.setName(petName);
-
-		Vet vet = new Vet();
-		vet.setName(vetName);
-
+	private Appointment createMockAppointment(Integer id, String petName, String symptoms, LocalDateTime dateTime) {
 		return Appointment.builder()
 			.id(id)
 			.petId(Pet.builder().name(petName).build())
-			.vetId(Vet.builder().name(vetName).build())
+			.vetId(Vet.builder().name("수의사").build())
 			.symptoms(symptoms)
 			.apptDateTime(dateTime)
 			.build();
