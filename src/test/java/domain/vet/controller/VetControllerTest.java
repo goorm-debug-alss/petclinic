@@ -219,7 +219,6 @@ public class VetControllerTest {
 
 	}
 
-	// 컨트롤러 수정 필요
 	@Test
 	@DisplayName("수의사 삭제 성공")
 	void deleteVet_Success(){

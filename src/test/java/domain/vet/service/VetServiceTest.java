@@ -291,38 +291,45 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("수의사 삭제 성공")
 	void deleteVetSuccess() {
-		doNothing().when(vetRepository).deleteById(1);
+		when(vetRepository.findById(1)).thenReturn(Optional.of(vet));
+		doNothing().when(vetRepository).delete(vet);
 
 		vetService.delete(1);
 
-		verify(vetRepository, times(1)).deleteById(1);
+		verify(vetRepository, times(1)).findById(1);
+		verify(vetRepository, times(1)).delete(vet);
+		verify(vetSpecialityRepository, times(1)).deleteAllByVetId_Id(1);
+
 		verifyNoMoreInteractions(vetRepository);
 	}
 
 	@Test
 	@DisplayName("수의사 삭제 성공 - 관련 전공 연결 삭제 확인")
 	void deleteVetSuccess_withSpecialities() {
-		doNothing().when(vetRepository).deleteById(1);
-		doNothing().when(vetSpecialityRepository).deleteAllByVetId_Id(1);
+		when(vetRepository.findById(1)).thenReturn(Optional.of(vet));
+		doNothing().when(vetRepository).delete(vet);
 
 		vetService.delete(1);
 
 		verify(vetSpecialityRepository, times(1)).deleteAllByVetId_Id(1);
-		verify(vetRepository, times(1)).deleteById(1);
+		verify(vetRepository, times(1)).delete(vet);
 
 		verifyNoMoreInteractions(vetRepository, vetSpecialityRepository);
 	}
 
-	// 서비스 수정 필요
+
 	@Test
 	@DisplayName("수의사 삭제 실패 - 해당 아이디에 해당하는 수의사가 존재하지 않을 때")
 	void deleteVetFailure_notFound() {
-		doNothing().when(vetRepository).deleteById(222);
+		when(vetRepository.findById(222)).thenReturn(Optional.empty());
 
-		vetService.delete(222);
+		assertThatThrownBy(() -> vetService.delete(222))
+			.isInstanceOf(RuntimeException.class)
+			.hasMessageContaining("해당 수의사를 찾을 수 없습니다");
 
-		verify(vetRepository, times(1)).deleteById(222);
-		verifyNoMoreInteractions(vetRepository);
+		verify(vetRepository, never()).delete(any());
+
+		verifyNoMoreInteractions(vetRepository, vetSpecialityRepository);
 	}
 
 	@Test

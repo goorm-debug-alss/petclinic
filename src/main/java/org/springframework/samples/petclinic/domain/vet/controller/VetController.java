@@ -57,7 +57,8 @@ public class VetController {
 
 	// 수의사 삭제
 	@DeleteMapping("/{vet-id}")
-	public void delete(@PathVariable("vet-id") int vetId) {
+	public ResponseEntity<Void> delete(@PathVariable("vet-id") int vetId) {
 		vetService.delete(vetId);
+		return ResponseEntity.noContent().build();
 	}
 }
