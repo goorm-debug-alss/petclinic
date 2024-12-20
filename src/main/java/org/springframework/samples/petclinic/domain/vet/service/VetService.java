@@ -101,8 +101,13 @@ public class VetService {
 	}
 
 	// 수의사 삭제
+	@Transactional
 	public void delete(int vetId) {
-		vetRepository.deleteById(vetId);
+		Vet vet = vetRepository.findById(vetId)
+			.orElseThrow(() -> new RuntimeException("해당 수의사를 찾을 수 없습니다"));
+
+		vetSpecialityRepository.deleteAllByVetId_Id(vetId);
+		vetRepository.delete(vet);
 	}
 
 	// 수의사 수정
