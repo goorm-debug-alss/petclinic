@@ -1,4 +1,4 @@
-package domain.appointment.service;
+package domain.vet.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -136,7 +136,6 @@ public class VetServiceTest {
 		verifyNoMoreInteractions(vetRepository, specialityRepository, vetSpecialityRepository, vetConvert);
 	}
 
-	// 서비스 수정 필요
 	@Test
 	@DisplayName("수의사 등록 실패 - 이름이 null일 때")
 	void registerVetFailure_nullName() {
@@ -148,11 +147,21 @@ public class VetServiceTest {
 		verify(specialityRepository, never()).save(any());
 	}
 
-	// 서비스 수정 필요
 	@Test
 	@DisplayName("수의사 등록 실패 - 전문 분야가 null일 때")
 	void registerVetFailure_nullSpecialties() {
 		vetRequestDto.setSpecialties(null);
+
+		assertThatThrownBy(() -> vetService.register(vetRequestDto)).isInstanceOf(NullPointerException.class);
+
+		verify(vetRepository, never()).save(any());
+		verify(specialityRepository, never()).save(any());
+	}
+
+	@Test
+	@DisplayName("수의사 등록 실패 - Dto가 null일 때")
+	void registerVetFailure_nullDto() {
+		vetRequestDto = null;
 
 		assertThatThrownBy(() -> vetService.register(vetRequestDto)).isInstanceOf(NullPointerException.class);
 

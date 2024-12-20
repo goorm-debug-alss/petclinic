@@ -1,4 +1,4 @@
-package domain.appointment.service;
+package domain.vet.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
