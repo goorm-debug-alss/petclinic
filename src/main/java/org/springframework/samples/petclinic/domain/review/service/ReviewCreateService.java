@@ -17,6 +17,8 @@ import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 /**
  * 리뷰 생성 서비스
  * - 리뷰 생성 로직 및 데이터베이스 연동 처리
@@ -46,6 +48,8 @@ public class ReviewCreateService {
 		Review review = convertToReviewEntity(requestDto, owner, vet);
 		Review savedReview = reviewRepository.save(review);
 
+		updateVetRatingAndReviewCount(vet, requestDto.getScore());
+
 		return createReviewResponse(savedReview);
 	}
 
@@ -73,6 +77,19 @@ public class ReviewCreateService {
 			.ownerId(owner)
 			.vetId(vet)
 			.build();
+	}
+
+	private void updateVetRatingAndReviewCount(Vet vet, int newScore) {
+		int currentReviewCount = vet.getReviewCount() != null ? vet.getReviewCount() : 0;
+		BigDecimal currentAverageRating = vet.getAverageRatings() != null ? vet.getAverageRatings() : BigDecimal.ZERO;
+
+		int updatedReviewCount = currentReviewCount + 1;
+		BigDecimal totalScore = currentAverageRating.multiply(BigDecimal.valueOf(currentReviewCount))
+			.add(BigDecimal.valueOf(newScore));
+		BigDecimal updatedAverageRating = totalScore.divide(BigDecimal.valueOf(updatedReviewCount), 2, BigDecimal.ROUND_HALF_UP);
+
+		vet.updateRatings(updatedAverageRating, updatedReviewCount);
+		vetRepository.save(vet);
 	}
 
 	private static ReviewResponseDto createReviewResponse(Review savedReview) {
