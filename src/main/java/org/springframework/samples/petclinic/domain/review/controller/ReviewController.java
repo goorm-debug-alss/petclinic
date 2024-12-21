@@ -9,7 +9,6 @@ import org.springframework.samples.petclinic.domain.review.service.ReviewCreateS
 import org.springframework.samples.petclinic.domain.review.service.ReviewDeleteService;
 import org.springframework.samples.petclinic.domain.review.service.ReviewReadService;
 import org.springframework.samples.petclinic.domain.review.service.ReviewUpdateService;
-import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -53,8 +52,7 @@ public class ReviewController {
 	@GetMapping("/my")
 	public ResponseEntity<List<ReviewResponseDto>> getMyReviews() {
 		Integer ownerId = getAuthenticatedOwnerId();
-		Owner owner = Owner.builder().id(ownerId).build();
-		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByOwner(owner);
+		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByOwner(ownerId);
 		return ResponseEntity.ok(reviews);
 	}
 
@@ -66,8 +64,7 @@ public class ReviewController {
 	 */
 	@GetMapping("/{vetId}")
 	public ResponseEntity<List<ReviewResponseDto>> getReviewsByVet(@PathVariable("vetId") Integer vetId) {
-		Vet vet = Vet.builder().id(vetId).build();
-		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByVet(vet);
+		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByVet(vetId);
 		return ResponseEntity.ok(reviews);
 	}
 
