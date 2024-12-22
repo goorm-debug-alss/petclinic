@@ -5,6 +5,8 @@ import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewRequestDto;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto;
+import org.springframework.samples.petclinic.domain.review.exception.InvalidContentException;
+import org.springframework.samples.petclinic.domain.review.exception.InvalidScoreException;
 import org.springframework.samples.petclinic.domain.review.exception.OwnerNotFoundException;
 import org.springframework.samples.petclinic.domain.review.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.review.mapper.ReviewHelper;
@@ -14,6 +16,8 @@ import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 /**
  * 리뷰 생성 서비스
@@ -37,21 +41,33 @@ public class ReviewCreateService {
 	 */
 	@Transactional
 	public ReviewResponseDto createReview(ReviewRequestDto requestDto, Integer ownerId, Integer vetId) {
+		validateRequest(requestDto);
 		Owner owner = fetchOwnerByIdOrThrow(ownerId);
 		Vet vet = fetchVetByIdOrThrow(vetId);
 
 		Review review = convertToReviewEntity(requestDto, owner, vet);
 		Review savedReview = reviewRepository.save(review);
 
+		updateVetRatingAndReviewCount(vet, requestDto.getScore());
+
 		return createReviewResponse(savedReview);
 	}
 
+	private void validateRequest(ReviewRequestDto requestDto) {
+		if (requestDto.getScore() == null || requestDto.getScore() < 1 || requestDto.getScore() > 5) {
+			throw new InvalidScoreException("평점은 1점 이상 5점 이하로 설정해야 합니다.");
+		}
+		if (requestDto.getContent() == null || requestDto.getContent().isEmpty()) {
+			throw new InvalidContentException("리뷰 내용은 비어 있을 수 없습니다.");
+		}
+	}
+
 	private Owner fetchOwnerByIdOrThrow(Integer ownerId) {
-		return ownerRepository.findById(ownerId).orElseThrow(() -> new OwnerNotFoundException("Invalid owner ID"));
+		return ownerRepository.findById(ownerId).orElseThrow(() -> new OwnerNotFoundException("유효하지 않은 소유자 ID 입니다."));
 	}
 
 	private Vet fetchVetByIdOrThrow(Integer vetId) {
-		return vetRepository.findById(vetId).orElseThrow(() -> new VetNotFoundException("Invalid vet ID"));
+		return vetRepository.findById(vetId).orElseThrow(() -> new VetNotFoundException("유효하지 않은 수의사 ID 입니다."));
 	}
 
 	private static Review convertToReviewEntity(ReviewRequestDto requestDto, Owner owner, Vet vet) {
@@ -61,6 +77,19 @@ public class ReviewCreateService {
 			.ownerId(owner)
 			.vetId(vet)
 			.build();
+	}
+
+	private void updateVetRatingAndReviewCount(Vet vet, int newScore) {
+		int currentReviewCount = vet.getReviewCount() != null ? vet.getReviewCount() : 0;
+		BigDecimal currentAverageRating = vet.getAverageRatings() != null ? vet.getAverageRatings() : BigDecimal.ZERO;
+
+		int updatedReviewCount = currentReviewCount + 1;
+		BigDecimal totalScore = currentAverageRating.multiply(BigDecimal.valueOf(currentReviewCount))
+			.add(BigDecimal.valueOf(newScore));
+		BigDecimal updatedAverageRating = totalScore.divide(BigDecimal.valueOf(updatedReviewCount), 2, BigDecimal.ROUND_HALF_UP);
+
+		vet.updateRatings(updatedAverageRating, updatedReviewCount);
+		vetRepository.save(vet);
 	}
 
 	private static ReviewResponseDto createReviewResponse(Review savedReview) {

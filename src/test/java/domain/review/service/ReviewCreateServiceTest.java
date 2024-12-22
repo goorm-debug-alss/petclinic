@@ -11,6 +11,8 @@ import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewRequestDto;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto;
+import org.springframework.samples.petclinic.domain.review.exception.InvalidContentException;
+import org.springframework.samples.petclinic.domain.review.exception.InvalidScoreException;
 import org.springframework.samples.petclinic.domain.review.exception.OwnerNotFoundException;
 import org.springframework.samples.petclinic.domain.review.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.review.model.Review;
@@ -79,6 +81,28 @@ public class ReviewCreateServiceTest {
 	}
 
 	@Test
+	@DisplayName("리뷰 생성 실패 - Score가 null일 때")
+	void createReview_ScoreIsNull() {
+		// given
+		requestDto.setScore(null);
+
+		// when & then
+		assertThrows(InvalidScoreException.class, () ->
+			reviewCreateService.createReview(requestDto, owner.getId(), vet.getId()));
+	}
+
+	@Test
+	@DisplayName("리뷰 생성 실패 - Content가 비어 있을 때")
+	void createReview_ContentIsEmpty() {
+		// given
+		requestDto.setContent("");
+
+		// when & then
+		assertThrows(InvalidContentException.class, () ->
+			reviewCreateService.createReview(requestDto, owner.getId(), vet.getId()));
+	}
+
+	@Test
 	@DisplayName("리뷰 생성 실패 - Owner ID가 존재하지 않을 때")
 	void createReview_OwnerNotFound() {
 		// given
@@ -91,6 +115,14 @@ public class ReviewCreateServiceTest {
 		verify(ownerRepository).findById(owner.getId());
 		verify(vetRepository, never()).findById(vet.getId());
 		verify(reviewRepository, never()).save(any(Review.class));
+	}
+
+	@Test
+	@DisplayName("리뷰 생성 실패 - Owner ID와 요청 데이터가 일치하지 않을 때")
+	void createReview_OwnerIdMismatch() {
+		// when & then
+		assertThrows(OwnerNotFoundException.class, () ->
+			reviewCreateService.createReview(requestDto, 999, vet.getId()));
 	}
 
 	@Test
