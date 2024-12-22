@@ -1,9 +1,6 @@
 package org.springframework.samples.petclinic.domain.vet.model;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,4 +24,9 @@ public class Vet extends BaseEntity {
 	private BigDecimal averageRatings;
 
 	private Integer reviewCount;
+
+	public void updateRatings(BigDecimal newAverageRatings, Integer newReviewCount) {
+		this.averageRatings = newAverageRatings;
+		this.reviewCount = newReviewCount;
+	}
 }
