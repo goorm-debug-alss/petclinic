@@ -65,11 +65,15 @@ class VisitServiceTest {
 	@Test
 	@DisplayName("방문 내역 생성 성공")
 	void createVisit_Success() {
+
+		// Given
 		when(petRepository.findById(eq(visitRequestDto.getPetId()))).thenReturn(Optional.of(pet));
 		when(visitRepository.save(any(Visit.class))).thenReturn(visit);
 
+		// When
 		VisitResponseDto response = visitService.createVisit(visitRequestDto);
 
+		// Then
 		assertThat(response).isNotNull();
 		assertThat(response.getBody().get(0).getVisitId()).isEqualTo(visit.getId());
 		assertThat(response.getBody().get(0).getPetName()).isEqualTo(pet.getName());
@@ -82,8 +86,10 @@ class VisitServiceTest {
 	@Test
 	@DisplayName("방문 내역 생성 실패 - 반려동물 없음")
 	void createVisit_Fail_PetNotFound() {
+		// Given
 		when(petRepository.findById(eq(visitRequestDto.getPetId()))).thenReturn(Optional.empty());
 
+		// When,Then
 		assertThatThrownBy(() -> visitService.createVisit(visitRequestDto))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Pet not found.");
@@ -95,16 +101,21 @@ class VisitServiceTest {
 	@Test
 	@DisplayName("특정 반려동물의 방문 내역 조회 성공")
 	void getVisitsByPetId_Success() {
+
+		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
 		when(visitRepository.findAllByPetId(eq(pet))).thenReturn(List.of(visit));
 
+		// When
 		VisitResponseDto response = visitService.getVisitsByPetId(pet.getId());
 
+		// Then
 		assertThat(response).isNotNull();
 		assertThat(response.getBody()).hasSize(1);
 		assertThat(response.getBody().get(0).getVisitId()).isEqualTo(visit.getId());
 		assertThat(response.getBody().get(0).getPetName()).isEqualTo(pet.getName());
 		assertThat(response.getBody().get(0).getDescription()).isEqualTo(visit.getDescription());
+
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
 		verify(visitRepository, times(1)).findAllByPetId(eq(pet));
@@ -113,12 +124,16 @@ class VisitServiceTest {
 	@Test
 	@DisplayName("특정 반려동물의 방문 내역 조회 실패 - 반려동물 없음")
 	void getVisitsByPetId_Fail_PetNotFound() {
+		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.empty());
 
+		// When
+		// Then
 		assertThatThrownBy(() -> visitService.getVisitsByPetId(pet.getId()))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Pet not found");
 
+		// Then
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
 		verifyNoInteractions(visitRepository);
 	}

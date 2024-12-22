@@ -1,8 +1,5 @@
 package domain.visit.controller;
 
-
-
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +14,8 @@ import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
 import org.springframework.samples.petclinic.domain.visit.service.VisitService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -45,7 +40,8 @@ class VisitControllerTest {
 	@Test
 	@DisplayName("POST /visits - 새로운 방문 내역 추가 성공")
 	void createVisit_Success() throws Exception {
-		// Arrange
+
+		// Given
 		String requestJson = """
         {
             "petId": 1,
@@ -69,10 +65,11 @@ class VisitControllerTest {
 
 		when(visitService.createVisit(any(VisitRequestDto.class))).thenReturn(responseDto);
 
-
+		// When
 		mockMvc.perform(post("/visits")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(requestJson))
+			// Then
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.result.resultCode").value("200"))
 			.andExpect(jsonPath("$.result.resultDescription").value("Operation completed successfully"))
@@ -85,7 +82,8 @@ class VisitControllerTest {
 	@Test
 	@DisplayName("GET /visits/{petId} - 특정 반려동물 방문 내역 조회 성공")
 	void getVisitsByPetId_Success() throws Exception {
-		// Arrange
+
+		// Given
 		LocalDateTime visitDate = LocalDateTime.of(2024, 12, 18, 19, 0);
 
 		VisitResponseDto responseDto = VisitResponseDto.builder()
@@ -103,9 +101,10 @@ class VisitControllerTest {
 
 		when(visitService.getVisitsByPetId(1)).thenReturn(responseDto);
 
-		// Act & Assert
+		// When
 		mockMvc.perform(get("/visits/1")
 				.accept(MediaType.APPLICATION_JSON))
+			// Then
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.result.resultCode").value("200"))
 			.andExpect(jsonPath("$.result.resultDescription").value("Operation completed successfully"))
