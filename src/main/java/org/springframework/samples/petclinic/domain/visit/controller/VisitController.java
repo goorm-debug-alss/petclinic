@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/visits")
 @RequiredArgsConstructor
-class VisitController {
+public class VisitController {
 	private final VisitService visitService;
 	/**
 	 * 새로운 방문 내역 추가
