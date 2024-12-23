@@ -26,6 +26,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -51,4 +53,24 @@ public class Owner extends BaseEntity {
 
 	@Column(length = 15, nullable = false)
 	private String telephone;
+
+	public void updatePassword(String updatePassword) {
+		this.password = updatePassword;
+	}
+
+	public void updateName(String updateName) {
+		this.name = updateName;
+	}
+
+	public void updateAddress(String updateAddress) {
+		this.address = updateAddress;
+	}
+
+	public void updateCity(String updateCity) {
+		this.city = updateCity;
+	}
+
+	public void updateTelephone(String updateTelephone) {
+		this.telephone = updateTelephone;
+	}
 }
