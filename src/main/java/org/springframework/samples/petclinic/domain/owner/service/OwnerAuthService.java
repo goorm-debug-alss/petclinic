@@ -9,6 +9,7 @@ import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
 import org.springframework.samples.petclinic.domain.token.service.TokenService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -23,6 +24,7 @@ public class OwnerAuthService {
 
 	private final OwnerRepository ownerRepository;
 	private final TokenService tokenService;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * 회원가입
@@ -32,7 +34,10 @@ public class OwnerAuthService {
 	public void register(RegisterRequestDto registerRequestDto) {
 		validateOwnerDoesNotExist(registerRequestDto);
 
+		String encryptedPassword = passwordEncoder.encode(registerRequestDto.getPassword());
+
 		Owner owner = registerRequestDto.toEntity();
+		owner.setPassword(encryptedPassword);
 		ownerRepository.save(owner);
 	}
 
@@ -72,8 +77,8 @@ public class OwnerAuthService {
 			.orElseThrow(() -> new OwnerNotFoundException("Owner not found with userId " + loginRequestDto.getUserId()));
 	}
 
-	private static void validatePasswordOrThrow(LoginRequestDto loginRequestDto, Owner owner) {
-		if (!owner.getPassword().equals(loginRequestDto.getPassword()))
+	private void validatePasswordOrThrow(LoginRequestDto loginRequestDto, Owner owner) {
+		if (!passwordEncoder.matches(loginRequestDto.getPassword(), owner.getPassword()))
 			throw new InvalidPasswordException("Password is not correct");
 	}
 }

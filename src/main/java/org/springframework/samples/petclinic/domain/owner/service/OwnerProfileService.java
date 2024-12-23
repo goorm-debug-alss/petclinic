@@ -7,6 +7,7 @@ import org.springframework.samples.petclinic.domain.owner.exception.InvalidPassw
 import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class OwnerProfileService {
 
 	private final OwnerRepository ownerRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * 회원 프로필 정보 수정
@@ -64,12 +66,13 @@ public class OwnerProfileService {
 			owner.updateCity(updateProfileRequestDto.getCity());
 	}
 
-	private static void validateCurrentPassword(UpdatePasswordRequestDto updatePasswordRequestDto, Owner owner) {
-		if (!owner.getPassword().equals(updatePasswordRequestDto.getCurrentPassword()))
+	private void validateCurrentPassword(UpdatePasswordRequestDto updatePasswordRequestDto, Owner owner) {
+		if (!passwordEncoder.matches(updatePasswordRequestDto.getCurrentPassword(), owner.getPassword()))
 			throw new InvalidPasswordException("Password is not correct");
 	}
 
-	private static void updateOwnerPassword(UpdatePasswordRequestDto updatePasswordRequestDto, Owner owner) {
-		owner.updatePassword(updatePasswordRequestDto.getNewPassword());
+	private void updateOwnerPassword(UpdatePasswordRequestDto updatePasswordRequestDto, Owner owner) {
+		String encryptedPassword = passwordEncoder.encode(updatePasswordRequestDto.getNewPassword());
+		owner.updatePassword(encryptedPassword);
 	}
 }
