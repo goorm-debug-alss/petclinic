@@ -82,6 +82,10 @@ dependencies {
   testImplementation 'org.testcontainers:junit-jupiter'
   testImplementation 'org.testcontainers:mysql'
 
+  //mockito-inline 디펜던시
+  testImplementation 'org.mockito:mockito-inline:5.2.0'
+
+
   // CheckStyle: 코드 품질 검사
   checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${springJavaformatCheckstyleVersion}"
   checkstyle "com.puppycrawl.tools:checkstyle:${checkstyleVersion}"

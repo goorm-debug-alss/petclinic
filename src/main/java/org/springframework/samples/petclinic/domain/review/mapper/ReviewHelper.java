@@ -37,6 +37,10 @@ public class ReviewHelper {
 	 * @return 생성된 리뷰 응답 DTO
 	 */
 	public static ReviewResponseDto buildResponseDto(Review review) {
+		//review가 null일 경유 예외를 명확히 처리하는 방어 코드
+		if (review == null) {
+			throw new IllegalArgumentException("Review cannot be null");
+		}
 		return ReviewResponseDto.builder()
 			.result(Result.builder()
 				.resultCode(StatusCode.SUCCESS.getCode())

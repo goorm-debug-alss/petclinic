@@ -119,6 +119,25 @@ public class ReviewUpdateServiceTest {
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
+	@Test
+	@DisplayName("리뷰 업데이트 실패 - 리뷰내용(content)이 비어있을때")
+	void updateReview_contentIsEmpty() {
+		// given
+		requestDto.setContent(""); // 내용이 빈 문자열로 설정
+		when(reviewRepository.findById(review.getId())).thenReturn(Optional.of(review));
+
+		// when & then
+		assertThrows(IllegalArgumentException.class, () ->
+			reviewUpdateService.updateReview(review.getId(), requestDto, owner));
+
+		// verify
+		verify(reviewRepository).findById(review.getId());
+		verify(vetRepository, never()).findById(anyInt()); // 호출되지 않음을 검증
+		verify(reviewRepository, never()).save(any(Review.class));
+	}
+
+
+
 	private void createTestOwner() {
 		owner = Owner.builder().id(1).name("구름").build();
 	}

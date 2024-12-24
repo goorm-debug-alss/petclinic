@@ -74,6 +74,21 @@ public class ReviewReadServiceTest {
 	}
 
 	@Test
+	@DisplayName("특정 소유자의 리뷰 목록 조회 - 실패")
+	void getReviewsByOwner_NotFound() {
+		// given
+		when(ownerRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+		when(reviewRepository.findByOwnerId(owner.getId())).thenReturn(List.of());
+
+		// when
+		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByOwner(owner.getId());
+
+		// then
+		assertThat(reviews).isEmpty();
+		verify(reviewRepository, times(1)).findByOwnerId(owner.getId());
+	}
+
+	@Test
 	@DisplayName("특정 수의사의 리뷰 목록 조회")
 	void getReviewsByVet() {
 		// given
