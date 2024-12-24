@@ -1,12 +1,15 @@
 package org.springframework.samples.petclinic.domain.owner.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.owner.dto.*;
+import org.springframework.samples.petclinic.domain.owner.service.BlacklistService;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerAuthService;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerReadService;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerProfileService;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
+import org.springframework.samples.petclinic.domain.token.service.TokenService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +26,8 @@ class OwnerController {
 	private final OwnerAuthService ownerAuthService;
 	private final OwnerReadService ownerReadService;
 	private final OwnerProfileService ownerProfileService;
+	private final TokenService tokenService;
+	private final BlacklistService blacklistService;
 
 	/**
 	 * 회원가입 API
@@ -46,6 +51,23 @@ class OwnerController {
 	public ResponseEntity<TokenResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
 		TokenResponseDto tokenResponseDto = ownerAuthService.login(loginRequestDto);
 		return ResponseEntity.ok(tokenResponseDto);
+	}
+
+	/**
+	 * 로그아웃 API
+	 *
+	 * @param request Http 요청 객체
+	 * @return 로그아웃 처리 결과
+	 */
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(HttpServletRequest request) {
+		String token = tokenService.extractToken(request);
+
+		if (token == null || token.isEmpty())
+			return ResponseEntity.badRequest().body("Token is empty");
+		blacklistService.addToBlacklist(token);
+
+		return ResponseEntity.ok("Logged out successfully");
 	}
 
 	/**
