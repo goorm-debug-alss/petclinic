@@ -28,6 +28,12 @@ public class PetController {
 		return ResponseEntity.ok(petService.getPetById(petId));
 	}
 
+	// 주인의 펫 조회
+	@GetMapping("/owner/{ownerId}")
+	public ResponseEntity<List<PetResponseDto>> getPetsByOwnerId(@PathVariable Integer ownerId) {
+		return ResponseEntity.ok(petService.getPetsByOwnerId(ownerId));
+	}
+
 	// Pet 생성
 	@PostMapping
 	public ResponseEntity<PetResponseDto> createPet(@RequestBody PetRequestDto request) {
