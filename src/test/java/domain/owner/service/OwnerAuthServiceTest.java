@@ -80,7 +80,7 @@ public class OwnerAuthServiceTest {
 		// when & then
 		OwnerNotFoundException exception = assertThrows(OwnerNotFoundException.class, () ->
 			ownerAuthService.register(registerRequestDto));
-		assertEquals("Owner already exists with ownerId testUser", exception.getMessage());
+		assertEquals("Owner already exists with userId testUser", exception.getMessage());
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class OwnerAuthServiceTest {
 		// when & then
 		OwnerNotFoundException exception = assertThrows(OwnerNotFoundException.class, () ->
 			ownerAuthService.login(loginRequestDto));
-		assertEquals("Owner not found with ownerId testUser", exception.getMessage());
+		assertEquals("Owner not found with userId testUser", exception.getMessage());
 	}
 
 	@Test
