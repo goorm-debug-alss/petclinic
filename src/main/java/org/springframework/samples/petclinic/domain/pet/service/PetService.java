@@ -51,6 +51,20 @@ public class PetService {
 			.build();
 	}
 
+	// 주인의 펫 조회
+	public List<PetResponseDto> getPetsByOwnerId(Integer ownerId) {
+		return petRepository.findAll().stream()
+			.filter(pet -> pet.getOwnerId() != null && pet.getOwnerId().getId().equals(ownerId))
+			.map(pet -> PetResponseDto.builder()
+				.id(pet.getId())
+				.name(pet.getName())
+				.birthDate(pet.getBirthDate())
+				.typeId(pet.getTypeId() != null ? pet.getTypeId().getId() : null)
+				.ownerId(pet.getOwnerId().getId())
+				.build())
+			.collect(Collectors.toList());
+	}
+
 	// Pet 생성
 	public PetResponseDto createPet(PetRequestDto request) {
 		Pet pet = new Pet();
