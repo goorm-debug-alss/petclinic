@@ -11,8 +11,7 @@ import org.springframework.samples.petclinic.domain.appointment.exception.Appoin
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentDeleteService;
-
-import java.util.Optional;
+import org.springframework.samples.petclinic.domain.appointment.service.EntityRetrievalService;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -29,42 +28,49 @@ public class AppointmentDeleteServiceTest {
 	@Mock
 	private AppointmentRepository appointmentRepository;
 
+	@Mock
+	private EntityRetrievalService entityFetchService;
+
 	private Integer appointmentId;
+	private Appointment mockAppointment;
 
 	@BeforeEach
 	void setUp() {
 		appointmentId = 1;
+		mockAppointment = Appointment.builder()
+			.id(appointmentId)
+			.build();
 	}
 
 	@Test
 	@DisplayName("예약 삭제 성공")
 	void deleteAppointment_Success() {
 		// given
-		Appointment appointment = Appointment.builder()
-			.id(appointmentId)
-			.build();
-
-		when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+		when(entityFetchService.fetchAppointmentByIdOrThrow(appointmentId)).thenReturn(mockAppointment);
 
 		// when
 		appointmentDeleteService.deleteAppointment(appointmentId);
 
 		// then
-		verify(appointmentRepository).findById(appointmentId);
-		verify(appointmentRepository).delete(appointment);
+		verify(entityFetchService).fetchAppointmentByIdOrThrow(appointmentId);
+		verify(appointmentRepository).delete(mockAppointment);
+		verifyNoMoreInteractions(appointmentRepository, entityFetchService);
 	}
 
 	@Test
 	@DisplayName("예약 삭제 실패 - 예약 ID가 존재하지 않을 때")
 	void deleteAppointment_NotFound() {
 		// given
-		when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.empty());
+		when(entityFetchService.fetchAppointmentByIdOrThrow(appointmentId))
+			.thenThrow(new AppointmentNotFoundException(appointmentId));
 
 		// when & then
 		assertThrows(AppointmentNotFoundException.class, () ->
 			appointmentDeleteService.deleteAppointment(appointmentId));
 
-		verify(appointmentRepository).findById(appointmentId);
+		// verify
+		verify(entityFetchService).fetchAppointmentByIdOrThrow(appointmentId);
 		verify(appointmentRepository, never()).delete(any());
+		verifyNoMoreInteractions(appointmentRepository, entityFetchService);
 	}
 }

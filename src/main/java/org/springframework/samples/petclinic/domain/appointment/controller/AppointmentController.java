@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentRequestDto;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
-import org.springframework.samples.petclinic.domain.appointment.dto.ResultResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentCreateService;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentDeleteService;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentReadService;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentUpdateService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -30,7 +31,7 @@ public class AppointmentController {
 	 * 새로운 예약을 생성하는 API
 	 *
 	 * @param requestDto 클라이언트로부터 전달받은 예약 생성 요청 데이터
-	 * @return 생성된 예약 정보를 포함하는 응답 DTO를 반환
+	 * @return 생성된 예약 정보를 포함하는 응답 DTO (HTTP 상태 코드 200 OK)
      */
 	@PostMapping
 	public ResponseEntity<AppointmentResponseDto> createAppointment(@RequestBody AppointmentRequestDto requestDto) {
@@ -41,22 +42,22 @@ public class AppointmentController {
 	/**
 	 * 모든 예약 정보를 조회하는 API
 	 *
-	 * @return {@link ResultResponseDto} 형식으로 예약 정보 목록을 반환
+	 * @return 예약 정보 목록을 포함하는 응답 DTO (HTTP 상태 코드 200 OK)
 	 */
 	@GetMapping
-	public ResponseEntity<ResultResponseDto<AppointmentResponseDto.Body>> getALlAppointments() {
-		return ResponseEntity.ok(appointmentReadService.findALlAppointments());
+	public ResponseEntity<List<AppointmentResponseDto>> getALlAppointments() {
+		return ResponseEntity.ok(appointmentReadService.findAllAppointments());
 	}
 
 	/**
 	 * 특정 ID를 기반으로 예약 상세 정보를 조회하는 API
 	 *
 	 * @param appointmentId 조회할 예약의 ID
-	 * @return {@link AppointmentResponseDto} 형식의 예약 상세 정보를 반환
+	 * @return 예약 상세 정보를 포함하는 응답 DTO (HTTP 상태 코드 200 OK)
      */
 	@GetMapping("/{appointmentId}")
-	public ResponseEntity<AppointmentResponseDto.Body> getAppointmentDetails(@PathVariable("appointmentId") Integer appointmentId) {
-		AppointmentResponseDto.Body responseDto = appointmentReadService.findAppointmentById(appointmentId);
+	public ResponseEntity<AppointmentResponseDto> getAppointmentDetails(@PathVariable("appointmentId") Integer appointmentId) {
+		AppointmentResponseDto responseDto = appointmentReadService.findAppointmentById(appointmentId);
 		return ResponseEntity.ok(responseDto);
 	}
 
@@ -65,10 +66,11 @@ public class AppointmentController {
 	 *
 	 * @param appointmentId 업데이트할 예약의 ID
 	 * @param requestDto 클라이언트로부터 전달받은 예약 업데이트 요청 데이터
-	 * @return 업데이트된 예약 정보를 포함하는 응답 DTO를 반환
+	 * @return 업데이트된 예약 정보를 포함하는 응답 DTO (HTTP 상태 코드 200 OK)
 	 * */
 	@PutMapping("/{appointmentId}")
-	public ResponseEntity<AppointmentResponseDto> updateAppointment(@PathVariable("appointmentId") Integer appointmentId, @RequestBody AppointmentRequestDto requestDto) {
+	public ResponseEntity<AppointmentResponseDto> updateAppointment(@PathVariable("appointmentId") Integer appointmentId,
+																	@RequestBody AppointmentRequestDto requestDto) {
 		AppointmentResponseDto responseDto = appointmentUpdateService.updateAppointment(appointmentId, requestDto);
 		return ResponseEntity.ok(responseDto);
 	}
@@ -77,7 +79,7 @@ public class AppointmentController {
 	 * 특정 ID를 기반으로 예약 정보를 삭제하는 API
 	 *
 	 * @param appointmentId 삭제할 예약의 ID
-	 * @return 삭제 성공 시 HTTP 상태 코드 204 (No Content)를 반환
+	 * @return 삭제 성공 시 HTTP 상태 코드 204 No Content를 반환
 	 */
 	@DeleteMapping("/{appointmentId}")
 	public ResponseEntity<Void> deleteAppointment(@PathVariable("appointmentId") Integer appointmentId) {
