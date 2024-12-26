@@ -10,20 +10,15 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class AppointmentResponseDto {
-	private Result result;
-	private Body body;
 
-	@Data
-	@Builder
-	public static class Body {
-		private Integer id;
+	private Integer id;
 
-		@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-		private LocalDateTime apptDateTime;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+	private LocalDateTime apptDateTime;
 
-		private ApptStatus status;
-		private String symptoms;
-		private String petName;
-		private String vetName;
-	}
+	private ApptStatus status;
+	private String symptoms;
+	private String petName;
+	private String vetName;
+
 }
