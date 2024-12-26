@@ -11,19 +11,15 @@ import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentR
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.exception.PetNotFoundException;
 import org.springframework.samples.petclinic.domain.appointment.exception.VetNotFoundException;
-import org.springframework.samples.petclinic.domain.appointment.mapper.AppointmentHelper;
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentCreateService;
+import org.springframework.samples.petclinic.domain.appointment.service.EntityRetrievalService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
-import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -42,108 +38,106 @@ public class AppointmentCreateServiceTest {
 	private AppointmentRepository appointmentRepository;
 
 	@Mock
-	private PetRepository petRepository;
-
-	@Mock
-	private VetRepository vetRepository;
-
-	private AppointmentHelper appointmentHelper = new AppointmentHelper();
+	private EntityRetrievalService entityRetrievalService;
 
 	private AppointmentRequestDto requestDto;
-	private Pet pet;
-	private Vet vet;
-	private Appointment appointment;
+	private Pet mockPet;
+	private Vet mockVet;
+	private Appointment mockAppointment;
 
 	@BeforeEach
-	@DisplayName("테스트 데이터")
+	@DisplayName("테스트 데이터 초기화")
 	void setUp() {
-		createTestAppointmentRequestDto();
-		createTestPet();
-		createTestVet();
-		createTestAppointment();
+		requestDto = createTestAppointmentRequestDto();
+		mockPet = createTestPet();
+		mockVet = createTestVet();
+		mockAppointment = createTestAppointment();
 	}
 
 	@Test
-	@DisplayName("예약 생성 성공 - 모든 조건이 충족될 때")
+	@DisplayName("예약 생성 성공")
 	void createAppointment_Success() {
 		// given
-		when(petRepository.findById(requestDto.getPetId())).thenReturn(Optional.of(pet));
-		when(vetRepository.findById(requestDto.getVetId())).thenReturn(Optional.of(vet));
-		when(appointmentRepository.save(appointment)).thenReturn(appointment);
+		when(entityRetrievalService.fetchPetByIdOrThrow(requestDto.getPetId())).thenReturn(mockPet);
+		when(entityRetrievalService.fetchVetByIdOrThrow(requestDto.getVetId())).thenReturn(mockVet);
+		when(appointmentRepository.save(any(Appointment.class))).thenReturn(mockAppointment);
 
 		// when
-		AppointmentResponseDto savedAppointment = appointmentCreateService.createAppointment(requestDto);
+		AppointmentResponseDto responseDto = appointmentCreateService.createAppointment(requestDto);
 
-		// Then
-		assertThat(savedAppointment).isNotNull();
-		assertThat(savedAppointment.getBody().getPetName()).isEqualTo(pet.getName());
-		assertThat(savedAppointment.getBody().getVetName()).isEqualTo(vet.getName());
-		assertThat(savedAppointment.getBody().getSymptoms()).isEqualTo(requestDto.getSymptoms());
+		// then
+		assertThat(responseDto).isNotNull();
+		assertThat(responseDto.getPetName()).isEqualTo("구름");
+		assertThat(responseDto.getVetName()).isEqualTo("닥터 구름");
+		assertThat(responseDto.getSymptoms()).isEqualTo("감기");
+		assertThat(responseDto.getStatus()).isEqualTo(ApptStatus.COMPLETE);
+
+		verify(entityRetrievalService).fetchPetByIdOrThrow(requestDto.getPetId());
+		verify(entityRetrievalService).fetchVetByIdOrThrow(requestDto.getVetId());
+		verify(appointmentRepository).save(any(Appointment.class));
 	}
 
 	@Test
 	@DisplayName("예약 생성 실패 - Pet ID가 존재하지 않을 때")
 	void createAppointment_PetNotFound() {
 		// given
-		when(petRepository.findById(requestDto.getPetId())).thenReturn(Optional.empty());
+		when(entityRetrievalService.fetchPetByIdOrThrow(requestDto.getPetId())).thenThrow(new PetNotFoundException(requestDto.getPetId()));
 
 		// when & then
-		assertThrows(PetNotFoundException.class, () ->
-				appointmentCreateService.createAppointment(requestDto));
+		assertThrows(PetNotFoundException.class, () -> appointmentCreateService.createAppointment(requestDto));
 
-		verify(petRepository).findById(requestDto.getPetId());
-		verify(vetRepository, never()).findById(anyInt());
+		verify(entityRetrievalService).fetchPetByIdOrThrow(requestDto.getPetId());
+		verify(entityRetrievalService, never()).fetchVetByIdOrThrow(anyInt());
 		verify(appointmentRepository, never()).save(any(Appointment.class));
 	}
 
 	@Test
-	@DisplayName("에약 생성 실패 - Vet ID가 존재하지 않을 때")
+	@DisplayName("예약 생성 실패 - Vet ID가 존재하지 않을 때")
 	void createAppointment_VetNotFound() {
 		// given
-		when(petRepository.findById(requestDto.getPetId())).thenReturn(Optional.of(pet));
-		when(vetRepository.findById(requestDto.getVetId())).thenReturn(Optional.empty());
+		when(entityRetrievalService.fetchPetByIdOrThrow(requestDto.getPetId())).thenReturn(mockPet);
+		when(entityRetrievalService.fetchVetByIdOrThrow(requestDto.getVetId())).thenThrow(new VetNotFoundException(requestDto.getVetId()));
 
 		// when & then
-		assertThrows(VetNotFoundException.class, () ->
-				appointmentCreateService.createAppointment(requestDto));
+		assertThrows(VetNotFoundException.class, () -> appointmentCreateService.createAppointment(requestDto));
 
-		verify(petRepository).findById(requestDto.getPetId());
-		verify(vetRepository).findById(requestDto.getVetId());
+		verify(entityRetrievalService).fetchPetByIdOrThrow(requestDto.getPetId());
+		verify(entityRetrievalService).fetchVetByIdOrThrow(requestDto.getVetId());
 		verify(appointmentRepository, never()).save(any(Appointment.class));
 	}
 
-	private void createTestAppointmentRequestDto() {
-		requestDto = AppointmentRequestDto.builder()
-				.petId(1)
-				.vetId(1)
-				.apptDateTime(LocalDateTime.now())
-				.status(ApptStatus.valueOf("COMPLETE"))
-				.symptoms("Coughing")
-				.build();
+	private AppointmentRequestDto createTestAppointmentRequestDto() {
+		return AppointmentRequestDto.builder()
+			.apptDateTime(LocalDateTime.now())
+			.status(ApptStatus.COMPLETE)
+			.symptoms("감기")
+			.petId(1)
+			.vetId(1)
+			.build();
 	}
 
-	private void createTestPet() {
-		pet = Pet.builder()
-				.id(1)
-				.name("구름")
-				.build();
+	private Appointment createTestAppointment() {
+		return Appointment.builder()
+			.id(1)
+			.apptDateTime(LocalDateTime.now())
+			.status(ApptStatus.COMPLETE)
+			.symptoms("감기")
+			.petId(mockPet)
+			.vetId(mockVet)
+			.build();
 	}
 
-	private void createTestAppointment() {
-		appointment = Appointment.builder()
-				.id(1)
-				.apptDateTime(requestDto.getApptDateTime())
-				.status(requestDto.getStatus())
-				.symptoms(requestDto.getSymptoms())
-				.petId(pet)
-				.vetId(vet)
-				.build();
+	private Pet createTestPet() {
+		return Pet.builder()
+			.id(1)
+			.name("구름")
+			.build();
 	}
 
-	private void createTestVet() {
-		vet = Vet.builder()
-				.id(1)
-				.name("구름수의사")
-				.build();
+	private Vet createTestVet() {
+		return Vet.builder()
+			.id(1)
+			.name("닥터 구름")
+			.build();
 	}
 }
