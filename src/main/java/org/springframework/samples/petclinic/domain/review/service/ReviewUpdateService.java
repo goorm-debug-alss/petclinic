@@ -35,6 +35,11 @@ public class ReviewUpdateService {
 
 		validateReviewOwnership(owner, review);
 
+		//리뷰 내용이 비어있는지 먼저 확인
+		if (dto.getContent() == null || dto.getContent().trim().isEmpty()) {
+			throw new IllegalArgumentException("Review content cannot be empty");
+		}
+
 		Vet vet = fetchByVetIdOrThrow(dto);
 
 		updateReviewDetails(dto, owner, review, vet);
