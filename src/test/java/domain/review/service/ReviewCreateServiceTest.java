@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
-import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewRequestDto;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto;
 import org.springframework.samples.petclinic.domain.review.exception.InvalidContentException;
@@ -18,10 +17,9 @@ import org.springframework.samples.petclinic.domain.review.exception.VetNotFound
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.ReviewCreateService;
+import org.springframework.samples.petclinic.domain.review.service.ReviewEntityRetrievalService;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -38,45 +36,45 @@ public class ReviewCreateServiceTest {
 	private ReviewCreateService reviewCreateService;
 
 	@Mock
-	private ReviewRepository reviewRepository;
-
-	@Mock
-	private OwnerRepository ownerRepository;
+	private ReviewEntityRetrievalService retrievalService;
 
 	@Mock
 	private VetRepository vetRepository;
 
+	@Mock
+	private ReviewRepository reviewRepository;
+
 	private ReviewRequestDto requestDto;
-	private Owner owner;
-	private Vet vet;
+	private Owner mockOwner;
+	private Vet mockVet;
 
 	@BeforeEach
 	void setUp() {
-		createTestReviewRequestDto();
-		createTestOwner();
-		createTestVet();
+		requestDto = createTestReviewRequestDto();
+		mockOwner = createTestOwner();
+		mockVet = createTestVet();
 	}
 
 	@Test
 	@DisplayName("리뷰 생성 성공")
 	void createReview_Success() {
 		// given
-		when(ownerRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
-		when(vetRepository.findById(vet.getId())).thenReturn(Optional.of(vet));
+		when(retrievalService.fetchOwnerByIdOrThrow(mockOwner.getId())).thenReturn(mockOwner);
+		when(retrievalService.fetchVetByIdOrThrow(mockVet.getId())).thenReturn(mockVet);
 		when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		// when
-		ReviewResponseDto responseDto = reviewCreateService.createReview(requestDto, 1, 1);
+		ReviewResponseDto responseDto = reviewCreateService.createReview(requestDto, mockOwner.getId(), mockVet.getId());
 
 		// then
 		assertThat(responseDto).isNotNull();
-		assertThat(responseDto.getBody().getScore()).isEqualTo(requestDto.getScore());
-		assertThat(responseDto.getBody().getContent()).isEqualTo(requestDto.getContent());
-		assertThat(responseDto.getBody().getOwnerId()).isEqualTo(owner.getId());
-		assertThat(responseDto.getBody().getVetId()).isEqualTo(vet.getId());
+		assertThat(responseDto.getScore()).isEqualTo(requestDto.getScore());
+		assertThat(responseDto.getContent()).isEqualTo(requestDto.getContent());
+		assertThat(responseDto.getOwnerId()).isEqualTo(mockOwner.getId());
+		assertThat(responseDto.getVetId()).isEqualTo(mockVet.getId());
 
-		verify(ownerRepository).findById(owner.getId());
-		verify(vetRepository).findById(vet.getId());
+		verify(retrievalService).fetchOwnerByIdOrThrow(mockOwner.getId());
+		verify(retrievalService).fetchVetByIdOrThrow(mockVet.getId());
 		verify(reviewRepository).save(any(Review.class));
 	}
 
@@ -88,7 +86,7 @@ public class ReviewCreateServiceTest {
 
 		// when & then
 		assertThrows(InvalidScoreException.class, () ->
-			reviewCreateService.createReview(requestDto, owner.getId(), vet.getId()));
+			reviewCreateService.createReview(requestDto, mockOwner.getId(), mockVet.getId()));
 	}
 
 	@Test
@@ -99,64 +97,56 @@ public class ReviewCreateServiceTest {
 
 		// when & then
 		assertThrows(InvalidContentException.class, () ->
-			reviewCreateService.createReview(requestDto, owner.getId(), vet.getId()));
+			reviewCreateService.createReview(requestDto, mockOwner.getId(), mockVet.getId()));
 	}
 
 	@Test
 	@DisplayName("리뷰 생성 실패 - Owner ID가 존재하지 않을 때")
 	void createReview_OwnerNotFound() {
 		// given
-		when(ownerRepository.findById(owner.getId())).thenReturn(Optional.empty());
+		when(retrievalService.fetchOwnerByIdOrThrow(mockOwner.getId())).thenThrow(new OwnerNotFoundException(mockOwner.getId()));
 
 		// when & then
 		assertThrows(OwnerNotFoundException.class, () ->
-			reviewCreateService.createReview(requestDto, 1, 1));
+			reviewCreateService.createReview(requestDto, mockOwner.getId(), mockVet.getId()));
 
-		verify(ownerRepository).findById(owner.getId());
-		verify(vetRepository, never()).findById(vet.getId());
-		verify(reviewRepository, never()).save(any(Review.class));
-	}
-
-	@Test
-	@DisplayName("리뷰 생성 실패 - Owner ID와 요청 데이터가 일치하지 않을 때")
-	void createReview_OwnerIdMismatch() {
-		// when & then
-		assertThrows(OwnerNotFoundException.class, () ->
-			reviewCreateService.createReview(requestDto, 999, vet.getId()));
+		verify(retrievalService).fetchOwnerByIdOrThrow(mockOwner.getId());
+		verify(retrievalService, never()).fetchVetByIdOrThrow(mockVet.getId());
+		verify(reviewRepository, never()).save(any());
 	}
 
 	@Test
 	@DisplayName("리뷰 생성 실패 - Vet ID가 존재하지 않을 때")
 	void createReview_VetNotFound() {
 		// given
-		when(ownerRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
-		when(vetRepository.findById(vet.getId())).thenReturn(Optional.empty());
+		when(retrievalService.fetchOwnerByIdOrThrow(mockOwner.getId())).thenReturn(mockOwner);
+		when(retrievalService.fetchVetByIdOrThrow(mockVet.getId())).thenThrow(new VetNotFoundException(mockVet.getId()));
 
 		// when & then
 		assertThrows(VetNotFoundException.class, () ->
-			reviewCreateService.createReview(requestDto, 1, 1));
+			reviewCreateService.createReview(requestDto, mockOwner.getId(), mockVet.getId()));
 
-		verify(ownerRepository).findById(owner.getId());
-		verify(vetRepository).findById(vet.getId());
+		verify(retrievalService).fetchOwnerByIdOrThrow(mockOwner.getId());
+		verify(retrievalService).fetchVetByIdOrThrow(mockVet.getId());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
-	private void createTestReviewRequestDto() {
-		requestDto = ReviewRequestDto.builder()
+	private ReviewRequestDto createTestReviewRequestDto() {
+		return ReviewRequestDto.builder()
 			.score(5)
-			.content("굳")
+			.content("좋은 서비스")
 			.build();
 	}
 
-	private void createTestOwner() {
-		owner = Owner.builder()
+	private Owner createTestOwner() {
+		return Owner.builder()
 			.id(1)
 			.name("구름")
 			.build();
 	}
 
-	private void createTestVet() {
-		vet = Vet.builder()
+	private Vet createTestVet() {
+		return Vet.builder()
 			.id(1)
 			.name("수의사")
 			.build();
