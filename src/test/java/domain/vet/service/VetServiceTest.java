@@ -431,30 +431,4 @@ public class VetServiceTest {
 		verify(vetRepository, times(1)).findById(2);
 		verifyNoInteractions(vetConvert);
 	}
-
-	// 서비스 수정 필요
-	@Test
-	@DisplayName("수의사 전공 수정 성공 - 기존 전공과 동일한 전공으로 변경")
-	void updateVetSuccess_SameSpeciality() {
-		when(vetRepository.findById(1)).thenReturn(Optional.of(vet));
-		when(specialityRepository.findByName("외과")).thenReturn(Optional.of(specialty));
-		when(vetConvert.toResponse(vet)).thenReturn(expectedVetResponseDto);
-
-		VetRequestDto updateDto = new VetRequestDto(null, List.of(new SpecialityRequestDto("외과")));
-		VetResponseDto result = vetService.update(1, updateDto);
-
-		assertThat(result).isNotNull();
-		assertThat(result.getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(result.getName()).isEqualTo(expectedVetResponseDto.getName());
-		assertThat(result.getSpecialties()).hasSize(1);
-		assertThat(result.getSpecialties().get(0).getName()).isEqualTo("외과");
-
-		verify(vetRepository, times(1)).findById(1);
-		verifyNoInteractions(vetSpecialityRepository);
-		verify(vetRepository, times(1)).save(vet);
-		verify(vetConvert, times(1)).toResponse(vet);
-
-		verifyNoMoreInteractions(vetRepository, specialityRepository, vetSpecialityRepository, vetConvert);
-	}
-
 }

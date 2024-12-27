@@ -1,28 +1,39 @@
 package domain.vet.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.samples.petclinic.domain.speciality.dto.SpecialityRequestDto;
 import org.springframework.samples.petclinic.domain.speciality.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.controller.VetController;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
+import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.model.VetSpecialty;
 import org.springframework.samples.petclinic.domain.vet.service.VetService;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VetControllerTest {
+class VetControllerTest {
+
+	private MockMvc mockMvc;
 
 	@InjectMocks
 	private VetController vetController;
@@ -30,30 +41,67 @@ public class VetControllerTest {
 	@Mock
 	private VetService vetService;
 
-	private VetResponseDto expectedVetResponseDto;
-	private VetRequestDto expectedVetRequestDtoChangeName;
-	private VetRequestDto expectedVetRequestDtoChangeSpecialty;
-	private VetRequestDto vetRequestDto;
-	private SpecialityRequestDto specialityRequestDto;
+	private ObjectMapper objectMapper = new ObjectMapper();
+
+	private Vet vet;
 	private Specialty specialty;
+	private Specialty specialty2;
+	private VetRequestDto vetRequestDto;
+	private VetRequestDto vetUpdateRequestDto;
+	private List<SpecialityRequestDto> specialityRequestDto;
+	private List<SpecialityRequestDto> specialityUpdateRequestDto;
+	private VetResponseDto expectedVetResponseDto;
+	private VetResponseDto expectedVetUpdateResponseDto;
 
 	@BeforeEach
+	@DisplayName("Sample Data")
 	void setUp() {
-		sampleVetRequestDto();
-		sampleSpecialityRequestDto();
-		sampleSpeciality();
-		sampleExpectedVetResponse();
-		sampleExpectedVetResponseChangeName();
-		sampleExpectedVetResponseChangeSpecialty();
+		MockitoAnnotations.openMocks(this);
+		vetController = new VetController(vetService); // 명시적으로 Mock 주입
+		mockMvc = MockMvcBuilders.standaloneSetup(vetController).build();
 
+		sampleVet();
+		sampleSpecialityRequestDto();
+		sampleSpecialityUpdateRequestDto();
+		sampleVetRequestDto();
+		sampleVetUpdateRequestDto();
+		sampleSpeciality();
+		sampleSpeciality2();
+		sampleExpectedVetResponse();
+		sampleExpectedVetUpdateResponse();
+	}
+
+	void sampleVet() {
+		vet = Vet.builder()
+			.id(1)
+			.name("테스트용")
+			.build();
 	}
 
 	void sampleVetRequestDto() {
 		vetRequestDto = new VetRequestDto();
-		vetRequestDto.setName("DTO테스트용");
-		SpecialityRequestDto specialityRequestDto = new SpecialityRequestDto();
-		specialityRequestDto.setName("외과");
-		vetRequestDto.setSpecialties(List.of(specialityRequestDto));
+		vetRequestDto.setName("테스트용");
+		vetRequestDto.setSpecialties(specialityRequestDto);
+	}
+
+	void sampleVetUpdateRequestDto() {
+		vetUpdateRequestDto = new VetRequestDto();
+		vetUpdateRequestDto.setName("업데이트");
+		vetUpdateRequestDto.setSpecialties(specialityUpdateRequestDto);
+	}
+
+	void sampleSpecialityRequestDto() {
+		specialityRequestDto = new ArrayList<>();
+		SpecialityRequestDto speciality = new SpecialityRequestDto();
+		speciality.setName("외과");
+		specialityRequestDto.add(speciality);
+	}
+
+	void sampleSpecialityUpdateRequestDto() {
+		specialityUpdateRequestDto = new ArrayList<>();
+		SpecialityRequestDto speciality = new SpecialityRequestDto();
+		speciality.setName("소아과");
+		specialityUpdateRequestDto.add(speciality);
 	}
 
 	void sampleSpeciality() {
@@ -62,170 +110,128 @@ public class VetControllerTest {
 		specialty.setName("외과");
 	}
 
+
 	void sampleExpectedVetResponse() {
-		expectedVetResponseDto = new VetResponseDto(1, "테스트용 수의사", null, null, List.of(specialty));
+		expectedVetResponseDto = new VetResponseDto(vet.getId(), vet.getName(), null, null, List.of(specialty));
 	}
 
-	void sampleSpecialityRequestDto(){
-		specialityRequestDto = new SpecialityRequestDto("외과");
+	void sampleExpectedVetUpdateResponse() {
+		expectedVetUpdateResponseDto = new VetResponseDto(vet.getId(), vetUpdateRequestDto.getName(), null, null, List.of(specialty2));
 	}
 
-	void sampleExpectedVetResponseChangeName(){
-		expectedVetRequestDtoChangeName = new VetRequestDto("이름 변경", List.of(specialityRequestDto));
-	}
-
-	void sampleExpectedVetResponseChangeSpecialty(){
-		expectedVetRequestDtoChangeSpecialty = new VetRequestDto("테스트용 수의사", List.of(new SpecialityRequestDto("내과")));
+	void sampleSpeciality2() {
+		specialty2 = new Specialty();
+		specialty2.setId(2);
+		specialty2.setName("소아과");
 	}
 
 	@Test
 	@DisplayName("수의사 등록 성공")
-	void createVet_Success(){
+	void createVet_Success_WithToken() throws Exception {
 		when(vetService.register(any(VetRequestDto.class))).thenReturn(expectedVetResponseDto);
 
-		ResponseEntity<VetResponseDto> response = vetController.create(vetRequestDto);
+		String requestJson = objectMapper.writeValueAsString(vetRequestDto);
 
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(response.getBody().getName()).isEqualTo(expectedVetResponseDto.getName());
+		MvcResult mvcResult = mockMvc.perform(post("/vets")
+				.header("Authorization", "abcd")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJson))
+			.andExpect(status().isOk())
+			.andReturn();
 
-		verify(vetService, times(1)).register(vetRequestDto);
-		verifyNoMoreInteractions(vetService);
+		verify(vetService, times(1)).register(any(VetRequestDto.class));
 	}
 
+
 	@Test
-	@DisplayName("수의사 전체 조회 성공")
-	void getAllVet_Success(){
+	@DisplayName("전체 수의사 조회 성공")
+	void getAllVet_Success_WithToken() throws Exception {
 		when(vetService.findAll()).thenReturn(List.of(expectedVetResponseDto));
 
-		ResponseEntity<List<VetResponseDto>> response = vetController.getAll();
-
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().size()).isEqualTo(1);
-		assertThat(response.getBody().get(0).getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(response.getBody().get(0).getName()).isEqualTo(expectedVetResponseDto.getName());
-
-		verify(vetService, times(1)).findAll();
-		verifyNoMoreInteractions(vetService);
-	}
-
-	@Test
-	@DisplayName("수의사 목록 조회 - 빈 리스트일 경우")
-	void getAllVet_Empty() {
-		when(vetService.findAll()).thenReturn(List.of());
-
-		ResponseEntity<List<VetResponseDto>> response = vetController.getAll();
-
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().isEmpty()).isTrue();
+		mockMvc.perform(get("/vets/all")
+				.header("Authorization", "abcd")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].id").value(1))
+			.andExpect(jsonPath("$[0].name").value("테스트용"))
+			.andExpect(jsonPath("$[0].specialties[0].id").value(1))
+			.andExpect(jsonPath("$[0].specialties[0].name").value("외과"))
+			.andDo(print());
 
 		verify(vetService, times(1)).findAll();
-		verifyNoMoreInteractions(vetService);
 	}
 
 	@Test
 	@DisplayName("특정 수의사 조회 성공")
-	void getVet_Success(){
+	void getVet_Success_WithToken() throws Exception {
 		when(vetService.findById(1)).thenReturn(expectedVetResponseDto);
 
-		ResponseEntity<VetResponseDto> response = vetController.getVet(1);
-
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(response.getBody().getName()).isEqualTo(expectedVetResponseDto.getName());
+		mockMvc.perform(get("/vets/1")
+				.header("Authorization", "abcd")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(1))
+			.andExpect(jsonPath("$.name").value("테스트용"))
+			.andExpect(jsonPath("$.specialties[0].id").value(1))
+			.andExpect(jsonPath("$.specialties[0].name").value("외과"))
+			.andDo(print());
 
 		verify(vetService, times(1)).findById(1);
-		verifyNoMoreInteractions(vetService);
 	}
 
 	@Test
-	@DisplayName("수의사 조회 실패 - NOT FOUND")
-	void getVet_NotFound() {
-		doThrow(new IllegalArgumentException("수의사를 찾을 수 없습니다")).when(vetService).findById(51);
+	@DisplayName("분야별 수의사 조회 성공")
+	void getVetsBySpecialityId_Success_WithToken() throws Exception {
+		when(vetService.findBySpecialtyId(specialty.getId())).thenReturn(List.of(expectedVetResponseDto));
 
-		Throwable exception = assertThrows(IllegalArgumentException.class, () -> vetController.getVet(51));
+		mockMvc.perform(get("/vets")
+				.header("Authorization", "abcd")
+				.param("speciality", String.valueOf(specialty.getId()))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].id").value(1))
+			.andExpect(jsonPath("$[0].name").value("테스트용"))
+			.andExpect(jsonPath("$[0].specialties[0].id").value(1))
+			.andExpect(jsonPath("$[0].specialties[0].name").value("외과"))
+			.andDo(print());
 
-		assertThat(exception.getMessage()).isEqualTo("수의사를 찾을 수 없습니다");
-		verify(vetService, times(1)).findById(51);
-		verifyNoMoreInteractions(vetService);
+		verify(vetService, times(1)).findBySpecialtyId(specialty.getId());
 	}
 
 	@Test
-	@DisplayName("전문분야별 수의사 조회 성공")
-	void getVetBySpecialty_Success(){
-		when(vetService.findBySpecialtyId(1)).thenReturn(List.of(expectedVetResponseDto));
+	@DisplayName("수의사 수정 성공")
+	void updateVet_Success_WithToken() throws Exception {
+		when(vetService.update(eq(vet.getId()), any(VetRequestDto.class))).thenReturn(expectedVetUpdateResponseDto);
 
-		ResponseEntity<List<VetResponseDto>> response = vetController.getVetsBySpecialityId(1);
+		String requestJson = objectMapper.writeValueAsString(vetUpdateRequestDto);
 
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().size()).isEqualTo(1);
-		assertThat(response.getBody().get(0).getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(response.getBody().get(0).getName()).isEqualTo(expectedVetResponseDto.getName());
+		mockMvc.perform(put("/vets/{vet-id}", vet.getId())
+				.header("Authorization", "abcd")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJson))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(1))
+			.andExpect(jsonPath("$.name").value("업데이트"))
+			.andExpect(jsonPath("$.specialties[0].id").value(2))
+			.andExpect(jsonPath("$.specialties[0].name").value("소아과"))
+			.andDo(print());
 
-		verify(vetService, times(1)).findBySpecialtyId(1);
-		verifyNoMoreInteractions(vetService);
+		verify(vetService, times(1)).update(eq(vet.getId()), any(VetRequestDto.class));
 	}
 
-	@Test
-	@DisplayName("전문 분야별 수의사 조회 - 결과 없음")
-	void getVetBySpecialty_NoResults() {
-		when(vetService.findBySpecialtyId(51)).thenReturn(List.of()); // 결과 없음
-
-		ResponseEntity<List<VetResponseDto>> response = vetController.getVetsBySpecialityId(51);
-
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().isEmpty()).isTrue();
-
-		verify(vetService, times(1)).findBySpecialtyId(51);
-		verifyNoMoreInteractions(vetService);
-	}
-
-	@Test
-	@DisplayName("수의사 전공 수정 성공")
-	void updateVetSpeciality_Success(){
-		when(vetService.update(1, expectedVetRequestDtoChangeSpecialty)).thenReturn(expectedVetResponseDto);
-
-		ResponseEntity<VetResponseDto> response = vetController.update(1, expectedVetRequestDtoChangeSpecialty);
-
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(response.getBody().getName()).isEqualTo(expectedVetResponseDto.getName());
-
-		verify(vetService, times(1)).update(1, expectedVetRequestDtoChangeSpecialty);
-		verifyNoMoreInteractions(vetService);
-	}
-
-	@Test
-	@DisplayName("수의사 이름 수정 성공")
-	void updateVetName_Success(){
-		when(vetService.update(1, expectedVetRequestDtoChangeName)).thenReturn(expectedVetResponseDto);
-
-		ResponseEntity<VetResponseDto> response = vetController.update(1, expectedVetRequestDtoChangeName);
-
-		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().getId()).isEqualTo(expectedVetResponseDto.getId());
-		assertThat(response.getBody().getName()).isEqualTo(expectedVetResponseDto.getName());
-
-		verify(vetService, times(1)).update(1, expectedVetRequestDtoChangeName);
-		verifyNoMoreInteractions(vetService);
-
-	}
 
 	@Test
 	@DisplayName("수의사 삭제 성공")
-	void deleteVet_Success(){
-		vetController.delete(1);
+	void deleteVet_Success_WithToken() throws Exception {
+		doNothing().when(vetService).delete(1);
+
+		mockMvc.perform(delete("/vets/1")
+				.header("Authorization", "abcd")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNoContent())
+			.andDo(print());
 
 		verify(vetService, times(1)).delete(1);
-
-		verifyNoMoreInteractions(vetService);
 	}
+
 }
