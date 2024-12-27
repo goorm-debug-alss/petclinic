@@ -20,25 +20,23 @@ public class ReviewUpdateService {
 
 	private final ReviewRepository reviewRepository;
 
-	/**
-	 * 리뷰를 업데이트하고 업데이트된 리뷰 반환
-	 *
-	 * @param reviewId 	리뷰 ID
-	 * @param dto		리뷰 요청 DTO
-	 * @param owner		리뷰를 소유한 사용자 정보
-	 * @return 업데이트된 리뷰에 대한 응답 DTO
-	 */
+
+	// 리뷰를 업데이트하고 업데이트된 리뷰 반환
 	public ReviewResponseDto updateReview(Integer reviewId, ReviewRequestDto dto, Owner owner) {
-		Review review = entityRetrievalService.fetchReviewByIdOrThrow(reviewId);
+		Review review = fetchReviewByIdOrThrow(reviewId);
 		validateOwnership(owner, review);
 
-		Vet vet = entityRetrievalService.fetchVetByIdOrThrow(dto.getVetId());
+		Vet vet = fetchVetByIdOrThrow(dto);
 
 		ReviewHelper.updateFields(dto, review, owner, vet);
 
 		reviewRepository.save(review);
 
-		return ReviewHelper.buildResponseDto(review);
+		return buildReviewResponse(review);
+	}
+
+	private Review fetchReviewByIdOrThrow(Integer reviewId) {
+		return entityRetrievalService.fetchReviewByIdOrThrow(reviewId);
 	}
 
 	private static void validateOwnership(Owner owner, Review review) {
@@ -47,5 +45,13 @@ public class ReviewUpdateService {
 		if (!owner.getId().equals(review.getOwnerId().getId())) {
 			throw new ReviewOwnershipException(owner.getId());
 		}
+	}
+
+	private Vet fetchVetByIdOrThrow(ReviewRequestDto dto) {
+		return entityRetrievalService.fetchVetByIdOrThrow(dto.getVetId());
+	}
+
+	private static ReviewResponseDto buildReviewResponse(Review review) {
+		return ReviewHelper.buildResponseDto(review);
 	}
 }
