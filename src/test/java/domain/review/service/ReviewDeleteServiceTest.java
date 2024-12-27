@@ -8,11 +8,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
+import org.springframework.samples.petclinic.domain.review.exception.ReviewIdNotFoundException;
 import org.springframework.samples.petclinic.domain.review.exception.ReviewNotFoundException;
 import org.springframework.samples.petclinic.domain.review.exception.ReviewOwnershipException;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.ReviewDeleteService;
+import org.springframework.samples.petclinic.domain.review.service.ReviewEntityRetrievalService;
 
 import java.util.Optional;
 
@@ -29,42 +31,46 @@ public class ReviewDeleteServiceTest {
 	private ReviewDeleteService reviewDeleteService;
 
 	@Mock
+	private ReviewEntityRetrievalService retrievalService;
+
+	@Mock
 	private ReviewRepository reviewRepository;
 
-	private Owner owner;
-	private Review review;
+	private Owner mockOwner;
+	private Review mockReview;
 
 	@BeforeEach
 	void setUp() {
-		createTestOwner();
-		createTestReview();
+		mockOwner = createTestOwner();
+		mockReview = createTestReview();
 	}
 
 	@Test
 	@DisplayName("리뷰 삭제 성공")
 	void deleteReview_Success() {
 		// given
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.of(review));
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId())).thenReturn(mockReview);
 
 		// when
-		reviewDeleteService.deleteReview(1, owner);
+		reviewDeleteService.deleteReview(1, mockOwner);
 
 		// then
-		verify(reviewRepository).findById(review.getId());
-		verify(reviewRepository).delete(review);
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
+		verify(reviewRepository).delete(mockReview);
 	}
 
 	@Test
 	@DisplayName("리뷰 삭제 실패 - Review ID가 존재하지 않을 때")
 	void deleteReview_ReviewNotFound() {
 		// given
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.empty());
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId()))
+			.thenThrow(new ReviewIdNotFoundException(mockReview.getId()));
 
 		// when & then
-		assertThrows(ReviewNotFoundException.class, () ->
-			reviewDeleteService.deleteReview(1, owner));
+		assertThrows(ReviewIdNotFoundException.class, () ->
+			reviewDeleteService.deleteReview(mockReview.getId(), mockOwner));
 
-		verify(reviewRepository).findById(review.getId());
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
 		verify(reviewRepository, never()).delete(any(Review.class));
 	}
 
@@ -74,31 +80,31 @@ public class ReviewDeleteServiceTest {
 		// given
 		Owner anotherOwner = Owner.builder()
 			.id(2)
-			.name("구르미")
+			.name("다른 사용자")
 			.build();
 
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.of(review));
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId())).thenReturn(mockReview);
 
 		// when & then
 		assertThrows(ReviewOwnershipException.class, () ->
-			reviewDeleteService.deleteReview(1, anotherOwner));
+			reviewDeleteService.deleteReview(mockReview.getId(), anotherOwner));
 
-		verify(reviewRepository).findById(review.getId());
-		verify(reviewRepository, never()).delete(any(Review.class));
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
+		verify(reviewRepository, never()).delete(any());
 	}
 
-	private void createTestOwner() {
-		owner = Owner.builder()
+	private Owner createTestOwner() {
+		return Owner.builder()
 			.id(1)
 			.name("구름")
 			.build();
 	}
 
-	private void createTestReview() {
-		review = Review.builder()
+	private Review createTestReview() {
+		return Review.builder()
 			.id(1)
 			.content("굳")
-			.ownerId(owner)
+			.ownerId(mockOwner)
 			.build();
 	}
 }
