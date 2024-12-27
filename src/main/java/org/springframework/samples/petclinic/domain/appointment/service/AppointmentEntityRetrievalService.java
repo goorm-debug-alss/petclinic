@@ -15,13 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * 엔티티(Appointment, Pet, Vet)를 조회하는 서비스
- * - ID로 엔티티를 조회하며, 없을 경우 예외를 발생
- */
 @Service
 @RequiredArgsConstructor
-public class EntityRetrievalService {
+public class AppointmentEntityRetrievalService {
 
 	private final AppointmentRepository appointmentRepository;
 	private final PetRepository petRepository;

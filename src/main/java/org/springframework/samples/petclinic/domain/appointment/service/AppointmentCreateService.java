@@ -11,31 +11,38 @@ import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 예약 생성 서비스
- * - 예약 생성 로직 및 데이터베이스 연동 처리
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AppointmentCreateService {
 
 	private final AppointmentRepository appointmentRepository;
-	private final EntityRetrievalService entityFetchService;
+	private final AppointmentEntityRetrievalService entityRetrievalService;
 
-	/**
-	 * 예약 생성
-	 *
-	 * @param dto 요청 데이터를 기반으로 예약 생성
-	 * @return 생성된 AppointmentResponseDto
-     */
+	// 예약을 생성하고 저장된 정보를 반환
 	public AppointmentResponseDto createAppointment(AppointmentRequestDto dto) {
-		Pet pet = entityFetchService.fetchPetByIdOrThrow(dto.getPetId());
-		Vet vet = entityFetchService.fetchVetByIdOrThrow(dto.getVetId());
+		Pet pet = fetchPetByIdOrThrowException(dto);
+		Vet vet = fetchVetByIdOrThrowException(dto);
 
-		Appointment appointment = AppointmentHelper.createEntityFromDto(dto, pet, vet);
+		Appointment appointment = createAppointmentEntity(dto, pet, vet);
 		Appointment savedAppointment = appointmentRepository.save(appointment);
 
+		return buildAppointmentResponse(savedAppointment, pet, vet);
+	}
+
+	private Pet fetchPetByIdOrThrowException(AppointmentRequestDto dto) {
+		return entityRetrievalService.fetchPetByIdOrThrow(dto.getPetId());
+	}
+
+	private Vet fetchVetByIdOrThrowException(AppointmentRequestDto dto) {
+		return entityRetrievalService.fetchVetByIdOrThrow(dto.getVetId());
+	}
+
+	private static Appointment createAppointmentEntity(AppointmentRequestDto dto, Pet pet, Vet vet) {
+		return AppointmentHelper.createEntityFromDto(dto, pet, vet);
+	}
+
+	private static AppointmentResponseDto buildAppointmentResponse(Appointment savedAppointment, Pet pet, Vet vet) {
 		return AppointmentHelper.createResponseDto(savedAppointment, pet, vet);
 	}
 }

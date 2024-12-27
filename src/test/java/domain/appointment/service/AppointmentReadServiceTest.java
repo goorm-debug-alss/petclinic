@@ -12,7 +12,7 @@ import org.springframework.samples.petclinic.domain.appointment.model.Appointmen
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentReadService;
-import org.springframework.samples.petclinic.domain.appointment.service.EntityRetrievalService;
+import org.springframework.samples.petclinic.domain.appointment.service.AppointmentEntityRetrievalService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +28,7 @@ public class AppointmentReadServiceTest {
 	private AppointmentReadService appointmentReadService;
 
 	@Mock
-	private EntityRetrievalService entityRetrievalService;
+	private AppointmentEntityRetrievalService entityRetrievalService;
 
 	@Test
 	@DisplayName("모든 예약 정보 조회 성공")

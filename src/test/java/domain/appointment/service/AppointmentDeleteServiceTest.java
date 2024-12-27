@@ -11,7 +11,7 @@ import org.springframework.samples.petclinic.domain.appointment.exception.Appoin
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentDeleteService;
-import org.springframework.samples.petclinic.domain.appointment.service.EntityRetrievalService;
+import org.springframework.samples.petclinic.domain.appointment.service.AppointmentEntityRetrievalService;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -29,7 +29,7 @@ public class AppointmentDeleteServiceTest {
 	private AppointmentRepository appointmentRepository;
 
 	@Mock
-	private EntityRetrievalService entityFetchService;
+	private AppointmentEntityRetrievalService entityFetchService;
 
 	private Integer appointmentId;
 	private Appointment mockAppointment;
