@@ -14,10 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
-/**
- * 주인 생성 서비스
- * - 로그인, 회원가입 처리 및 토큰 재발급
- */
 @Service
 @RequiredArgsConstructor
 public class OwnerAuthService {
@@ -26,11 +22,7 @@ public class OwnerAuthService {
 	private final TokenService tokenService;
 	private final PasswordEncoder passwordEncoder;
 
-	/**
-	 * 회원가입
-	 *
-	 * @param registerRequestDto 클라이언트로부터 전달받은 회원가입 요청 데이터
-	 */
+	// 회원가입
 	public void register(RegisterRequestDto registerRequestDto) {
 		validateOwnerDoesNotExist(registerRequestDto);
 
@@ -41,12 +33,7 @@ public class OwnerAuthService {
 		ownerRepository.save(owner);
 	}
 
-	/**
-	 * 로그인
-	 *
-	 * @param loginRequestDto 클라이언트로부터 전달받은 로그인 요청 데이터
-	 * @return 인증 토큰 정보를 포함하는 TokenResponseDto
-	 */
+	// 로그인
 	public TokenResponseDto login(LoginRequestDto loginRequestDto) {
 		Owner owner = findOwnerByOwnerIdOrThrow(loginRequestDto);
 
@@ -55,10 +42,7 @@ public class OwnerAuthService {
 		return tokenService.issueToken(owner.getId());
 	}
 
-	/**
-	 * 토큰 재발급
-	 *
-	 * @return 재발급된 인증 토큰 정보를 포함하는 TokenResponseDto*/
+	// 토큰 재발급
 	public TokenResponseDto tokens() {
 		var requestContext = RequestContextHolder.getRequestAttributes();
 		var ownerId = requestContext.getAttribute("ownerId", RequestAttributes.SCOPE_REQUEST);
