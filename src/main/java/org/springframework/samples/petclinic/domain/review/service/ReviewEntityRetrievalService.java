@@ -13,10 +13,6 @@ import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 엔티티(Review, Pet, Vet)를 조회하는 서비스
- * - ID로 엔티티를 조회하며, 없을 경우 예외를 발생
- */
 @Service
 @RequiredArgsConstructor
 public class ReviewEntityRetrievalService {
