@@ -10,15 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewRequestDto;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto;
-import org.springframework.samples.petclinic.domain.review.exception.ReviewNotFoundException;
-import org.springframework.samples.petclinic.domain.review.exception.VetNotFoundException;
+import org.springframework.samples.petclinic.domain.review.exception.*;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
+import org.springframework.samples.petclinic.domain.review.service.ReviewEntityRetrievalService;
 import org.springframework.samples.petclinic.domain.review.service.ReviewUpdateService;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -35,40 +32,40 @@ public class ReviewUpdateServiceTest {
 	private ReviewUpdateService reviewUpdateService;
 
 	@Mock
-	private ReviewRepository reviewRepository;
+	private ReviewEntityRetrievalService retrievalService;
 
 	@Mock
-	private VetRepository vetRepository;
+	private ReviewRepository reviewRepository;
 
-	private Owner owner;
-	private Vet vet;
-	private Review review;
+	private Owner mockOwner;
+	private Vet mockVet;
+	private Review mockReview;
 	private ReviewRequestDto requestDto;
 
 	@BeforeEach
 	void setUp() {
-		createTestOwner();
-		createTestVet();
-		createTestReview();
-		createTestUpdateReview();
+		mockOwner = createTestOwner();
+		mockVet = createTestVet();
+		mockReview = createTestReview();
+		requestDto = createTestUpdateReview();
 	}
 
 	@Test
 	@DisplayName("리뷰 업데이트 성공")
 	void updateReview_Success() {
 		// given
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.of(review));
-		when(vetRepository.findById(requestDto.getVetId())).thenReturn(Optional.of(vet));
-		when(reviewRepository.save(any(Review.class))).thenReturn(review);
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId())).thenReturn(mockReview);
+		when(retrievalService.fetchVetByIdOrThrow(requestDto.getVetId())).thenReturn(mockVet);
+		when(reviewRepository.save(any(Review.class))).thenReturn(mockReview);
 
 		// when
-		ReviewResponseDto response = reviewUpdateService.updateReview(review.getId(), requestDto, owner);
+		ReviewResponseDto response = reviewUpdateService.updateReview(mockReview.getId(), requestDto, mockOwner);
 
 		// then
 		assertThat(response).isNotNull();
-		assertThat(response.getBody().getContent()).isEqualTo("업데이트 굳");
-		verify(reviewRepository).findById(review.getId());
-		verify(vetRepository).findById(requestDto.getVetId());
+		assertThat(response.getContent()).isEqualTo("업데이트 굳");
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
+		verify(retrievalService).fetchVetByIdOrThrow(requestDto.getVetId());
 		verify(reviewRepository).save(any(Review.class));
 	}
 
@@ -76,14 +73,14 @@ public class ReviewUpdateServiceTest {
 	@DisplayName("리뷰 업데이트 실패 - Review ID가 존재하지 않을 때")
 	void updateReview_ReviewNotFound() {
 		// given
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.empty());
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId())).thenThrow(new ReviewIdNotFoundException(mockReview.getId()));
 
 		// when & then
-		assertThrows(ReviewNotFoundException.class, () ->
-			reviewUpdateService.updateReview(review.getId(), requestDto, owner));
+		assertThrows(ReviewIdNotFoundException.class, () ->
+			reviewUpdateService.updateReview(mockReview.getId(), requestDto, mockOwner));
 
-		verify(reviewRepository).findById(review.getId());
-		verify(vetRepository, never()).findById(anyInt());
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
+		verify(retrievalService, never()).fetchVetByIdOrThrow(anyInt());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
@@ -92,14 +89,17 @@ public class ReviewUpdateServiceTest {
 	void updateReview_InvalidOwner() {
 		// given
 		Owner invalidOwner = Owner.builder().id(2).name("구르미").build();
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.of(review));
+		Review mockReview = mock(Review.class);
+		when(mockReview.getOwnerId()).thenReturn(mockOwner);
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId())).thenReturn(mockReview);
 
 		// when & then
-		assertThrows(SecurityException.class, () ->
-			reviewUpdateService.updateReview(review.getId(), requestDto, invalidOwner));
+		assertThrows(ReviewOwnershipException.class, () ->
+			reviewUpdateService.updateReview(mockReview.getId(), requestDto, invalidOwner));
 
-		verify(reviewRepository).findById(review.getId());
-		verify(vetRepository, never()).findById(anyInt());
+		// verify
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
+		verify(retrievalService, never()).fetchVetByIdOrThrow(anyInt());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
@@ -107,37 +107,38 @@ public class ReviewUpdateServiceTest {
 	@DisplayName("리뷰 업데이트 실패 - Vet ID가 존재하지 않을 때")
 	void updateReview_InvalidVet() {
 		// given
-		when(reviewRepository.findById(review.getId())).thenReturn(Optional.of(review));
-		when(vetRepository.findById(requestDto.getVetId())).thenReturn(Optional.empty());
+		when(retrievalService.fetchReviewByIdOrThrow(mockReview.getId())).thenReturn(mockReview);
+		when(retrievalService.fetchVetByIdOrThrow(requestDto.getVetId())).thenThrow(new VetNotFoundException(mockVet.getId()));
 
 		// when & then
 		assertThrows(VetNotFoundException.class, () ->
-			reviewUpdateService.updateReview(review.getId(), requestDto, owner));
+			reviewUpdateService.updateReview(mockReview.getId(), requestDto, mockOwner));
 
-		verify(reviewRepository).findById(review.getId());
-		verify(vetRepository).findById(requestDto.getVetId());
+		verify(retrievalService).fetchReviewByIdOrThrow(mockReview.getId());
+		verify(retrievalService).fetchVetByIdOrThrow(requestDto.getVetId());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
-	private void createTestOwner() {
-		owner = Owner.builder().id(1).name("구름").build();
+	private Owner createTestOwner() {
+		return Owner.builder().id(1).name("구름").build();
 	}
 
-	private void createTestVet() {
-		vet = Vet.builder().id(1).name("수의사").build();
+	private Vet createTestVet() {
+		return Vet.builder().id(1).name("수의사").build();
 	}
 
-	private void createTestReview() {
-		review = Review.builder()
+	private Review createTestReview() {
+		return Review.builder()
 			.id(1)
-			.ownerId(owner)
-			.vetId(vet)
+			.ownerId(mockOwner)
+			.vetId(mockVet)
 			.content("굳")
 			.build();
 	}
 
-	private void createTestUpdateReview() {
-		requestDto = ReviewRequestDto.builder()
+
+	private ReviewRequestDto createTestUpdateReview() {
+		return ReviewRequestDto.builder()
 			.vetId(1)
 			.content("업데이트 굳")
 			.build();
