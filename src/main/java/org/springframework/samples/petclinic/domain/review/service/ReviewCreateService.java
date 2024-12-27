@@ -15,10 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-/**
- * 리뷰 생성 서비스
- * - 리뷰 생성 로직 및 데이터베이스 연동 처리
- */
 @Service
 @RequiredArgsConstructor
 public class ReviewCreateService {
@@ -27,26 +23,19 @@ public class ReviewCreateService {
 	private final VetRepository vetRepository;
 	private final ReviewEntityRetrievalService entityRetrievalService;
 
-	/**
-	 * 리뷰 생성
-	 *
-	 * @param dto 리뷰 요청 데이터
-	 * @param ownerId 리뷰를 작성하는 소유자의 ID
-	 * @param vetId 리뷰 대상인 수의사 ID
-	 * @return 생성된 리뷰에 대한 응답 데이터
-	 */
+	// 리뷰를 생성하고 저장된 리뷰 정보를 반환
 	public ReviewResponseDto createReview(ReviewRequestDto dto, Integer ownerId, Integer vetId) {
 		validateRequest(dto);
 
-		Owner owner = entityRetrievalService.fetchOwnerByIdOrThrow(ownerId);
-		Vet vet = entityRetrievalService.fetchVetByIdOrThrow(vetId);
+		Owner owner = fetchOwnerByIdOrThrow(ownerId);
+		Vet vet = fetchVetByIdOrThrow(vetId);
 
 		Review review = ReviewHelper.convertToReviewEntity(dto, owner, vet);
 		Review savedReview = reviewRepository.save(review);
 
 		updateVetRatingAndReviewCount(vet, dto.getScore());
 
-		return ReviewHelper.buildResponseDto(savedReview);
+		return buildReviewResponse(savedReview);
 	}
 
 	private void validateRequest(ReviewRequestDto requestDto) {
@@ -64,6 +53,14 @@ public class ReviewCreateService {
 			throw new InvalidContentException("리뷰 내용은 비어 있을 수 없습니다.");
 	}
 
+	private Owner fetchOwnerByIdOrThrow(Integer ownerId) {
+		return entityRetrievalService.fetchOwnerByIdOrThrow(ownerId);
+	}
+
+	private Vet fetchVetByIdOrThrow(Integer vetId) {
+		return entityRetrievalService.fetchVetByIdOrThrow(vetId);
+	}
+
 	private void updateVetRatingAndReviewCount(Vet vet, int newScore) {
 		int currentReviewCount = vet.getReviewCount() != null ? vet.getReviewCount() : 0;
 		BigDecimal updatedAverageRating = calculateUpdatedAverageRating(vet.getAverageRatings(), currentReviewCount, newScore);
@@ -78,5 +75,9 @@ public class ReviewCreateService {
 			.multiply(BigDecimal.valueOf(currentReviewCount))
 			.add(BigDecimal.valueOf(newScore));
 		return totalScore.divide(BigDecimal.valueOf(currentReviewCount + 1), 2, BigDecimal.ROUND_HALF_UP);
+	}
+
+	private static ReviewResponseDto buildReviewResponse(Review savedReview) {
+		return ReviewHelper.buildResponseDto(savedReview);
 	}
 }
