@@ -11,33 +11,38 @@ import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-/**
- * 예약 정보 업데이트 서비스
- * - 예약 정보를 수정, 검증, 저장하고 응답
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AppointmentUpdateService {
 
 	private final AppointmentRepository appointmentRepository;
-	private final EntityRetrievalService entityFetchService;
+	private final AppointmentEntityRetrievalService entityRetrievalService;
 
-	/**
-	 * 예약 정보를 업데이트하고, 결과를 반환
-	 *
-	 * @param appointmentId 업데이트할 예약의 ID
-	 * @param dto 예약 업데이트 요청 데이터
-	 * @return 업데이트된 예약 정보를 포함하는 응답 DTO
-	 */
+	// 예약 정보 업데이트
 	public AppointmentResponseDto updateAppointment(Integer appointmentId, AppointmentRequestDto dto) {
-		Appointment appointment = entityFetchService.fetchAppointmentByIdOrThrow(appointmentId);
-		Pet pet = entityFetchService.fetchPetByIdOrThrow(dto.getPetId());
-		Vet vet = entityFetchService.fetchVetByIdOrThrow(dto.getVetId());
+		Appointment appointment = fetchAppointmentByIdOrThrow(appointmentId);
+		Pet pet = fetchPetByIdOrThrow(dto);
+		Vet vet = fetchVetByIdOrThrow(dto);
 
 		AppointmentHelper.updateAppointmentFromDto(dto, appointment, pet, vet);
 
+		return saveAndConvertToResponse(appointment);
+	}
+
+	private Vet fetchVetByIdOrThrow(AppointmentRequestDto dto) {
+		return entityRetrievalService.fetchVetByIdOrThrow(dto.getVetId());
+	}
+
+	private Pet fetchPetByIdOrThrow(AppointmentRequestDto dto) {
+		return entityRetrievalService.fetchPetByIdOrThrow(dto.getPetId());
+	}
+
+	private Appointment fetchAppointmentByIdOrThrow(Integer appointmentId) {
+		return entityRetrievalService.fetchAppointmentByIdOrThrow(appointmentId);
+	}
+
+	private AppointmentResponseDto saveAndConvertToResponse(Appointment appointment) {
 		Appointment updatedAppointment = appointmentRepository.save(appointment);
 
 		return AppointmentHelper.convertToResponse(updatedAppointment);
