@@ -15,7 +15,7 @@ import org.springframework.samples.petclinic.domain.appointment.model.Appointmen
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.appointment.service.AppointmentCreateService;
-import org.springframework.samples.petclinic.domain.appointment.service.EntityRetrievalService;
+import org.springframework.samples.petclinic.domain.appointment.service.AppointmentEntityRetrievalService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
@@ -38,7 +38,7 @@ public class AppointmentCreateServiceTest {
 	private AppointmentRepository appointmentRepository;
 
 	@Mock
-	private EntityRetrievalService entityRetrievalService;
+	private AppointmentEntityRetrievalService entityRetrievalService;
 
 	private AppointmentRequestDto requestDto;
 	private Pet mockPet;
