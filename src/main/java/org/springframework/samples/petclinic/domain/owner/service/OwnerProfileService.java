@@ -10,10 +10,6 @@ import org.springframework.samples.petclinic.domain.owner.repository.OwnerReposi
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-/**
- * 주인 수정 서비스
- * - 주인 정보를 수정, 검증, 저장하고 응답
- */
 @Service
 @RequiredArgsConstructor
 public class OwnerProfileService {
@@ -21,12 +17,7 @@ public class OwnerProfileService {
 	private final OwnerRepository ownerRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	/**
-	 * 회원 프로필 정보 수정
-	 *
-	 * @param  id 수정할 회원의 고유 ID
-	 * @param  updateProfileRequestDto 클라이언트로부터 전달받은 프로필 수정 요청 데이터
-	 */
+	// 회원 프로필 수정
 	public void updateProfile(Integer id, UpdateProfileRequestDto updateProfileRequestDto) {
 		Owner owner = findOwnerByIdOrThrow(id);
 
@@ -35,12 +26,7 @@ public class OwnerProfileService {
 		ownerRepository.save(owner);
 	}
 
-	/**
-	 * 회원 비밀번호 수정
-	 *
-	 * @param id 수정할 회원의 고유 ID
-	 * @param updatePasswordRequestDto 클라이언트로부터 전달받은 비밀번호 수정 요청 데이터
-	 */
+	// 회원 비밀번호 변경
 	public void updatePassword(Integer id, UpdatePasswordRequestDto updatePasswordRequestDto) {
 		Owner owner = findOwnerByIdOrThrow(id);
 
