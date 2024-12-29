@@ -1,6 +1,8 @@
 package org.springframework.samples.petclinic.domain.vet.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.VetErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.speciality.SpecialityRepository;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.VetSpecialityRepository;
@@ -30,15 +32,15 @@ public class VetService {
 	public VetResponseDto register(VetRequestDto vetRequestDto) {
 
 		if (vetRequestDto == null) {
-			throw new NullPointerException("요청데이터가 비어 있습니다.");
+			throw new RuntimeException("요청데이터가 비어 있습니다.");
 		}
 
 		if (vetRequestDto.getName() == null || vetRequestDto.getName().isBlank()) {
-			throw new NullPointerException("이름은 필수값입니다.");
+			throw new RuntimeException("이름은 필수값입니다.");
 		}
 
 		if (vetRequestDto.getSpecialties() == null || vetRequestDto.getSpecialties().isEmpty()) {
-			throw new NullPointerException("전문분야는 필수값입니다.");
+			throw new RuntimeException("전문분야는 필수값입니다.");
 		}
 
 		Vet vet = new Vet();
@@ -82,7 +84,7 @@ public class VetService {
 	// 특정 수의사 조회
 	public VetResponseDto findById(int vetId) {
 		var vet = vetRepository.findById(vetId)
-			.orElseThrow(() -> new RuntimeException("해당 수의사를 찾을 수 없습니다"));
+			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 		return vetConvert.toResponse(vet);
 	}
 
@@ -104,7 +106,7 @@ public class VetService {
 	@Transactional
 	public void delete(int vetId) {
 		Vet vet = vetRepository.findById(vetId)
-			.orElseThrow(() -> new RuntimeException("해당 수의사를 찾을 수 없습니다"));
+			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
 		vetSpecialityRepository.deleteAllByVetId_Id(vetId);
 		vetRepository.delete(vet);
@@ -114,7 +116,7 @@ public class VetService {
 	@Transactional
 	public VetResponseDto update(int id, VetRequestDto vetRequestDto) {
 		Vet vet = vetRepository.findById(id)
-			.orElseThrow(() -> new RuntimeException("해당 수의사를 찾을 수 없습니다"));
+			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
 		// 이름 수정
 		Optional.ofNullable(vetRequestDto.getName()).ifPresent(vet::setName);
