@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.domain.vet.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
@@ -19,7 +20,7 @@ public class VetController {
 
 	// 수의사 등록
 	@PostMapping
-	public ResponseEntity<VetResponseDto> create(@RequestBody VetRequestDto vetRequestDto) {
+	public ResponseEntity<VetResponseDto> create(@Valid @RequestBody VetRequestDto vetRequestDto) {
 		var response = vetService.register(vetRequestDto);
 		return ResponseEntity.ok(response);
 	}
