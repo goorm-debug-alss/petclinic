@@ -36,11 +36,11 @@ public class VetService {
 		}
 
 		if (vetRequestDto.getName() == null || vetRequestDto.getName().isBlank()) {
-			throw new RuntimeException("이름은 필수값입니다.");
+			throw new ApiException(VetErrorCode.NULL_NAME);
 		}
 
 		if (vetRequestDto.getSpecialties() == null || vetRequestDto.getSpecialties().isEmpty()) {
-			throw new RuntimeException("전문분야는 필수값입니다.");
+			throw new ApiException(VetErrorCode.NO_SPECIALITY);
 		}
 
 		Vet vet = new Vet();
