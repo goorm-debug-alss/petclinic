@@ -1,26 +1,32 @@
 package org.springframework.samples.petclinic.domain.appointment.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class AppointmentRequestDto {
-	private Integer petId;
+
+	@NotNull
 	private Integer vetId;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+	@NotNull
+	private Integer petId;
+
+	@NotNull
 	private LocalDateTime apptDateTime;
 
-	private ApptStatus status;
+	private ApptStatus appStatus;
+
+	@NotNull
 	private String symptoms;
 }
