@@ -72,7 +72,7 @@ public class ReadAppointmentServiceTest {
 	}
 
 	@Test
-	@DisplayName("특정 예약 조회 성공 - 유요한 예약 ID로 조회를 시도하면 해당 예약 데이터를 반환한다")
+	@DisplayName("특정 예약 조회 성공 - 유효한 예약 ID로 조회를 시도하면 해당 예약 데이터를 반환한다")
 	void validAppointmentId_findAppointment_returnAppointmentDetails() {
 		// given
 		when(appointmentRepository.findById(1)).thenReturn(Optional.of(mockAppointment1));

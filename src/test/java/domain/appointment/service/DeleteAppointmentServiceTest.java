@@ -41,7 +41,7 @@ public class DeleteAppointmentServiceTest {
 	}
 
 	@Test
-	@DisplayName("예약 삭제 성공 - 유요한 예약 ID를 제공하면 예약이 성공적으로 삭제된다")
+	@DisplayName("예약 삭제 성공 - 유효한 예약 ID를 제공하면 예약이 성공적으로 삭제된다")
 	void validId_deleteAppointment_deleteSuccessfully() {
 		// given
 		when(appointmentRepository.findById(1)).thenReturn(Optional.of(mockAppointment));
