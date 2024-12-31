@@ -1,11 +1,11 @@
 package org.springframework.samples.petclinic.domain.review.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.samples.petclinic.domain.appointment.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.review.exception.OwnerNotFoundException;
 import org.springframework.samples.petclinic.domain.review.exception.ReviewIdNotFoundException;
+import org.springframework.samples.petclinic.domain.review.exception.VetNotFoundException;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
