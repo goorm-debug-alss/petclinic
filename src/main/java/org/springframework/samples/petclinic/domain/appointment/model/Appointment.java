@@ -30,18 +30,18 @@ public class Appointment extends BaseEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "pet_id", nullable = false)
-	private Pet petId;
+	private Pet pet;
 
 	@ManyToOne
 	@JoinColumn(name = "vet_id", nullable = false)
-	private Vet vetId;
+	private Vet vet;
 
 	public void updateAppointment(LocalDateTime apptDateTime, ApptStatus status, String symptoms, Pet petId, Vet vetId) {
 		this.apptDateTime = apptDateTime;
 		this.status = status;
 		this.symptoms = symptoms;
-		this.petId = petId;
-		this.vetId = vetId;
+		this.pet = petId;
+		this.vet = vetId;
 	}
 }
 
