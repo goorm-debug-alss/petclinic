@@ -49,13 +49,7 @@ public class VetService {
 		vet.setName(vetRequestDto.getName());
 		Vet savedVet = vetRepository.save(vet);
 
-		List<Specialty> specialties = specialityService.findByIds(vetRequestDto.getSpecialties());
-		Set<VetSpecialty> vetSpecialties = specialties.stream().map(specialty -> {
-			VetSpecialty vetSpecialty = new VetSpecialty();
-			vetSpecialty.setVetId(savedVet);
-			vetSpecialty.setSpecialtyId(specialty);
-			return vetSpecialityRepository.save(vetSpecialty);
-		}).collect(Collectors.toSet());
+		saveSpecialities(savedVet, vetRequestDto.getSpecialties());
 
 		return vetConvert.toResponse(savedVet);
 	}
@@ -113,17 +107,21 @@ public class VetService {
 		// 분야 수정
 		if (vetRequestDto.getSpecialties() != null && !vetRequestDto.getSpecialties().isEmpty()) {
 			vetSpecialityRepository.deleteAllByVetId_Id(vet.getId());
-
-			List<Specialty> specialties = specialityService.findByIds(vetRequestDto.getSpecialties());
-			specialties.forEach(specialty -> {
-				VetSpecialty vetSpecialty = new VetSpecialty();
-				vetSpecialty.setVetId(vet);
-				vetSpecialty.setSpecialtyId(specialty);
-				vetSpecialityRepository.save(vetSpecialty);
-			});
+			saveSpecialities(vet, vetRequestDto.getSpecialties());
 		}
 
 		vetRepository.save(vet);
 		return vetConvert.toResponse(vet);
+	}
+
+	// 전문분야-수의사 연결 테이블 저장
+	private void saveSpecialities(Vet vet, List<Integer> specialtyIds) {
+		List<Specialty> specialties = specialityService.findByIds(specialtyIds);
+		specialties.forEach(specialty -> {
+			VetSpecialty vetSpecialty = new VetSpecialty();
+			vetSpecialty.setVetId(vet);
+			vetSpecialty.setSpecialtyId(specialty);
+			vetSpecialityRepository.save(vetSpecialty);
+		});
 	}
 }
