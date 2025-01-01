@@ -49,12 +49,12 @@ public class VetController {
 	}
 
 	// 수의사 수정
-//	@PutMapping("/{vet-id}")
-//	public ResponseEntity<VetResponseDto> update(
-//			@PathVariable("vet-id") int vetId, @RequestBody VetRequestDto vetRequestDto){
-//		var response = vetService.update(vetId, vetRequestDto);
-//		return ResponseEntity.ok(response);
-//	}
+	@PutMapping("/{vet-id}")
+	public ResponseEntity<VetResponseDto> update(
+			@PathVariable("vet-id") int vetId, @RequestBody VetRequestDto vetRequestDto){
+		var response = vetService.update(vetId, vetRequestDto);
+		return ResponseEntity.ok(response);
+	}
 
 	// 수의사 삭제
 	@DeleteMapping("/{vet-id}")
