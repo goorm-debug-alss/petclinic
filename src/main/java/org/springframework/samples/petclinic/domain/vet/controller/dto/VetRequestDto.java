@@ -19,5 +19,5 @@ public class VetRequestDto {
 
 	@NotNull
 	@Size(min = 1)
-	private List<SpecialityRequestDto> specialties;
+	private List<Integer> specialties;
 }

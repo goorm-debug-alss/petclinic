@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.speciality.SpecialityRepository;
+import org.springframework.samples.petclinic.domain.speciality.service.SpecialityService;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.VetSpecialityRepository;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
@@ -26,6 +27,7 @@ public class VetService {
 	private final SpecialityRepository specialityRepository;
 	private final VetConvert vetConvert;
 	private final VetSpecialityRepository vetSpecialityRepository;
+	private final SpecialityService specialityService;
 
 	// 수의사 등록
 	@Transactional
@@ -47,26 +49,13 @@ public class VetService {
 		vet.setName(vetRequestDto.getName());
 		Vet savedVet = vetRepository.save(vet);
 
-		Set<VetSpecialty> vetSpecialties = new HashSet<>();
-
-		// 리스트 처리
-		vetRequestDto.getSpecialties().forEach(specialtyDto -> {
-			// Specialty 확인 후 저장 또는 조회
-			Specialty specialty = specialityRepository.findByName(specialtyDto.getName())
-				.orElseGet(() -> {
-					Specialty newSpecialty = new Specialty();
-					newSpecialty.setName(specialtyDto.getName());
-					return specialityRepository.save(newSpecialty);
-				});
-
-			// VetSpecialty 생성 및 연결
+		List<Specialty> specialties = specialityService.findByIds(vetRequestDto.getSpecialties());
+		Set<VetSpecialty> vetSpecialties = specialties.stream().map(specialty -> {
 			VetSpecialty vetSpecialty = new VetSpecialty();
 			vetSpecialty.setVetId(savedVet);
 			vetSpecialty.setSpecialtyId(specialty);
-			vetSpecialityRepository.save(vetSpecialty);
-
-			vetSpecialties.add(vetSpecialty);
-		});
+			return vetSpecialityRepository.save(vetSpecialty);
+		}).collect(Collectors.toSet());
 
 		return vetConvert.toResponse(savedVet);
 	}
@@ -113,34 +102,34 @@ public class VetService {
 	}
 
 	// 수의사 수정
-	@Transactional
-	public VetResponseDto update(int id, VetRequestDto vetRequestDto) {
-		Vet vet = vetRepository.findById(id)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
-
-		// 이름 수정
-		Optional.ofNullable(vetRequestDto.getName()).ifPresent(vet::setName);
-
-		// 분야 수정
-		Optional.ofNullable(vetRequestDto.getSpecialties()).ifPresent(specialtyDtos -> {
-			vetSpecialityRepository.deleteAllByVetId_Id(vet.getId());
-
-			specialtyDtos.forEach(specialtyDto -> {
-				Specialty specialty = specialityRepository.findByName(specialtyDto.getName())
-					.orElseGet(() -> {
-						Specialty newSpecialty = new Specialty();
-						newSpecialty.setName(specialtyDto.getName());
-						return specialityRepository.save(newSpecialty);
-					});
-
-				// VetSpecialty 생성 / 연결
-				VetSpecialty vetSpecialty = new VetSpecialty();
-				vetSpecialty.setVetId(vet);
-				vetSpecialty.setSpecialtyId(specialty);
-				vetSpecialityRepository.save(vetSpecialty);
-			});
-		});
-		vetRepository.save(vet);
-		return vetConvert.toResponse(vet);
-	}
+//	@Transactional
+//	public VetResponseDto update(int id, VetRequestDto vetRequestDto) {
+//		Vet vet = vetRepository.findById(id)
+//			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
+//
+//		// 이름 수정
+//		Optional.ofNullable(vetRequestDto.getName()).ifPresent(vet::setName);
+//
+//		// 분야 수정
+//		Optional.ofNullable(vetRequestDto.getSpecialties()).ifPresent(specialtyDtos -> {
+//			vetSpecialityRepository.deleteAllByVetId_Id(vet.getId());
+//
+//			specialtyDtos.forEach(specialtyDto -> {
+//				Specialty specialty = specialityRepository.findByName(specialtyDto.getName())
+//					.orElseGet(() -> {
+//						Specialty newSpecialty = new Specialty();
+//						newSpecialty.setName(specialtyDto.getName());
+//						return specialityRepository.save(newSpecialty);
+//					});
+//
+//				// VetSpecialty 생성 / 연결
+//				VetSpecialty vetSpecialty = new VetSpecialty();
+//				vetSpecialty.setVetId(vet);
+//				vetSpecialty.setSpecialtyId(specialty);
+//				vetSpecialityRepository.save(vetSpecialty);
+//			});
+//		});
+//		vetRepository.save(vet);
+//		return vetConvert.toResponse(vet);
+//	}
 }
