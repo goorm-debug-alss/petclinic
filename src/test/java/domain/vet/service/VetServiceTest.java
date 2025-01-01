@@ -7,16 +7,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.samples.petclinic.domain.speciality.SpecialityRepository;
+import org.springframework.samples.petclinic.domain.vet.SpecialityRepository;
 import org.springframework.samples.petclinic.domain.speciality.dto.SpecialityRequestDto;
-import org.springframework.samples.petclinic.domain.speciality.model.Specialty;
+import org.springframework.samples.petclinic.domain.vet.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.VetSpecialityRepository;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.convert.VetConvert;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-import org.springframework.samples.petclinic.domain.vet.model.VetSpecialty;
+import org.springframework.samples.petclinic.domain.vet.model.VetSpeciality;
 import org.springframework.samples.petclinic.domain.vet.service.VetService;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class VetServiceTest {
 	private VetRequestDto vetRequestDto;
 	private List<SpecialityRequestDto> specialityRequestDto;
 	private VetResponseDto expectedVetResponseDto;
-	private VetSpecialty vetSpecialty;
+	private VetSpeciality vetSpeciality;
 
 	@BeforeEach
 	@DisplayName("Sample Data")
@@ -94,7 +94,7 @@ public class VetServiceTest {
 	}
 
 	void sampleVetSpeciality() {
-		vetSpecialty = VetSpecialty.builder()
+		vetSpeciality = VetSpeciality.builder()
 			.id(1)
 			.vetId(vet) // Vet 객체 재활용
 			.specialtyId(specialty) // Specialty 객체 재활용
@@ -252,7 +252,7 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("전문 분아별 수의사 조회 성공")
 	void viewVetBySpecialtySuccess() {
-		when(vetSpecialityRepository.findVetIdsBySpecialtyId_Id(1)).thenReturn(List.of(vetSpecialty));
+		when(vetSpecialityRepository.findVetIdsBySpecialtyId_Id(1)).thenReturn(List.of(vetSpeciality));
 		when(vetRepository.findAllById(List.of(vet.getId()))).thenReturn(List.of(vet));
 		when(vetConvert.toResponse(vet)).thenReturn(expectedVetResponseDto);
 
@@ -361,7 +361,7 @@ public class VetServiceTest {
 		verify(vetSpecialityRepository, times(1)).deleteAllByVetId_Id(1);
 		verify(specialityRepository, times(1)).findByName("내과");
 		verify(specialityRepository, times(1)).save(any(Specialty.class));
-		verify(vetSpecialityRepository, times(1)).save(any(VetSpecialty.class));
+		verify(vetSpecialityRepository, times(1)).save(any(VetSpeciality.class));
 		verify(vetRepository, times(1)).save(any(Vet.class));
 		verify(vetConvert, times(1)).toResponse(vet);
 
@@ -390,7 +390,7 @@ public class VetServiceTest {
 		verify(vetRepository, times(1)).findById(1);
 		verify(vetSpecialityRepository, times(1)).deleteAllByVetId_Id(1);
 		verify(specialityRepository, times(1)).findByName("소아과");
-		verify(vetSpecialityRepository, times(1)).save(any(VetSpecialty.class));
+		verify(vetSpecialityRepository, times(1)).save(any(VetSpeciality.class));
 		verify(vetRepository, times(1)).save(any(Vet.class));
 		verify(vetConvert, times(1)).toResponse(vet);
 

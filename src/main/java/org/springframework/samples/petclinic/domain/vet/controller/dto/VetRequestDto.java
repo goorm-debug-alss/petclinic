@@ -13,10 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VetRequestDto {
-	@NotBlank
 	private String name;
 
-	@NotNull
-	@Size(min = 1)
 	private List<Integer> specialties;
 }
