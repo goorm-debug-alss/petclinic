@@ -39,10 +39,8 @@ public class Review extends BaseEntity {
 	@JoinColumn(name = "owner_id", nullable = false)
 	private Owner ownerId;
 
-	public void updateReview(Integer score, String content, Owner ownerId, Vet vetId) {
+	public void updateReview(Integer score, String content) {
 		this.score = score;
 		this.content = content;
-		this.vetId = vetId;
-		this.ownerId = ownerId;
 	}
 }
