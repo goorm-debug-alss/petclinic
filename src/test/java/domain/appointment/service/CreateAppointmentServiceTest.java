@@ -45,7 +45,7 @@ public class CreateAppointmentServiceTest {
 	private AppointmentMapper appointmentMapper;
 
 	@InjectMocks
-	private CreateAppointmentService appointmentCreateService;
+	private CreateAppointmentService createAppointmentService;
 
 	private AppointmentRequestDto request;
 	private Pet mockPet;
@@ -67,11 +67,11 @@ public class CreateAppointmentServiceTest {
 		// given
 		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
 		when(petRepository.findById(1)).thenReturn(Optional.of(mockPet));
-		when(appointmentRepository.save(any(Appointment.class))).thenReturn(mockAppointment);
 		when(appointmentMapper.toEntity(request, mockPet, mockVet)).thenReturn(mockAppointment);
+		when(appointmentRepository.save(any(Appointment.class))).thenReturn(mockAppointment);
 
 		// when
-		Appointment appointment = appointmentCreateService.createAppointment(request);
+		Appointment appointment = createAppointmentService.createAppointment(request);
 
 		// then
 		assertThat(appointment.getId()).isEqualTo(mockAppointment.getId());
@@ -83,13 +83,13 @@ public class CreateAppointmentServiceTest {
 	}
 
 	@Test
-	@DisplayName("예약 생성 실패 - 유효하지 않은 수의사 ID가 제공되었을 때,  에러가 발생한다")
+	@DisplayName("예약 생성 실패 - 유효하지 않은 수의사 ID가 제공되었을 때, 에러가 발생한다")
 	void invalidVetId_createAppointment_throwsException() {
 		// given
 		when(vetRepository.findById(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// when & then
-		assertThrows(ApiException.class, () -> appointmentCreateService.createAppointment(request));
+		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class CreateAppointmentServiceTest {
 		when(petRepository.findById(1)).thenThrow(new ApiException(PetErrorCode.NO_PET));
 
 		// when & then
-		assertThrows(ApiException.class, () -> appointmentCreateService.createAppointment(request));
+		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class CreateAppointmentServiceTest {
 			.build();
 
 		// when & then
-		assertThrows(ApiException.class, () -> appointmentCreateService.createAppointment(request));
+		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class CreateAppointmentServiceTest {
 			.thenReturn(true);
 
 		// when & then
-		assertThrows(ApiException.class, () -> appointmentCreateService.createAppointment(request));
+		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
 	}
 
 	@Test
@@ -145,14 +145,14 @@ public class CreateAppointmentServiceTest {
 			.build();
 
 		// when & then
-		assertThrows(ApiException.class, () -> appointmentCreateService.createAppointment(request));
+		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
 	}
 
 	private void createMockRequestTestData() {
 		request = AppointmentRequestDto.builder()
 			.vetId(1)
 			.petId(1)
-			.apptDateTime(LocalDateTime.now().plusHours(1))
+			.apptDateTime(LocalDateTime.of(2025, 12, 25, 12, 0 , 0))
 			.appStatus(ApptStatus.COMPLETE)
 			.symptoms("test")
 			.build();
