@@ -5,7 +5,7 @@ import org.springframework.samples.petclinic.domain.vet.model.VetSpeciality;
 
 import java.util.List;
 
-public interface VetSpecialityRepository extends JpaRepository<VetSpeciality, Integer> {
+public interface VetSpecialtyRepository extends JpaRepository<VetSpeciality, Integer> {
 	List<VetSpeciality> findVetSpecialtiesByVetId_Id(int vetId);
 
 	void deleteAllByVetId_Id(int vetId);

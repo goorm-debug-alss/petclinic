@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.vet.VetRepository;
-import org.springframework.samples.petclinic.domain.vet.VetSpecialityRepository;
+import org.springframework.samples.petclinic.domain.vet.VetSpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.convert.VetConvert;
@@ -24,20 +24,24 @@ public class VetService {
 
 	private final VetRepository vetRepository;
 	private final VetConvert vetConvert;
-	private final VetSpecialityRepository vetSpecialityRepository;
+	private final VetSpecialtyRepository vetSpecialtyRepository;
 	private final SpecialityService specialityService;
 	private final VetSpecialtyConvert vetSpecialtyConvert;
 
 	// 수의사 등록
 	@Transactional
 	public VetResponseDto register(VetRequestDto vetRequestDto) {
-		Vet vet = vetConvert.toEntity(vetRequestDto);
 		validateVetRequestDto(vetRequestDto);
+
+		List<Specialty> validSpecialties = specialityService.findByIds(vetRequestDto.getSpecialties());
+
+		Vet vet = vetConvert.toEntity(vetRequestDto);
 		Vet savedVet = vetRepository.save(vet);
 
-		saveSpecialities(savedVet, vetRequestDto.getSpecialties());
+		saveSpecialities(savedVet, validSpecialties);
 		return vetConvert.toResponse(savedVet);
 	}
+
 
 	// 수의사 전체 조회
 	public List<VetResponseDto> findAll() {
@@ -55,7 +59,7 @@ public class VetService {
 
 	// 전문 분야별 수의사 조회
 	public List<VetResponseDto> findBySpecialtyId(int specialtyId) {
-		var vetIds = vetSpecialityRepository.findVetIdsBySpecialtyId_Id(specialtyId)
+		var vetIds = vetSpecialtyRepository.findVetIdsBySpecialtyId_Id(specialtyId)
 			.stream()
 			.map(vs -> vs.getVet().getId())
 			.collect(Collectors.toList());
@@ -77,7 +81,7 @@ public class VetService {
 		Vet vet = vetRepository.findById(vetId)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
-		vetSpecialityRepository.deleteAllByVetId_Id(vetId);
+		vetSpecialtyRepository.deleteAllByVetId_Id(vetId);
 		vetRepository.delete(vet);
 	}
 
@@ -92,8 +96,10 @@ public class VetService {
 
 		// 분야 수정
 		if (vetRequestDto.getSpecialties() != null && !vetRequestDto.getSpecialties().isEmpty()) {
-			vetSpecialityRepository.deleteAllByVetId_Id(vet.getId());
-			saveSpecialities(vet, vetRequestDto.getSpecialties());
+			List<Specialty> validSpecialties = specialityService.findByIds(vetRequestDto.getSpecialties());
+
+			vetSpecialtyRepository.deleteAllByVetId_Id(vet.getId());
+			saveSpecialities(vet, validSpecialties);
 		}
 
 		vetRepository.save(vet);
@@ -101,10 +107,9 @@ public class VetService {
 	}
 
 	// 전문분야-수의사 연결 테이블 저장
-	private void saveSpecialities(Vet vet, List<Integer> specialtyIds) {
-		List<Specialty> specialties = specialityService.findByIds(specialtyIds);
+	private void saveSpecialities(Vet vet, List<Specialty> specialties) {
 		List<VetSpeciality> vetSpecialties = vetSpecialtyConvert.toEntityList(vet, specialties);
-		vetSpecialityRepository.saveAll(vetSpecialties);
+		vetSpecialtyRepository.saveAll(vetSpecialties);
 	}
 
 	// 요청값 검증

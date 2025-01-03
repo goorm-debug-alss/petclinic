@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.samples.petclinic.domain.speciality.dto.SpecialityRequestDto;
 import org.springframework.samples.petclinic.domain.vet.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.controller.VetController;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
@@ -47,8 +46,6 @@ class VetControllerTest {
 	private Specialty specialty2;
 	private VetRequestDto vetRequestDto;
 	private VetRequestDto vetUpdateRequestDto;
-	private List<SpecialityRequestDto> specialityRequestDto;
-	private List<SpecialityRequestDto> specialityUpdateRequestDto;
 	private VetResponseDto expectedVetResponseDto;
 	private VetResponseDto expectedVetUpdateResponseDto;
 
@@ -60,8 +57,6 @@ class VetControllerTest {
 		mockMvc = MockMvcBuilders.standaloneSetup(vetController).build();
 
 		sampleVet();
-		sampleSpecialityRequestDto();
-		sampleSpecialityUpdateRequestDto();
 		sampleVetRequestDto();
 		sampleVetUpdateRequestDto();
 		sampleSpeciality();
@@ -80,27 +75,14 @@ class VetControllerTest {
 	void sampleVetRequestDto() {
 		vetRequestDto = new VetRequestDto();
 		vetRequestDto.setName("테스트용");
-		vetRequestDto.setSpecialties(specialityRequestDto);
+		vetRequestDto.setSpecialties(new ArrayList<>(List.of(1)));
 	}
 
 	void sampleVetUpdateRequestDto() {
 		vetUpdateRequestDto = new VetRequestDto();
 		vetUpdateRequestDto.setName("업데이트");
-		vetUpdateRequestDto.setSpecialties(specialityUpdateRequestDto);
-	}
-
-	void sampleSpecialityRequestDto() {
-		specialityRequestDto = new ArrayList<>();
-		SpecialityRequestDto speciality = new SpecialityRequestDto();
-		speciality.setName("외과");
-		specialityRequestDto.add(speciality);
-	}
-
-	void sampleSpecialityUpdateRequestDto() {
-		specialityUpdateRequestDto = new ArrayList<>();
-		SpecialityRequestDto speciality = new SpecialityRequestDto();
-		speciality.setName("소아과");
-		specialityUpdateRequestDto.add(speciality);
+		vetRequestDto.setSpecialties(new ArrayList<>(List.of(2)));
+		;
 	}
 
 	void sampleSpeciality() {
