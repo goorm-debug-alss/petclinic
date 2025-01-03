@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest(classes = PetClinicApplication.class)
-@ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 @Transactional
 public class AppointmentControllerTest {
@@ -66,16 +63,16 @@ public class AppointmentControllerTest {
 		return AppointmentRequestDto.builder()
 			.vetId(vetId)
 			.petId(petId)
-			.apptDateTime(LocalDateTime.now().plusHours(1))
+			.apptDateTime(LocalDateTime.of(2025, 12, 25, 12, 0 , 0))
 			.appStatus(ApptStatus.COMPLETE)
 			.symptoms(symptoms)
 			.build();
 	}
 
 	@Test
-	@DisplayName("POST / appointment - 예약 생성 시 유요한 데이터를 제공하면 예약이 성공적으로 생성된다")
+	@DisplayName("POST / appointment - 예약 생성 시 유효한 데이터를 제공하면 예약이 성공적으로 생성된다")
 	void createAppointment_shouldSucceedWhenValidDateProvided() throws Exception {
-		// given: 유요한 예약 데이터 생성
+		// given: 유효한 예약 데이터 생성
 		AppointmentRequestDto request = createAppointmentRequestDto(1, 5, "test");
 
 		// when: 예약 생성 API 호출
@@ -85,7 +82,7 @@ public class AppointmentControllerTest {
 				.content(objectMapper.writeValueAsString(request)))
 			.andReturn().getResponse();
 
-		// then: 응답 상태 코드가 200이고, 생성된 에약 ID가 유요한 값이어야 한다
+		// then: 응답 상태 코드가 200이고, 생성된 예약 ID가 유효한 값이어야 한다
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		AppointmentResponseDto appointmentResponseDto = objectMapper.readValue(response.getContentAsString(), AppointmentResponseDto.class);
 		assertThat(appointmentResponseDto.getId()).isGreaterThan(0);
@@ -175,7 +172,7 @@ public class AppointmentControllerTest {
 				.content(objectMapper.writeValueAsString(updateRequest)))
 			.andReturn().getResponse();
 
-		// then: 응답 상태가 200이고, 반환된 데이터가 업데이트된 데이터와 일치해야 한다
+		// then: 응답 상태 코드가 200이고, 반환된 데이터가 업데이트된 데이터와 일치해야 한다
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		AppointmentResponseDto updatedAppointment = objectMapper.readValue(response.getContentAsString(), AppointmentResponseDto.class);
 		assertThat(updatedAppointment.getId()).isEqualTo(appointmentId);
@@ -187,13 +184,13 @@ public class AppointmentControllerTest {
 	void deleteAppointment_shouldSucceedWhenValidIdProvided() throws Exception {
 		// given: 하나의 예약 데이터를 생성
 		AppointmentRequestDto request = createAppointmentRequestDto(1, 5, "Test Symptoms");
-		MockHttpServletResponse crateResponse = mockMvc.perform(post("/appointment")
+		MockHttpServletResponse createResponse = mockMvc.perform(post("/appointment")
 				.header("Authorization", token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andReturn().getResponse();
 
-		AppointmentResponseDto createAppointment = objectMapper.readValue(crateResponse.getContentAsString(), AppointmentResponseDto.class);
+		AppointmentResponseDto createAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
 		Integer appointmentId = createAppointment.getId();
 
 		// when: 예약 삭제 API 호출

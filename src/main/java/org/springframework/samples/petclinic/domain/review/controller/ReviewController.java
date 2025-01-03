@@ -2,13 +2,13 @@ package org.springframework.samples.petclinic.domain.review.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewRequestDto;
 import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto;
-import org.springframework.samples.petclinic.domain.review.service.ReviewCreateService;
-import org.springframework.samples.petclinic.domain.review.service.ReviewDeleteService;
-import org.springframework.samples.petclinic.domain.review.service.ReviewReadService;
-import org.springframework.samples.petclinic.domain.review.service.ReviewUpdateService;
+import org.springframework.samples.petclinic.domain.review.model.Review;
+import org.springframework.samples.petclinic.domain.review.service.CreateReviewService;
+import org.springframework.samples.petclinic.domain.review.service.DeleteReviewService;
+import org.springframework.samples.petclinic.domain.review.service.ReadReviewService;
+import org.springframework.samples.petclinic.domain.review.service.UpdateReviewService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -16,56 +16,52 @@ import org.springframework.web.context.request.RequestContextHolder;
 import java.util.List;
 
 @RestController
-@RequestMapping("/review")
 @RequiredArgsConstructor
+@RequestMapping("/review")
 public class ReviewController {
 
-	private final ReviewCreateService reviewCreateService;
-	private final ReviewReadService reviewReadService;
-	private final ReviewUpdateService reviewUpdateService;
-	private final ReviewDeleteService reviewDeleteService;
+	private final CreateReviewService createReviewService;
+	private final ReadReviewService readReviewService;
+	private final UpdateReviewService updateReviewService;
+	private final DeleteReviewService deleteReviewService;
 
 	// 리뷰 생성
 	@PostMapping
-	public ResponseEntity<ReviewResponseDto> createReview(@RequestBody ReviewRequestDto reviewRequestDto) {
+	public ResponseEntity<ReviewResponseDto> createReview(@RequestBody ReviewRequestDto request) {
 		Integer ownerId = getAuthenticatedOwnerId();
-		Integer vetId = reviewRequestDto.getVetId();
-		ReviewResponseDto responseDto = reviewCreateService.createReview(reviewRequestDto, ownerId, vetId);
-		return ResponseEntity.ok(responseDto);
+		Review review = createReviewService.createReview(request, ownerId);
+		ReviewResponseDto response = new ReviewResponseDto(review);
+		return ResponseEntity.ok(response);
 	}
 
 	// 사용자 리뷰 조회
 	@GetMapping("/my")
 	public ResponseEntity<List<ReviewResponseDto>> getMyReviews() {
 		Integer ownerId = getAuthenticatedOwnerId();
-		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByOwner(ownerId);
-		return ResponseEntity.ok(reviews);
+		return ResponseEntity.ok(readReviewService.findMyReviews(ownerId));
 	}
 
 	// 수의사 리뷰 조회
 	@GetMapping("/{vetId}")
-	public ResponseEntity<List<ReviewResponseDto>> getReviewsByVet(@PathVariable("vetId") Integer vetId) {
-		List<ReviewResponseDto> reviews = reviewReadService.getReviewsByVet(vetId);
-		return ResponseEntity.ok(reviews);
+	public ResponseEntity<List<ReviewResponseDto>> getVetReviews(@PathVariable("vetId") Integer vetId) {
+		return ResponseEntity.ok(readReviewService.findVetReviews(vetId));
 	}
 
 	// 리뷰 수정
 	@PutMapping("/{reviewId}")
 	public ResponseEntity<ReviewResponseDto> updateReview(@PathVariable("reviewId") Integer reviewId,
-														  @RequestBody ReviewRequestDto reviewRequestDto) {
+														  @RequestBody ReviewRequestDto request) {
 		Integer ownerId = getAuthenticatedOwnerId();
-		Owner owner = Owner.builder().id(ownerId).build();
-		ReviewResponseDto responseDto = reviewUpdateService.updateReview(reviewId, reviewRequestDto, owner);
-		return ResponseEntity.ok(responseDto);
+		ReviewResponseDto response = updateReviewService.updateReview(request, ownerId, reviewId);
+		return ResponseEntity.ok(response);
 	}
 
 	// 리뷰 삭제
 	@DeleteMapping("/{reviewId}")
-	public ResponseEntity<Void> deleteReview(@PathVariable("reviewId") Integer reviewId) {
+	public ResponseEntity<ReviewResponseDto> deleteReview(@PathVariable("reviewId") Integer reviewId) {
 		Integer ownerId = getAuthenticatedOwnerId();
-		Owner owner = Owner.builder().id(ownerId).build();
-		reviewDeleteService.deleteReview(reviewId, owner);
-		return ResponseEntity.noContent().build();
+		deleteReviewService.deleteReview(reviewId, ownerId);
+		return ResponseEntity.ok().build();
 	}
 
 	private Integer getAuthenticatedOwnerId() {
