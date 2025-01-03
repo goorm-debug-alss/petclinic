@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ReviewRequestDto {
+
 	private Integer score;
 	private String content;
 	private Integer vetId;

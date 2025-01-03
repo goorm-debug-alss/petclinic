@@ -6,12 +6,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
 	@Query("SELECT r FROM Review r WHERE r.vetId.id = :vetId")
-	List<Review> findByVetId(@Param("vetId") Integer vetId);
+	Optional<List<Review>> findByVetId(@Param("vetId") Integer vetId);
 
 	@Query("SELECT r FROM Review r WHERE r.ownerId.id = :ownerId")
-	List<Review> findByOwnerId(@Param("ownerId") Integer ownerId);
+	Optional<List<Review>> findByOwnerId(@Param("ownerId") Integer ownerId);
 }

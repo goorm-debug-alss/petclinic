@@ -114,7 +114,7 @@ public class UpdateAppointmentServiceTest {
 		return AppointmentRequestDto.builder()
 			.vetId(1)
 			.petId(1)
-			.apptDateTime(LocalDateTime.now())
+			.apptDateTime(LocalDateTime.of(2025, 12, 25, 12, 0 , 0))
 			.appStatus(ApptStatus.COMPLETE)
 			.symptoms("Updated Symptoms")
 			.build();
