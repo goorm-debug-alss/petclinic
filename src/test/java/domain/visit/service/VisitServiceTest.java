@@ -93,7 +93,9 @@ class VisitServiceTest {
 
 		// When,Then
 		assertThatThrownBy(() -> visitService.createVisit(visitRequestDto))
-			.isInstanceOf(ApiException.class);
+			.isInstanceOf(ApiException.class)
+			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
+			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
 		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
 		verifyNoInteractions(visitRepository);
@@ -131,7 +133,11 @@ class VisitServiceTest {
 		// When
 		// Then
 		assertThatThrownBy(() -> visitService.getVisitsByPetId(pet.getId()))
-			.isInstanceOf(ApiException.class);
+			.isInstanceOf(ApiException.class)
+			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
+			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
+
+
 
 		// Then
 		verify(petRepository, times(1)).findById(eq(pet.getId()));

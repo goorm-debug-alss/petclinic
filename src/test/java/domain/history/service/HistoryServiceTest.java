@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.error.HistoryErrorCode;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
@@ -132,7 +134,9 @@ class HistoryServiceTest {
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.getHistoriesByPetId(pet.getId()))
-			.isInstanceOf(ApiException.class);
+			.isInstanceOf(ApiException.class)
+			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
+			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
 		verifyNoInteractions(historyRepository);
@@ -160,7 +164,9 @@ class HistoryServiceTest {
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.deleteHistory(history.getId()))
-			.isInstanceOf(ApiException.class);
+			.isInstanceOf(ApiException.class)
+			.hasFieldOrPropertyWithValue("errorCodeInterface", HistoryErrorCode.NO_HISTORY)
+			.hasFieldOrPropertyWithValue("errorDescription", "해당 진료내역이 존재하지 않습니다.");
 
 		verify(historyRepository, times(1)).existsById(eq(history.getId()));
 		verify(historyRepository, times(0)).deleteById(anyInt());
