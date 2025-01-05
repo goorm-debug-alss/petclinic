@@ -1,12 +1,8 @@
 package org.springframework.samples.petclinic.domain.vet.controller.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.samples.petclinic.domain.speciality.dto.SpecialityRequestDto;
 
 import java.util.List;
 
@@ -14,10 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VetRequestDto {
-	@NotBlank
 	private String name;
 
-	@NotNull
-	@Size(min = 1)
-	private List<SpecialityRequestDto> specialties;
+	private List<Integer> specialties;
 }

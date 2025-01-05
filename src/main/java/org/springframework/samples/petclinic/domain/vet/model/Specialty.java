@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.domain.speciality.model;
+package org.springframework.samples.petclinic.domain.vet.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
