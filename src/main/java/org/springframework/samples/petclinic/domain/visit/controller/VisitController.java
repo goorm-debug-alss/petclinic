@@ -6,6 +6,9 @@ import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
 import org.springframework.samples.petclinic.domain.visit.service.VisitService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/visits")
 @RequiredArgsConstructor
@@ -31,8 +34,8 @@ public class VisitController {
 	 * @return 방문 내역 목록
 	 */
 	@GetMapping("/{petId}")
-	public ResponseEntity<VisitResponseDto> getVisitsByPetId(@PathVariable int petId) {
-		VisitResponseDto response = visitService.getVisitsByPetId(petId);
+	public ResponseEntity<List<VisitResponseDto>> getVisitsByPetId(@PathVariable int petId) {
+		List<VisitResponseDto> response = visitService.getVisitsByPetId(petId);
 		return ResponseEntity.ok(response);
 	}
 }

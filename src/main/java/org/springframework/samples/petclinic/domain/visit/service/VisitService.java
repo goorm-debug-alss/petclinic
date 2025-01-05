@@ -1,11 +1,12 @@
 package org.springframework.samples.petclinic.domain.visit.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
-import org.springframework.samples.petclinic.domain.visit.enums.StatusCode;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
@@ -42,10 +43,10 @@ public class VisitService {
      * @param requestDto 요청 DTO
      * @return 생성된 Visit 객체
      */
-    private Visit createVisitEntity(VisitRequestDto requestDto) throws IllegalArgumentException {
+    private Visit createVisitEntity(VisitRequestDto requestDto) {
 
         Pet pet = petRepository.findById(requestDto.getPetId())
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found."));
+                .orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
         return Visit.builder()
                 .description(requestDto.getDescription())
@@ -62,21 +63,11 @@ public class VisitService {
      */
     private VisitResponseDto buildResponseDto(Visit visit) {
 
-        VisitResponseDto.Result result = VisitResponseDto.Result.builder()
-                .resultCode(StatusCode.SUCCESS.getCode())
-                .resultDescription(StatusCode.SUCCESS.getDescription())
-                .build();
-
-        VisitResponseDto.Body body = VisitResponseDto.Body.builder()
+        return VisitResponseDto.builder()
                 .visitId(visit.getId())
                 .visitDate(visit.getVisitDate())
                 .description(visit.getDescription())
                 .petName(visit.getPetId().getName())
-                .build();
-
-        return VisitResponseDto.builder()
-                .result(result)
-                .body(List.of(body))
                 .build();
     }
 
@@ -86,14 +77,14 @@ public class VisitService {
      * @param petId 반려동물 ID
      * @return 방문 내역 목록 응답 DTO
      */
-    public VisitResponseDto getVisitsByPetId(int petId) {
+    public List<VisitResponseDto> getVisitsByPetId(int petId) {
 
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
-        List<VisitResponseDto.Body> visits = visitRepository.findAllByPetId(pet)
+        return visitRepository.findAllByPetId(pet)
                 .stream()
-                .map(visit -> VisitResponseDto.Body.builder()
+                .map(visit -> VisitResponseDto.builder()
                         .visitId(visit.getId())
                         .petName(pet.getName())
                         .visitDate(visit.getVisitDate())
@@ -101,12 +92,5 @@ public class VisitService {
                         .build())
                 .collect(Collectors.toList());
 
-        return VisitResponseDto.builder()
-                .result(VisitResponseDto.Result.builder()
-                        .resultCode(StatusCode.SUCCESS.getCode())
-                        .resultDescription(StatusCode.SUCCESS.getDescription())
-                        .build())
-                .body(visits)
-                .build();
     }
 }
