@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
 import org.springframework.samples.petclinic.domain.history.model.History;
@@ -94,9 +95,9 @@ class HistoryServiceTest {
 
 		// Then
 		assertThat(response).isNotNull();
-		assertThat(response.getBody().get(0).getHistoryId()).isEqualTo(history.getId());
-		assertThat(response.getBody().get(0).getSymptoms()).isEqualTo(history.getSymptoms());
-		assertThat(response.getBody().get(0).getContent()).isEqualTo(history.getContent());
+		assertThat(response.getHistoryId()).isEqualTo(history.getId());
+		assertThat(response.getSymptoms()).isEqualTo(history.getSymptoms());
+		assertThat(response.getContent()).isEqualTo(history.getContent());
 
 		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
 		verify(visitRepository, times(1)).findById(eq(requestDto.getVisitId()));
@@ -111,13 +112,13 @@ class HistoryServiceTest {
 		when(historyRepository.findAllByVisitId_PetId(eq(pet))).thenReturn(List.of(history));
 
 		// When
-		HistoryResponseDto response = historyService.getHistoriesByPetId(pet.getId());
+		List<HistoryResponseDto> response = historyService.getHistoriesByPetId(pet.getId());
 
 		// Then
 		assertThat(response).isNotNull();
-		assertThat(response.getBody()).hasSize(1);
-		assertThat(response.getBody().get(0).getHistoryId()).isEqualTo(history.getId());
-		assertThat(response.getBody().get(0).getSymptoms()).isEqualTo(history.getSymptoms());
+		assertThat(response).hasSize(1);
+		assertThat(response.get(0).getHistoryId()).isEqualTo(history.getId());
+		assertThat(response.get(0).getSymptoms()).isEqualTo(history.getSymptoms());
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
 		verify(historyRepository, times(1)).findAllByVisitId_PetId(eq(pet));
@@ -131,8 +132,7 @@ class HistoryServiceTest {
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.getHistoriesByPetId(pet.getId()))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Pet not found");
+			.isInstanceOf(ApiException.class);
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
 		verifyNoInteractions(historyRepository);
@@ -160,8 +160,7 @@ class HistoryServiceTest {
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.deleteHistory(history.getId()))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("History not found with id: "+ history.getId());
+			.isInstanceOf(ApiException.class);
 
 		verify(historyRepository, times(1)).existsById(eq(history.getId()));
 		verify(historyRepository, times(0)).deleteById(anyInt());
