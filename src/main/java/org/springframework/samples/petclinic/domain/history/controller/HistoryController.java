@@ -9,6 +9,8 @@ import org.springframework.samples.petclinic.domain.history.service.HistoryServi
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/history")
 @RequiredArgsConstructor
@@ -34,8 +36,8 @@ public class HistoryController {
 	 * @return 방문 내역 목록
 	 */
 	@GetMapping("/{petId}")
-	public ResponseEntity<HistoryResponseDto> getHistoriesByPetId(@PathVariable int petId) {
-		HistoryResponseDto response = historyService.getHistoriesByPetId(petId);
+	public ResponseEntity<List<HistoryResponseDto>> getHistoriesByPetId(@PathVariable int petId) {
+		List<HistoryResponseDto> response = historyService.getHistoriesByPetId(petId);
 		return ResponseEntity.ok(response);
 	}
 
