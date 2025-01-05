@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
@@ -75,9 +77,9 @@ class VisitServiceTest {
 
 		// Then
 		assertThat(response).isNotNull();
-		assertThat(response.getBody().get(0).getVisitId()).isEqualTo(visit.getId());
-		assertThat(response.getBody().get(0).getPetName()).isEqualTo(pet.getName());
-		assertThat(response.getBody().get(0).getDescription()).isEqualTo(visit.getDescription());
+		assertThat(response.getVisitId()).isEqualTo(visit.getId());
+		assertThat(response.getPetName()).isEqualTo(pet.getName());
+		assertThat(response.getDescription()).isEqualTo(visit.getDescription());
 
 		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
 		verify(visitRepository, times(1)).save(any(Visit.class));
@@ -91,8 +93,7 @@ class VisitServiceTest {
 
 		// When,Then
 		assertThatThrownBy(() -> visitService.createVisit(visitRequestDto))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Pet not found.");
+			.isInstanceOf(ApiException.class);
 
 		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
 		verifyNoInteractions(visitRepository);
@@ -107,14 +108,14 @@ class VisitServiceTest {
 		when(visitRepository.findAllByPetId(eq(pet))).thenReturn(List.of(visit));
 
 		// When
-		VisitResponseDto response = visitService.getVisitsByPetId(pet.getId());
+		List<VisitResponseDto> response = visitService.getVisitsByPetId(pet.getId());
 
 		// Then
 		assertThat(response).isNotNull();
-		assertThat(response.getBody()).hasSize(1);
-		assertThat(response.getBody().get(0).getVisitId()).isEqualTo(visit.getId());
-		assertThat(response.getBody().get(0).getPetName()).isEqualTo(pet.getName());
-		assertThat(response.getBody().get(0).getDescription()).isEqualTo(visit.getDescription());
+		assertThat(response).hasSize(1);
+		assertThat(response.get(0).getVisitId()).isEqualTo(visit.getId());
+		assertThat(response.get(0).getPetName()).isEqualTo(pet.getName());
+		assertThat(response.get(0).getDescription()).isEqualTo(visit.getDescription());
 
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
@@ -130,8 +131,7 @@ class VisitServiceTest {
 		// When
 		// Then
 		assertThatThrownBy(() -> visitService.getVisitsByPetId(pet.getId()))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Pet not found");
+			.isInstanceOf(ApiException.class);
 
 		// Then
 		verify(petRepository, times(1)).findById(eq(pet.getId()));

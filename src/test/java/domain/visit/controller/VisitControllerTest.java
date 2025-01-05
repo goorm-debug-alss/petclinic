@@ -51,16 +51,10 @@ class VisitControllerTest {
         """;
 
 		VisitResponseDto responseDto = VisitResponseDto.builder()
-			.result(VisitResponseDto.Result.builder()
-				.resultCode("200")
-				.resultDescription("Operation completed successfully")
-				.build())
-			.body(List.of(VisitResponseDto.Body.builder()
-				.visitId(1)
+                .visitId(1)
 				.petName("PetA")
 				.visitDate(LocalDateTime.of(2024, 12, 18, 19, 0))
 				.description("진료")
-				.build()))
 			.build();
 
 		when(visitService.createVisit(any(VisitRequestDto.class))).thenReturn(responseDto);
@@ -71,12 +65,10 @@ class VisitControllerTest {
 				.content(requestJson))
 			// Then
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.result.resultCode").value("200"))
-			.andExpect(jsonPath("$.result.resultDescription").value("Operation completed successfully"))
-			.andExpect(jsonPath("$.body[0].visitId").value(1))
-			.andExpect(jsonPath("$.body[0].petName").value("PetA"))
-			.andExpect(jsonPath("$.body[0].visitDate").value("2024-12-18T19:00:00"))
-			.andExpect(jsonPath("$.body[0].description").value("진료"));
+			.andExpect(jsonPath("$.visitId").value(1))
+			.andExpect(jsonPath("$.petName").value("PetA"))
+			.andExpect(jsonPath("$.visitDate").value("2024-12-18T19:00:00"))
+			.andExpect(jsonPath("$.description").value("진료"));
 	}
 
 	@Test
@@ -87,30 +79,22 @@ class VisitControllerTest {
 		LocalDateTime visitDate = LocalDateTime.of(2024, 12, 18, 19, 0);
 
 		VisitResponseDto responseDto = VisitResponseDto.builder()
-			.result(VisitResponseDto.Result.builder()
-				.resultCode("200")
-				.resultDescription("Operation completed successfully")
-				.build())
-			.body(List.of(VisitResponseDto.Body.builder()
 				.visitId(1)
 				.petName("PetA")
 				.visitDate(visitDate)
 				.description("진료")
-				.build()))
 			.build();
 
-		when(visitService.getVisitsByPetId(1)).thenReturn(responseDto);
+		when(visitService.getVisitsByPetId(1)).thenReturn(List.of(responseDto));
 
 		// When
 		mockMvc.perform(get("/visits/1")
 				.accept(MediaType.APPLICATION_JSON))
 			// Then
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.resultCode").value("200"))
-			.andExpect(jsonPath("$.result.resultDescription").value("Operation completed successfully"))
-			.andExpect(jsonPath("$.body[0].visitId").value(1))
-			.andExpect(jsonPath("$.body[0].petName").value("PetA"))
-			.andExpect(jsonPath("$.body[0].visitDate").value("2024-12-18T19:00:00"))
-			.andExpect(jsonPath("$.body[0].description").value("진료"));
+			.andExpect(jsonPath("$[0].visitId").value(1))
+			.andExpect(jsonPath("$[0].petName").value("PetA"))
+			.andExpect(jsonPath("$[0].visitDate").value("2024-12-18T19:00:00"))
+			.andExpect(jsonPath("$[0].description").value("진료"));
 	}
 }
