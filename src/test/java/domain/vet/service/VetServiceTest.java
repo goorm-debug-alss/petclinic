@@ -83,7 +83,6 @@ public class VetServiceTest {
 		vetRequestDto = new VetRequestDto();
 		vetRequestDto.setName("DTO테스트용");
 		vetRequestDto.setSpecialties(new ArrayList<>(List.of(1)));
-
 	}
 
 	void sampleSpeciality(){
