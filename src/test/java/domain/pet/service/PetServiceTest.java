@@ -9,6 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
+import org.springframework.samples.petclinic.domain.pet.exception.InvalidOwnerException;
+import org.springframework.samples.petclinic.domain.pet.exception.InvalidPetTypeException;
+import org.springframework.samples.petclinic.domain.pet.exception.PetNotFoundException;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.model.PetType;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
@@ -45,7 +48,6 @@ public class PetServiceTest {
 	private PetType petType;
 	private Owner owner;
 	private PetRequestDto petRequestDto;
-	private PetResponseDto petResponseDto;
 
 	@BeforeEach
 	void setUp() {
@@ -64,14 +66,6 @@ public class PetServiceTest {
 		petRequestDto.setBirthDate(LocalDate.of(2020, 1, 1));
 		petRequestDto.setTypeId(1);
 		petRequestDto.setOwnerId(1);
-
-		petResponseDto = PetResponseDto.builder()
-			.id(1)
-			.name("강아지")
-			.birthDate(LocalDate.of(2020, 1, 1))
-			.typeId(1)
-			.ownerId(1)
-			.build();
 	}
 
 	@Test
@@ -109,16 +103,16 @@ public class PetServiceTest {
 		when(petRepository.findById(1)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.getPetById(1))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Pet not found");
+			.isInstanceOf(PetNotFoundException.class)
+			.hasMessage("Pet not found with ID: 1");
 
 		verify(petRepository, times(1)).findById(1);
-		verifyNoMoreInteractions(petRepository);
 	}
 
 	@Test
 	@DisplayName("주인의 펫 조회 성공")
 	void getPetsByOwnerId_Success() {
+		when(ownerRepository.findById(1)).thenReturn(Optional.of(owner));
 		when(petRepository.findAll()).thenReturn(List.of(pet));
 
 		List<PetResponseDto> result = petService.getPetsByOwnerId(1);
@@ -127,21 +121,22 @@ public class PetServiceTest {
 		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getOwnerId()).isEqualTo(1);
 
+		verify(ownerRepository, times(1)).findById(1);
 		verify(petRepository, times(1)).findAll();
-		verifyNoMoreInteractions(petRepository);
+		verifyNoMoreInteractions(ownerRepository, petRepository);
 	}
 
 	@Test
-	@DisplayName("주인의 펫 조회 실패 - No pets found")
-	void getPetsByOwnerId_Failure_NoPets() {
-		when(petRepository.findAll()).thenReturn(List.of());
+	@DisplayName("주인의 펫 조회 실패 - Invalid Owner")
+	void getPetsByOwnerId_Failure_InvalidOwner() {
+		when(ownerRepository.findById(99)).thenReturn(Optional.empty());
 
-		List<PetResponseDto> result = petService.getPetsByOwnerId(1);
+		assertThatThrownBy(() -> petService.getPetsByOwnerId(99))
+			.isInstanceOf(InvalidOwnerException.class)
+			.hasMessage("Invalid Owner ID: 99");
 
-		assertThat(result).isNotNull();
-		assertThat(result).isEmpty();
-
-		verify(petRepository, times(1)).findAll();
+		verify(ownerRepository, times(1)).findById(99);
+		verifyNoInteractions(petRepository);
 	}
 
 	@Test
@@ -163,17 +158,17 @@ public class PetServiceTest {
 	}
 
 	@Test
-	@DisplayName("Pet 생성 실패 - Invalid PetType ID")
-	void createPet_Failure_InvalidPetTypeId() {
-		petRequestDto.setTypeId(99);
+	@DisplayName("Pet 생성 실패 - Invalid PetType")
+	void createPet_Failure_InvalidPetType() {
 		when(petTypeRepository.findById(99)).thenReturn(Optional.empty());
+		petRequestDto.setTypeId(99);
 
 		assertThatThrownBy(() -> petService.createPet(petRequestDto))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Invalid PetType ID");
+			.isInstanceOf(InvalidPetTypeException.class)
+			.hasMessage("Invalid PetType ID: 99");
 
 		verify(petTypeRepository, times(1)).findById(99);
-		verifyNoInteractions(petRepository, ownerRepository);
+		verifyNoInteractions(ownerRepository, petRepository);
 	}
 
 	@Test
@@ -202,8 +197,8 @@ public class PetServiceTest {
 		when(petRepository.findById(99)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.updatePet(99, petRequestDto))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Pet not found");
+			.isInstanceOf(PetNotFoundException.class)
+			.hasMessage("Pet not found with ID: 99");
 
 		verify(petRepository, times(1)).findById(99);
 		verifyNoInteractions(petTypeRepository, ownerRepository);
@@ -212,23 +207,26 @@ public class PetServiceTest {
 	@Test
 	@DisplayName("Pet 삭제 성공")
 	void deletePet_Success() {
+		when(petRepository.findById(1)).thenReturn(Optional.of(pet));
 		doNothing().when(petRepository).deleteById(1);
 
 		petService.deletePet(1);
 
+		verify(petRepository, times(1)).findById(1);
 		verify(petRepository, times(1)).deleteById(1);
 		verifyNoMoreInteractions(petRepository);
 	}
 
 	@Test
-	@DisplayName("Pet 삭제 실패 - Pet not found")
+	@DisplayName("Pet 삭제 실패 - Pet Not Found")
 	void deletePet_Failure_NotFound() {
-		doThrow(new IllegalArgumentException("Pet not found")).when(petRepository).deleteById(99);
+		when(petRepository.findById(99)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.deletePet(99))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Pet not found");
+			.isInstanceOf(PetNotFoundException.class)
+			.hasMessage("Pet not found with ID: 99");
 
-		verify(petRepository, times(1)).deleteById(99);
+		verify(petRepository, times(1)).findById(99);
+		verify(petRepository, never()).deleteById(99);
 	}
 }
