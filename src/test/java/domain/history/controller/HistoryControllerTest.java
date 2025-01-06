@@ -54,17 +54,11 @@ class HistoryControllerTest {
 			""";
 
 		HistoryResponseDto responseDto = HistoryResponseDto.builder()
-			.result(HistoryResponseDto.Result.builder()
-				.resultCode("200")
-				.resultDescription("Operation completed successfully")
-				.build())
-			.body(List.of(HistoryResponseDto.Body.builder()
 				.historyId(1)
 				.symptoms("감기")
 				.content("감기약 처방")
 				.vetId(1)
 				.visitId(1)
-				.build()))
 			.build();
 
 		when(historyService.addHistory(any(HistoryRequestDto.class))).thenReturn(responseDto);
@@ -75,13 +69,11 @@ class HistoryControllerTest {
 				.content(requestJson))
 			// Then
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.result.resultCode").value("200"))
-			.andExpect(jsonPath("$.result.resultDescription").value("Operation completed successfully"))
-			.andExpect(jsonPath("$.body[0].historyId").value(1))
-			.andExpect(jsonPath("$.body[0].symptoms").value("감기"))
-			.andExpect(jsonPath("$.body[0].content").value("감기약 처방"))
-			.andExpect(jsonPath("$.body[0].vetId").value(1))
-			.andExpect(jsonPath("$.body[0].visitId").value(1));
+			.andExpect(jsonPath("$.historyId").value(1))
+			.andExpect(jsonPath("$.symptoms").value("감기"))
+			.andExpect(jsonPath("$.content").value("감기약 처방"))
+			.andExpect(jsonPath("$.vetId").value(1))
+			.andExpect(jsonPath("$.visitId").value(1));
 	}
 
 	@Test
@@ -89,33 +81,25 @@ class HistoryControllerTest {
 	void getHistoriesByPetId_Success() throws Exception {
 		// Given
 		HistoryResponseDto responseDto = HistoryResponseDto.builder()
-			.result(HistoryResponseDto.Result.builder()
-				.resultCode("200")
-				.resultDescription("Success")
-				.build())
-			.body(List.of(HistoryResponseDto.Body.builder()
 				.historyId(1)
 				.symptoms("감기")
 				.content("감기약 처방")
 				.vetId(1)
 				.visitId(1)
-				.build()))
 			.build();
 
-		when(historyService.getHistoriesByPetId(eq(1))).thenReturn(responseDto);
+		when(historyService.getHistoriesByPetId(eq(1))).thenReturn(List.of(responseDto));
 
 		// When
 		mockMvc.perform(get("/history/1")
 				.accept(MediaType.APPLICATION_JSON))
 			// Then
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.resultCode").value("200"))
-			.andExpect(jsonPath("$.result.resultDescription").value("Success"))
-			.andExpect(jsonPath("$.body[0].historyId").value(1))
-			.andExpect(jsonPath("$.body[0].symptoms").value("감기"))
-			.andExpect(jsonPath("$.body[0].content").value("감기약 처방"))
-			.andExpect(jsonPath("$.body[0].vetId").value(1))
-			.andExpect(jsonPath("$.body[0].visitId").value(1));
+			.andExpect(jsonPath("$[0].historyId").value(1))
+			.andExpect(jsonPath("$[0].symptoms").value("감기"))
+			.andExpect(jsonPath("$[0].content").value("감기약 처방"))
+			.andExpect(jsonPath("$[0].vetId").value(1))
+			.andExpect(jsonPath("$[0].visitId").value(1));
 	}
 
 	@Test
@@ -132,17 +116,11 @@ class HistoryControllerTest {
 			""";
 
 		HistoryResponseDto responseDto = HistoryResponseDto.builder()
-			.result(HistoryResponseDto.Result.builder()
-				.resultCode("200")
-				.resultDescription("Operation completed successfully")
-				.build())
-			.body(List.of(HistoryResponseDto.Body.builder()
 				.historyId(1)
 				.symptoms("Updated Symptoms")
 				.content("Updated Content")
 				.vetId(1)
 				.visitId(1)
-				.build()))
 			.build();
 
 		when(historyService.updateHistory(eq(1), any(HistoryRequestDto.class))).thenReturn(responseDto);
@@ -153,11 +131,9 @@ class HistoryControllerTest {
 				.content(requestJson))
 			// Then
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.result.resultCode").value("200"))
-			.andExpect(jsonPath("$.result.resultDescription").value("Operation completed successfully"))
-			.andExpect(jsonPath("$.body[0].historyId").value(1))
-			.andExpect(jsonPath("$.body[0].symptoms").value("Updated Symptoms"))
-			.andExpect(jsonPath("$.body[0].content").value("Updated Content"));
+			.andExpect(jsonPath("$.historyId").value(1))
+			.andExpect(jsonPath("$.symptoms").value("Updated Symptoms"))
+			.andExpect(jsonPath("$.content").value("Updated Content"));
 	}
 
 	@Test

@@ -2,6 +2,11 @@ package org.springframework.samples.petclinic.domain.history.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.HistoryErrorCode;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
+import org.springframework.samples.petclinic.common.error.VetErrorCode;
+import org.springframework.samples.petclinic.common.error.VisitErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.history.model.History;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
@@ -53,9 +58,9 @@ public class HistoryService {
 	 */
 	private History createHistoryEntity(HistoryRequestDto requestDto) {
 		Vet vet = vetRepository.findById(requestDto.getVetId())
-			.orElseThrow(() -> new IllegalArgumentException("Vet not found"));
+			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 		Visit visit = visitRepository.findById(requestDto.getVisitId())
-			.orElseThrow(() -> new IllegalArgumentException("Visit not found"));
+			.orElseThrow(() -> new ApiException(VisitErrorCode.NO_VISIT));
 
 		return History.builder()
 			.symptoms(requestDto.getSymptoms())
@@ -73,24 +78,13 @@ public class HistoryService {
 	 */
 	private HistoryResponseDto buildResponseDto(History history) {
 
-		HistoryResponseDto.Result result = HistoryResponseDto.Result.builder()
-			.resultCode(StatusCode.SUCCESS.getCode())
-			.resultDescription(StatusCode.SUCCESS.getDescription())
-			.build();
-
-		HistoryResponseDto.Body body = HistoryResponseDto.Body.builder()
+		return HistoryResponseDto.builder()
 			.historyId(history.getId())
 			.symptoms(history.getSymptoms())
 			.content(history.getContent())
 			.vetId(history.getVetId().getId())
 			.visitId(history.getVisitId().getId())
 			.build();
-
-		return HistoryResponseDto.builder()
-			.result(result)
-			.body(List.of(body))
-			.build();
-
 	}
 
 	/**
@@ -99,14 +93,14 @@ public class HistoryService {
 	 * @param petId 반려동물 ID
 	 * @return 진료 내역 목록 응답 DTO
 	 */
-	public HistoryResponseDto getHistoriesByPetId(int petId) {
+	public List<HistoryResponseDto> getHistoriesByPetId(int petId) {
 
 		Pet pet = petRepository.findById(petId)
-			.orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
-		List<HistoryResponseDto.Body> histories = historyRepository.findAllByVisitId_PetId(pet)
+		return historyRepository.findAllByVisitId_PetId(pet)
 			.stream()
-			.map(history -> HistoryResponseDto.Body.builder()
+			.map(history -> HistoryResponseDto.builder()
 				.historyId(history.getId())
 				.symptoms(history.getSymptoms())
 				.content(history.getContent())
@@ -115,13 +109,6 @@ public class HistoryService {
 				.build())
 			.collect(Collectors.toList());
 
-		return HistoryResponseDto.builder()
-			.result(HistoryResponseDto.Result.builder()
-				.resultCode(StatusCode.SUCCESS.getCode())
-				.resultDescription(StatusCode.SUCCESS.getDescription())
-				.build())
-			.body(histories)
-			.build();
 	}
 
 	/**
@@ -134,13 +121,13 @@ public class HistoryService {
 	public HistoryResponseDto updateHistory(int historyId, HistoryRequestDto request) {
 		// 존재 여부 확인
 		History history = historyRepository.findById(historyId)
-			.orElseThrow(() -> new IllegalArgumentException("History not found"));
+			.orElseThrow(() -> new ApiException(HistoryErrorCode.NO_HISTORY));
 
 		Vet vet = vetRepository.findById(request.getVetId())
-			.orElseThrow(() -> new IllegalArgumentException("Vet not found"));
+			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
 		Visit visit = visitRepository.findById(request.getVisitId())
-			.orElseThrow(() -> new IllegalArgumentException("Visit not found"));
+			.orElseThrow(() -> new ApiException(VisitErrorCode.NO_VISIT));
 
 		// 업데이트 내용 반영
 		history.setSymptoms(request.getSymptoms());
@@ -166,7 +153,7 @@ public class HistoryService {
 
 		//진료내역 존재 여부 확인
 		if (!historyRepository.existsById(historyId)) {
-			throw new IllegalArgumentException("History not found with id: " + historyId);
+			throw new ApiException(HistoryErrorCode.NO_HISTORY);
 		}
 
 		//진료내역 삭제
