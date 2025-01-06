@@ -1,55 +1,83 @@
-CREATE TABLE IF NOT EXISTS vets (
-  id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  first_name VARCHAR(30),
-  last_name VARCHAR(30),
-  INDEX(last_name)
-) engine=InnoDB;
+CREATE TABLE `pets` (
+                      `id` INT NOT NULL AUTO_INCREMENT,
+                      `name` VARCHAR(15) NOT NULL,
+                      `birth_date` DATE NULL,
+                      `type_id` INT NOT NULL,
+                      `owner_id` INT NOT NULL,
+                      PRIMARY KEY (`id`)
+);
 
-CREATE TABLE IF NOT EXISTS specialties (
-  id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(80),
-  INDEX(name)
-) engine=InnoDB;
+CREATE TABLE `types` (
+                       `id` INT NOT NULL AUTO_INCREMENT,
+                       `name` VARCHAR(255) NOT NULL,
+                       PRIMARY KEY (`id`)
+);
 
-CREATE TABLE IF NOT EXISTS vet_specialties (
-  vet_id INT(4) UNSIGNED NOT NULL,
-  specialty_id INT(4) UNSIGNED NOT NULL,
-  FOREIGN KEY (vet_id) REFERENCES vets(id),
-  FOREIGN KEY (specialty_id) REFERENCES specialties(id),
-  UNIQUE (vet_id,specialty_id)
-) engine=InnoDB;
+CREATE TABLE `visits` (
+                        `id` INT NOT NULL AUTO_INCREMENT,
+                        `visit_date` DATETIME NOT NULL,
+                        `description` VARCHAR(255) NOT NULL,
+                        `pet_id` INT NOT NULL,
+                        PRIMARY KEY (`id`)
+);
 
-CREATE TABLE IF NOT EXISTS types (
-  id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(80),
-  INDEX(name)
-) engine=InnoDB;
+CREATE TABLE `owner` (
+                       `id` INT NOT NULL AUTO_INCREMENT,
+                       `user_id` VARCHAR(100) NOT NULL,
+                       `password` VARCHAR(100) NOT NULL,
+                       `name` VARCHAR(15) NOT NULL,
+                       `address` VARCHAR(255) NOT NULL,
+                       `city` VARCHAR(15) NOT NULL,
+                       `telephone` VARCHAR(15) NOT NULL,
+                       PRIMARY KEY (`id`)
+);
 
-CREATE TABLE IF NOT EXISTS owners (
-  id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  first_name VARCHAR(30),
-  last_name VARCHAR(30),
-  address VARCHAR(255),
-  city VARCHAR(80),
-  telephone VARCHAR(20),
-  INDEX(last_name)
-) engine=InnoDB;
+CREATE TABLE `vets` (
+                      `id` INT NOT NULL AUTO_INCREMENT,
+                      `name` VARCHAR(15) NOT NULL,
+                      `average_ratings` DECIMAL(3,2) NULL DEFAULT 0,
+                      `review_count` INT NULL DEFAULT 0,
+                      PRIMARY KEY (`id`)
+);
 
-CREATE TABLE IF NOT EXISTS pets (
-  id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(30),
-  birth_date DATE,
-  type_id INT(4) UNSIGNED NOT NULL,
-  owner_id INT(4) UNSIGNED,
-  INDEX(name),
-  FOREIGN KEY (owner_id) REFERENCES owners(id),
-  FOREIGN KEY (type_id) REFERENCES types(id)
-) engine=InnoDB;
+CREATE TABLE `specialties` (
+                             `id` INT NOT NULL AUTO_INCREMENT,
+                             `name` VARCHAR(255) NOT NULL,
+                             PRIMARY KEY (`id`)
+);
 
-CREATE TABLE IF NOT EXISTS visits (
-  id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  pet_id INT(4) UNSIGNED,
-  visit_date DATE,
-  description VARCHAR(255),
-  FOREIGN KEY (pet_id) REFERENCES pets(id)
-) engine=InnoDB;
+CREATE TABLE `vet_specialties` (
+                                 `id` INT NOT NULL AUTO_INCREMENT,
+                                 `vet_id` INT NOT NULL,
+                                 `specialty_id` INT NOT NULL,
+                                 PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `history` (
+                         `id` INT NOT NULL AUTO_INCREMENT,
+                         `symptoms` VARCHAR(255) NOT NULL,
+                         `content` VARCHAR(255) NOT NULL,
+                         `vet_id` INT NOT NULL,
+                         `visit_id` INT NOT NULL,
+                         PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `appointment` (
+                             `id` INT NOT NULL AUTO_INCREMENT,
+                             `appt_date` DATE NOT NULL,
+                             `status` enum('완료', '취소') NULL,
+                             `symptoms` VARCHAR(255) NULL,
+                             `pet_id` INT NOT NULL,
+                             `vet_id` INT NOT NULL,
+                             PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `review` (
+                        `id` INT NOT NULL AUTO_INCREMENT,
+                        `score` INT NOT NULL,
+                        `content` VARCHAR(200) NULL,
+                        `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        `vet_id` INT NOT NULL,
+                        `owner_id` INT NOT NULL,
+                        PRIMARY KEY (`id`)
+);

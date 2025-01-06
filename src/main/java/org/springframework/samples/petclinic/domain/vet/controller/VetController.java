@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
-import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

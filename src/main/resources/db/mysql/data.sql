@@ -1,53 +1,55 @@
-INSERT IGNORE INTO vets VALUES (1, 'James', 'Carter');
-INSERT IGNORE INTO vets VALUES (2, 'Helen', 'Leary');
-INSERT IGNORE INTO vets VALUES (3, 'Linda', 'Douglas');
-INSERT IGNORE INTO vets VALUES (4, 'Rafael', 'Ortega');
-INSERT IGNORE INTO vets VALUES (5, 'Henry', 'Stevens');
-INSERT IGNORE INTO vets VALUES (6, 'Sharon', 'Jenkins');
+-- 동물 유형
+INSERT INTO `types` (`id`, `name`)
+VALUES (1, '개'),
+       (2, '고양이');
 
-INSERT IGNORE INTO specialties VALUES (1, 'radiology');
-INSERT IGNORE INTO specialties VALUES (2, 'surgery');
-INSERT IGNORE INTO specialties VALUES (3, 'dentistry');
+-- 소유자
+INSERT INTO `owner` (`id`, `user_id`, `password`, `name`, `address`, `city`, `telephone`)
+VALUES (1, 'goorm1', 'pw1234', '김구름', '서울 강남구', '서울', '010-1234-5678'),
+       (2, 'goorm2', 'pw1234', '박구름', '부산 해운대구', '부산', '010-1111-2222');
 
-INSERT IGNORE INTO vet_specialties VALUES (2, 1);
-INSERT IGNORE INTO vet_specialties VALUES (3, 2);
-INSERT IGNORE INTO vet_specialties VALUES (3, 3);
-INSERT IGNORE INTO vet_specialties VALUES (4, 2);
-INSERT IGNORE INTO vet_specialties VALUES (5, 1);
+-- 애완동물
+INSERT INTO `pets` (`id`, `name`, `birth_date`, `type_id`, `owner_id`)
+VALUES (1, '뿡치', '2020-01-15', 1, 1),
+       (2, '부각', '2019-05-20', 2, 2),
+       (3, '돌배', '2021-03-10', 2, 1);
 
-INSERT IGNORE INTO types VALUES (1, 'cat');
-INSERT IGNORE INTO types VALUES (2, 'dog');
-INSERT IGNORE INTO types VALUES (3, 'lizard');
-INSERT IGNORE INTO types VALUES (4, 'snake');
-INSERT IGNORE INTO types VALUES (5, 'bird');
-INSERT IGNORE INTO types VALUES (6, 'hamster');
+-- 수의사
+INSERT INTO `vets` (`id`, `name`, `average_ratings`, `review_count`)
+VALUES (1, '이의사', 4.5, 10),
+       (2, '강의사', 4.8, 15);
 
-INSERT IGNORE INTO owners VALUES (1, 'George', 'Franklin', '110 W. Liberty St.', 'Madison', '6085551023');
-INSERT IGNORE INTO owners VALUES (2, 'Betty', 'Davis', '638 Cardinal Ave.', 'Sun Prairie', '6085551749');
-INSERT IGNORE INTO owners VALUES (3, 'Eduardo', 'Rodriquez', '2693 Commerce St.', 'McFarland', '6085558763');
-INSERT IGNORE INTO owners VALUES (4, 'Harold', 'Davis', '563 Friendly St.', 'Windsor', '6085553198');
-INSERT IGNORE INTO owners VALUES (5, 'Peter', 'McTavish', '2387 S. Fair Way', 'Madison', '6085552765');
-INSERT IGNORE INTO owners VALUES (6, 'Jean', 'Coleman', '105 N. Lake St.', 'Monona', '6085552654');
-INSERT IGNORE INTO owners VALUES (7, 'Jeff', 'Black', '1450 Oak Blvd.', 'Monona', '6085555387');
-INSERT IGNORE INTO owners VALUES (8, 'Maria', 'Escobito', '345 Maple St.', 'Madison', '6085557683');
-INSERT IGNORE INTO owners VALUES (9, 'David', 'Schroeder', '2749 Blackhawk Trail', 'Madison', '6085559435');
-INSERT IGNORE INTO owners VALUES (10, 'Carlos', 'Estaban', '2335 Independence La.', 'Waunakee', '6085555487');
+-- 전문 분야
+INSERT INTO `specialties` (`id`, `name`)
+VALUES (1, '외과'),
+       (2, '소아과'),
+       (3, '피부과'),
+       (4, '안과');
 
-INSERT IGNORE INTO pets VALUES (1, 'Leo', '2000-09-07', 1, 1);
-INSERT IGNORE INTO pets VALUES (2, 'Basil', '2002-08-06', 6, 2);
-INSERT IGNORE INTO pets VALUES (3, 'Rosy', '2001-04-17', 2, 3);
-INSERT IGNORE INTO pets VALUES (4, 'Jewel', '2000-03-07', 2, 3);
-INSERT IGNORE INTO pets VALUES (5, 'Iggy', '2000-11-30', 3, 4);
-INSERT IGNORE INTO pets VALUES (6, 'George', '2000-01-20', 4, 5);
-INSERT IGNORE INTO pets VALUES (7, 'Samantha', '1995-09-04', 1, 6);
-INSERT IGNORE INTO pets VALUES (8, 'Max', '1995-09-04', 1, 6);
-INSERT IGNORE INTO pets VALUES (9, 'Lucky', '1999-08-06', 5, 7);
-INSERT IGNORE INTO pets VALUES (10, 'Mulligan', '1997-02-24', 2, 8);
-INSERT IGNORE INTO pets VALUES (11, 'Freddy', '2000-03-09', 5, 9);
-INSERT IGNORE INTO pets VALUES (12, 'Lucky', '2000-06-24', 2, 10);
-INSERT IGNORE INTO pets VALUES (13, 'Sly', '2002-06-08', 1, 10);
+-- 수의사 전문 분야 연결
+INSERT INTO `vet_specialties` (`id`, `vet_id`, `specialty_id`)
+VALUES (1, 1, 1),
+       (2, 1, 3),
+       (3, 2, 2),
+       (4, 2, 4);
 
-INSERT IGNORE INTO visits VALUES (1, 7, '2010-03-04', 'rabies shot');
-INSERT IGNORE INTO visits VALUES (2, 8, '2011-03-04', 'rabies shot');
-INSERT IGNORE INTO visits VALUES (3, 8, '2009-06-04', 'neutered');
-INSERT IGNORE INTO visits VALUES (4, 7, '2008-09-04', 'spayed');
+-- 방문 기록
+INSERT INTO `visits` (`id`, `visit_date`, `description`, `pet_id`)
+VALUES (1, '2023-01-10 10:30:00', '예방접종', 1),
+       (2, '2023-02-15 14:00:00', '건강검진', 2),
+       (3, '2023-03-20 09:00:00', '감기', 3);
+
+-- 진료 기록
+INSERT INTO `history` (`id`, `symptoms`, `content`, `vet_id`, `visit_id`)
+VALUES (1, '기침', '감기 진단 및 처방', 1, 1),
+       (2, '피부 발진', '피부 치료', 2, 2);
+
+-- 예약
+INSERT INTO `appointment` (`id`, `appt_date`, `status`, `symptoms`, `pet_id`, `vet_id`)
+VALUES (1, '2025-01-11', '완료', '발열 및 기침', 1, 1),
+       (2, '2025-5-10', '취소', '다리 부상', 2, 2);
+
+-- 리뷰
+INSERT INTO `review` (`id`, `score`, `content`, `created_at`, `vet_id`, `owner_id`)
+VALUES (1, 5, '아주 굳', '2023-12-25 12:00:00', 1, 1),
+       (2, 4, '만족', '2023-12-26 15:00:00', 2, 2);
