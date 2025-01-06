@@ -8,11 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.samples.petclinic.PetClinicApplication;
 import org.springframework.samples.petclinic.common.exception.ApiException;
-import org.springframework.samples.petclinic.domain.vet.SpecialityRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
-import org.springframework.samples.petclinic.domain.vet.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -52,50 +49,24 @@ public class VetServiceIntegrationTest {
 		registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
 		registry.add("spring.sql.init.mode", () -> "always");
 		registry.add("spring.sql.init.schema-locations", () -> "classpath:db/mysql/schema.sql");
+		registry.add("spring.sql.init.data-locations", () -> "classpath:db/mysql/data.sql");
 	}
 
 	@Autowired
 	private VetService vetService;
 
-	@Autowired
-	private SpecialityRepository specialityRepository;
-
-	@Autowired
-	private VetRepository vetRepository;
-
-	private Specialty specialty;
-	private Specialty specialty2;
 	private VetRequestDto vetRequestDto;
 
 	@BeforeEach
 	void setUp() {
-		vetRepository.deleteAll();
-		specialityRepository.deleteAll();
-
 		MockitoAnnotations.openMocks(this);
 		sampleVetRequestDto();
-		sampleSpeciality();
-		sampleSpeciality2();
 	}
 
 	void sampleVetRequestDto(){
 		vetRequestDto = new VetRequestDto();
 		vetRequestDto.setName("테스트용");
 		vetRequestDto.setSpecialties(new ArrayList<>(List.of(1, 2)));
-	}
-
-	void sampleSpeciality(){
-		specialty = new Specialty();
-		specialty.setName("외과");
-
-		specialityRepository.save(specialty);
-	}
-
-	void sampleSpeciality2(){
-		specialty2 = new Specialty();
-		specialty2.setName("소아과");
-
-		specialityRepository.save(specialty2);
 	}
 
 	@Test
@@ -141,37 +112,31 @@ public class VetServiceIntegrationTest {
 	@Test
 	@DisplayName("수의사 전체 조회 성공")
 	void findAllVetsSuccess() {
-		vetService.register(vetRequestDto);
-
 		List<VetResponseDto> vets = vetService.findAll();
 
 		assertThat(vets).isNotEmpty();
-		assertThat(vets).hasSize(1);
-		assertThat(vets.get(0).getName()).isEqualTo("테스트용");
+		assertThat(vets).hasSize(2);
+		assertThat(vets.get(0).getName()).isEqualTo("이의사");
 	}
 
 	@Test
 	@DisplayName("특정 수의사 조회 성공")
 	void findVetByIdSuccess() {
-		VetResponseDto savedVet = vetService.register(vetRequestDto);
-
-		VetResponseDto foundVet = vetService.findById(savedVet.getId());
+		VetResponseDto foundVet = vetService.findById(1);
 
 		assertThat(foundVet).isNotNull();
-		assertThat(foundVet.getName()).isEqualTo("테스트용");
+		assertThat(foundVet.getName()).isEqualTo("이의사");
 		assertThat(foundVet.getSpecialties()).hasSize(2);
 	}
 
 	@Test
 	@DisplayName("전문 분야별 수의사 조회 성공")
 	void findVetsBySpecialtyIdSuccess() {
-		vetService.register(vetRequestDto);
-
-		List<VetResponseDto> vets = vetService.findBySpecialtyId(specialty2.getId());
+		List<VetResponseDto> vets = vetService.findBySpecialtyId(2);
 
 		assertThat(vets).isNotEmpty();
 		assertThat(vets).hasSize(1);
-		assertThat(vets.get(0).getName()).isEqualTo("테스트용");
+		assertThat(vets.get(0).getName()).isEqualTo("강의사");
 		assertThat(vets.get(0).getSpecialties().stream()
 			.anyMatch(s -> s.getName().equals("소아과"))).isTrue();
 	}
