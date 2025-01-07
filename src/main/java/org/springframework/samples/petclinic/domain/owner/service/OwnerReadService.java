@@ -1,6 +1,8 @@
 package org.springframework.samples.petclinic.domain.owner.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.dto.OwnerResponseDto;
 import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
@@ -41,7 +43,7 @@ public class OwnerReadService {
 
 	private Owner findOwnerByIdOrThrow(Integer id) {
 		return ownerRepository.findById(id)
-			.orElseThrow(() -> new OwnerNotFoundException("Owner not found with id " + id));
+			.orElseThrow(() -> new ApiException(OwnerErrorCode.NO_OWNER));
 	}
 
 	private static OwnerResponseDto buildOwnerResponse(Owner owner) {

@@ -1,10 +1,12 @@
 package org.springframework.samples.petclinic.domain.owner.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
+import org.springframework.samples.petclinic.domain.owner.dto.OwnerResponseDto;
 import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
-import org.springframework.samples.petclinic.domain.owner.exception.InvalidPasswordException;
-import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
+import org.springframework.samples.petclinic.domain.owner.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
@@ -21,9 +23,10 @@ public class OwnerAuthService {
 	private final OwnerRepository ownerRepository;
 	private final TokenService tokenService;
 	private final PasswordEncoder passwordEncoder;
+	private final OwnerMapper ownerMapper;
 
 	// 회원가입
-	public void register(RegisterRequestDto registerRequestDto) {
+	public OwnerResponseDto register(RegisterRequestDto registerRequestDto) {
 		validateOwnerDoesNotExist(registerRequestDto);
 
 		String encryptedPassword = passwordEncoder.encode(registerRequestDto.getPassword());
@@ -31,6 +34,7 @@ public class OwnerAuthService {
 		Owner owner = registerRequestDto.toEntity();
 		owner.setPassword(encryptedPassword);
 		ownerRepository.save(owner);
+		return ownerMapper.toDto(owner);
 	}
 
 	// 로그인
@@ -52,17 +56,17 @@ public class OwnerAuthService {
 
 	private void validateOwnerDoesNotExist(RegisterRequestDto registerRequestDto) {
 		if (ownerRepository.existsByUserId(registerRequestDto.getUserId()))
-			throw new OwnerNotFoundException("Owner already exists with userId " + registerRequestDto.getUserId());
+			throw new ApiException(OwnerErrorCode.NO_OWNER);
 
 	}
 
 	private Owner findOwnerByOwnerIdOrThrow(LoginRequestDto loginRequestDto) {
 		return ownerRepository.findByUserId(loginRequestDto.getUserId())
-			.orElseThrow(() -> new OwnerNotFoundException("Owner not found with userId " + loginRequestDto.getUserId()));
+			.orElseThrow(() -> new ApiException(OwnerErrorCode.NO_OWNER));
 	}
 
 	private void validatePasswordOrThrow(LoginRequestDto loginRequestDto, Owner owner) {
 		if (!passwordEncoder.matches(loginRequestDto.getPassword(), owner.getPassword()))
-			throw new InvalidPasswordException("Password is not correct");
+			throw new ApiException(OwnerErrorCode.INVALID_PASSWORD);
 	}
 }

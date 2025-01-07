@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequestDto {

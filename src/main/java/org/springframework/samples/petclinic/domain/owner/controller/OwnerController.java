@@ -27,9 +27,9 @@ class OwnerController {
 
 	// 회원가입
 	@PostMapping("/register")
-	public ResponseEntity register(@RequestBody RegisterRequestDto registerRequestDto) {
-		ownerAuthService.register(registerRequestDto);
-		return ResponseEntity.ok().build();
+	public ResponseEntity<OwnerResponseDto> register(@RequestBody RegisterRequestDto registerRequestDto) {
+		OwnerResponseDto responseDto = ownerAuthService.register(registerRequestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	// 로그인
@@ -60,9 +60,9 @@ class OwnerController {
 
 	// 회원정보 수정
 	@PutMapping("/update/{ownerId}")
-	public ResponseEntity updateProfile(@PathVariable("ownerId") Integer id, @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
-		ownerProfileService.updateProfile(id, updateProfileRequestDto);
-		return ResponseEntity.ok().build();
+	public ResponseEntity<OwnerResponseDto> updateProfile(@PathVariable("ownerId") Integer id, @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
+		OwnerResponseDto responseDto = ownerProfileService.updateProfile(id, updateProfileRequestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	// 비밀번호 변경
