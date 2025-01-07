@@ -8,11 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.common.error.PetErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
-import org.springframework.samples.petclinic.domain.pet.exception.InvalidOwnerException;
-import org.springframework.samples.petclinic.domain.pet.exception.InvalidPetTypeException;
-import org.springframework.samples.petclinic.domain.pet.exception.PetNotFoundException;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.model.PetType;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
@@ -104,7 +102,7 @@ public class PetServiceTest {
 		when(petRepository.findById(1)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.getPetById(1))
-			.isInstanceOf(PetNotFoundException.class)
+			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
 		verify(petRepository, times(1)).findById(1);
@@ -133,7 +131,7 @@ public class PetServiceTest {
 		when(ownerRepository.findById(99)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.getPetsByOwnerId(99))
-			.isInstanceOf(InvalidOwnerException.class)
+			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.INVALID_OWNER.getDescription());
 
 		verify(ownerRepository, times(1)).findById(99);
@@ -165,7 +163,7 @@ public class PetServiceTest {
 		petRequestDto.setTypeId(99);
 
 		assertThatThrownBy(() -> petService.createPet(petRequestDto))
-			.isInstanceOf(InvalidPetTypeException.class)
+			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.INVALID_PET_TYPE.getDescription());
 
 		verify(petTypeRepository, times(1)).findById(99);
@@ -198,7 +196,7 @@ public class PetServiceTest {
 		when(petRepository.findById(99)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.updatePet(99, petRequestDto))
-			.isInstanceOf(PetNotFoundException.class)
+			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
 		verify(petRepository, times(1)).findById(99);
@@ -224,7 +222,7 @@ public class PetServiceTest {
 		when(petRepository.findById(99)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.deletePet(99))
-			.isInstanceOf(PetNotFoundException.class)
+			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
 		verify(petRepository, times(1)).findById(99);
