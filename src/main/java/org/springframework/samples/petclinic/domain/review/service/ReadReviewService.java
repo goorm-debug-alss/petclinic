@@ -22,6 +22,12 @@ public class ReadReviewService {
 	private final ReviewMapper reviewMapper;
 	private final VetRepository vetRepository;
 
+	public List<ReviewResponseDto> findAllReviews(){
+		return reviewRepository.findAll().stream()
+			.map(reviewMapper::toDto)
+			.collect(Collectors.toList());
+	}
+
 	public List<ReviewResponseDto> findMyReviews(Integer ownerId) {
 		return getReviewsByOwnerId(ownerId).stream()
 			.map(reviewMapper::toDto)

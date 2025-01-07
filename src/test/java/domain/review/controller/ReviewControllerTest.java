@@ -15,6 +15,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.samples.petclinic.PetClinicApplication;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.token.helper.JwtTokenHelper;
+import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +43,9 @@ public class ReviewControllerTest {
 
 	@Autowired
 	private JwtTokenHelper jwtTokenHelper;
+
+	@Autowired
+	private VetRepository vetRepository;
 
 	private String token;
 	private String token1;
@@ -72,6 +77,43 @@ public class ReviewControllerTest {
 			.content(content)
 			.vetId(vetId)
 			.build();
+	}
+
+	@Test
+	@DisplayName("GET /review - 전체 리뷰 조회 성공")
+	void getAllReviews_shouldReturnAllReviews() throws Exception {
+		// given: 두 개의 리뷰 데이터와 수의사를 생성
+		Vet vet1 = Vet.builder().name("수의사1").build();
+		Vet vet2 = Vet.builder().name("수의사2").build();
+		vetRepository.save(vet1);
+		vetRepository.save(vet2);
+		ReviewRequestDto request1 = createReviewRequestDto(5, "이 분 믿을만합니다 아주 실력이 좋아요", vet1.getId());
+		ReviewRequestDto request2 = createReviewRequestDto(4, "베리 굳입니다 굳굳 재방문의사있음", vet2.getId());
+
+		mockMvc.perform(post("/review")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request1)))
+			.andReturn().getResponse();
+
+		mockMvc.perform(post("/review")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request2)))
+			.andReturn().getResponse();
+
+		// when: 전체 리뷰 조회 API 호출
+		MockHttpServletResponse response = mockMvc.perform(get("/review")
+				.header("Authorization", token)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andReturn().getResponse();
+
+		// then: 응답 상태 코드가 200이고, 리뷰 데이터가 반환되어야 한다
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+		ReviewResponseDto[] reviewResponseDtos = objectMapper.readValue(response.getContentAsString(), ReviewResponseDto[].class);
+		assertThat(reviewResponseDtos).hasSize(2);
+		assertThat(reviewResponseDtos[0].getContent()).isEqualTo("이 분 믿을만합니다 아주 실력이 좋아요");
+		assertThat(reviewResponseDtos[1].getContent()).isEqualTo("베리 굳입니다 굳굳 재방문의사있음");
 	}
 
 	@Test

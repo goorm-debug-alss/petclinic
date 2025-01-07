@@ -56,6 +56,35 @@ public class ReadReviewServiceTest {
 	}
 
 	@Test
+	@DisplayName("리뷰 조회 성공 - 전체 리뷰 반환")
+	void findAllReviews_returnReviewList() {
+		// given
+		when(reviewRepository.findAll()).thenReturn(List.of(mockReview));
+		when(reviewMapper.toDto(mockReview)).thenReturn(mockResponse);
+
+		// when
+		List<ReviewResponseDto> reviews = readReviewService.findAllReviews();
+
+		// then
+		assertThat(reviews).hasSize(1);
+		assertThat(reviews.get(0).getOwnerId()).isEqualTo(1);
+		assertThat(reviews.get(0).getContent()).isEqualTo("Test Review");
+	}
+
+	@Test
+	@DisplayName("리뷰 조회 실패 - 리뷰가 없으면 빈 리스트 반환")
+	void findAllReviews_returnEmptyList() {
+		// given
+		when(reviewRepository.findAll()).thenReturn(List.of());
+
+		// when
+		List<ReviewResponseDto> reviews = readReviewService.findAllReviews();
+
+		// then
+		assertThat(reviews).isEmpty();
+	}
+
+	@Test
 	@DisplayName("리뷰 조회 성공 - 유효한 Owner ID로 리뷰를 조회하면 해당 리뷰 목록을 반환한다")
 	void validOwnerId_findMyReviews_returnReviewList() {
 		// given
