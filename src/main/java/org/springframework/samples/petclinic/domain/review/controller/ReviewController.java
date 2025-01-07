@@ -34,6 +34,12 @@ public class ReviewController {
 		return ResponseEntity.ok(response);
 	}
 
+	// 전체 리뷰 조회
+	@GetMapping
+	public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
+		return ResponseEntity.ok(readReviewService.findAllReviews());
+	}
+
 	// 사용자 리뷰 조회
 	@GetMapping("/my")
 	public ResponseEntity<List<ReviewResponseDto>> getMyReviews() {
@@ -58,10 +64,10 @@ public class ReviewController {
 
 	// 리뷰 삭제
 	@DeleteMapping("/{reviewId}")
-	public ResponseEntity<ReviewResponseDto> deleteReview(@PathVariable("reviewId") Integer reviewId) {
+	public ResponseEntity<Void> deleteReview(@PathVariable("reviewId") Integer reviewId) {
 		Integer ownerId = getAuthenticatedOwnerId();
 		deleteReviewService.deleteReview(reviewId, ownerId);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.noContent().build();
 	}
 
 	private Integer getAuthenticatedOwnerId() {
