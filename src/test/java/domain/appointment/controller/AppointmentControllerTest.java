@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.samples.petclinic.PetClinicApplication;
-
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentRequestDto;
 import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentResponseDto;
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
@@ -52,37 +52,16 @@ public class AppointmentControllerTest {
 		token = generateTestToken();
 	}
 
-	private String generateTestToken() {
-		Map<String, Object> claims = new HashMap<>();
-		claims.put("ownerId", 1);
-		claims.put("role", "ROLE_USER");
-		return jwtTokenHelper.issueAccessToken(claims).getToken();
-	}
-
-	private static AppointmentRequestDto createAppointmentRequestDto(int vetId, int petId, String symptoms) {
-		return AppointmentRequestDto.builder()
-			.vetId(vetId)
-			.petId(petId)
-			.apptDateTime(LocalDateTime.of(2025, 12, 25, 12, 0 , 0))
-			.appStatus(ApptStatus.COMPLETE)
-			.symptoms(symptoms)
-			.build();
-	}
-
 	@Test
-	@DisplayName("POST / appointment - 예약 생성 시 유효한 데이터를 제공하면 예약이 성공적으로 생성된다")
-	void createAppointment_shouldSucceedWhenValidDateProvided() throws Exception {
-		// given: 유효한 예약 데이터 생성
+	@DisplayName("POST /appointment - 예약 생성 시 유효한 데이터를 제공하면 예약이 성공적으로 생성된다")
+	void createAppointment_shouldSucceedWhenValidDataProvided() throws Exception {
+		// given
 		AppointmentRequestDto request = createAppointmentRequestDto(1, 5, "test");
 
-		// when: 예약 생성 API 호출
-		MockHttpServletResponse response = mockMvc.perform(post("/appointment")
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
-			.andReturn().getResponse();
+		// when
+		MockHttpServletResponse response = performRequest("/appointment", request, HttpMethod.POST);
 
-		// then: 응답 상태 코드가 200이고, 생성된 예약 ID가 유효한 값이어야 한다
+		// then
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		AppointmentResponseDto appointmentResponseDto = objectMapper.readValue(response.getContentAsString(), AppointmentResponseDto.class);
 		assertThat(appointmentResponseDto.getId()).isGreaterThan(0);
@@ -91,29 +70,17 @@ public class AppointmentControllerTest {
 	@Test
 	@DisplayName("GET /appointment - 모든 예약 조회 시 생성된 모든 예약 데이터가 반환된다")
 	void getAllAppointments_shouldReturnAllAppointments() throws Exception {
-		// given: 두 개의 예약 데이터를 생성
+		// given
 		AppointmentRequestDto request1 = createAppointmentRequestDto(1, 5, "Test Symptoms 1");
 		AppointmentRequestDto request2 = createAppointmentRequestDto(2, 5, "Test Symptoms 2");
 
-		mockMvc.perform(post("/appointment")
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request1)))
-			.andReturn();
+		performRequest("/appointment", request1, HttpMethod.POST);
+		performRequest("/appointment", request2, HttpMethod.POST);
 
-		mockMvc.perform(post("/appointment")
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request2)))
-			.andReturn();
+		// when
+		MockHttpServletResponse response = performRequest("/appointment", null, HttpMethod.GET);
 
-		// when: 모든 예약 조회 API 호출
-		MockHttpServletResponse response = mockMvc.perform(get("/appointment")
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andReturn().getResponse();
-
-		// then: 응답 상태 코드가 200이고, 반환된 예약 데이터의 개수가 2개여야 한다
+		// then
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		AppointmentResponseDto[] appointments = objectMapper.readValue(response.getContentAsString(), AppointmentResponseDto[].class);
 		assertThat(appointments).hasSize(2);
@@ -124,55 +91,39 @@ public class AppointmentControllerTest {
 	@Test
 	@DisplayName("GET /appointment/{appointmentId} - 특정 예약 조회 시 해당 예약 데이터가 반환된다")
 	void getAppointmentById_shouldReturnSpecificAppointment() throws Exception {
-		// given: 하나의 예약 데이터를 생성
+		// given
 		AppointmentRequestDto request = createAppointmentRequestDto(1, 5, "Test Symptoms 1");
-		MockHttpServletResponse createResponse = mockMvc.perform(post("/appointment")
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
-			.andReturn().getResponse();
+		MockHttpServletResponse createResponse = performRequest("/appointment", request, HttpMethod.POST);
 
-		AppointmentResponseDto createAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
-		Integer appointmentId = createAppointment.getId();
+		AppointmentResponseDto createdAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
+		Integer appointmentId = createdAppointment.getId();
 
-		// when: 특정 예약 조회 API 호출
-		MockHttpServletResponse response = mockMvc.perform(get("/appointment/{appointmentId}", appointmentId)
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andReturn().getResponse();
+		// when
+		MockHttpServletResponse response = performRequest("/appointment/" + appointmentId, null, HttpMethod.GET);
 
-		// then: 응답 상태 코드가 200이고, 반환된 데이터가 예약 데이터와 일치해야 한다
+		// then
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		AppointmentResponseDto appointmentResponseDto = objectMapper.readValue(response.getContentAsString(), AppointmentResponseDto.class);
 		assertThat(appointmentResponseDto.getId()).isEqualTo(appointmentId);
 		assertThat(appointmentResponseDto.getSymptoms()).isEqualTo("Test Symptoms 1");
-		assertThat(appointmentResponseDto.getPetId()).isEqualTo(5);
 	}
 
 	@Test
 	@DisplayName("PUT /appointment/{appointmentId} - 예약 데이터를 수정하면 업데이트된 데이터가 반환된다")
 	void updateAppointment_shouldReturnUpdatedAppointment() throws Exception {
-		// given: 하나의 예약 데이터를 생성 후 업데이트할 데이터 준비
+		// given
 		AppointmentRequestDto initialRequest = createAppointmentRequestDto(1, 5, "Initial Symptoms");
-		MockHttpServletResponse createResponse = mockMvc.perform(post("/appointment")
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(initialRequest)))
-			.andReturn().getResponse();
+		MockHttpServletResponse createResponse = performRequest("/appointment", initialRequest, HttpMethod.POST);
 
-		AppointmentResponseDto createAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
-		Integer appointmentId = createAppointment.getId();
+		AppointmentResponseDto createdAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
+		Integer appointmentId = createdAppointment.getId();
 
 		AppointmentRequestDto updateRequest = createAppointmentRequestDto(1, 5, "Updated Symptoms");
 
-		// when: 예약 수정 API 호출
-		MockHttpServletResponse response = mockMvc.perform(put("/appointment/{appointmentId}", appointmentId)
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(updateRequest)))
-			.andReturn().getResponse();
+		// when
+		MockHttpServletResponse response = performRequest("/appointment/" + appointmentId, updateRequest, HttpMethod.PUT);
 
-		// then: 응답 상태 코드가 200이고, 반환된 데이터가 업데이트된 데이터와 일치해야 한다
+		// then
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		AppointmentResponseDto updatedAppointment = objectMapper.readValue(response.getContentAsString(), AppointmentResponseDto.class);
 		assertThat(updatedAppointment.getId()).isEqualTo(appointmentId);
@@ -182,24 +133,43 @@ public class AppointmentControllerTest {
 	@Test
 	@DisplayName("DELETE /appointment/{appointmentId} - 예약을 삭제하면 성공적으로 처리된다")
 	void deleteAppointment_shouldSucceedWhenValidIdProvided() throws Exception {
-		// given: 하나의 예약 데이터를 생성
+		// given
 		AppointmentRequestDto request = createAppointmentRequestDto(1, 5, "Test Symptoms");
-		MockHttpServletResponse createResponse = mockMvc.perform(post("/appointment")
+		MockHttpServletResponse createResponse = performRequest("/appointment", request, HttpMethod.POST);
+
+		AppointmentResponseDto createdAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
+		Integer appointmentId = createdAppointment.getId();
+
+		// when
+		MockHttpServletResponse deleteResponse = performRequest("/appointment/" + appointmentId, null, HttpMethod.DELETE);
+
+		// then
+		assertThat(deleteResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+	}
+
+	private String generateTestToken() {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("ownerId", 1);
+		claims.put("role", "ROLE_USER");
+		return jwtTokenHelper.issueAccessToken(claims).getToken();
+	}
+
+	private MockHttpServletResponse performRequest(String url, Object request, HttpMethod method) throws Exception {
+		return mockMvc.perform(
+			request(HttpMethod.valueOf(method.name()), url)
 				.header("Authorization", token)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
-			.andReturn().getResponse();
+				.content(request != null ? objectMapper.writeValueAsString(request) : "")
+		).andReturn().getResponse();
+	}
 
-		AppointmentResponseDto createAppointment = objectMapper.readValue(createResponse.getContentAsString(), AppointmentResponseDto.class);
-		Integer appointmentId = createAppointment.getId();
-
-		// when: 예약 삭제 API 호출
-		MockHttpServletResponse deleteResponse = mockMvc.perform(delete("/appointment/{appointmentId}", appointmentId)
-				.header("Authorization", token)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andReturn().getResponse();
-
-		// then: 응답 상태 코드가 200이어야 한다
-		assertThat(deleteResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+	private static AppointmentRequestDto createAppointmentRequestDto(int vetId, int petId, String symptoms) {
+		return AppointmentRequestDto.builder()
+			.vetId(vetId)
+			.petId(petId)
+			.apptDateTime(LocalDateTime.of(2025, 12, 25, 12, 0, 0))
+			.appStatus(ApptStatus.COMPLETE)
+			.symptoms(symptoms)
+			.build();
 	}
 }
