@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
 import org.springframework.samples.petclinic.domain.pet.exception.InvalidOwnerException;
@@ -104,7 +105,7 @@ public class PetServiceTest {
 
 		assertThatThrownBy(() -> petService.getPetById(1))
 			.isInstanceOf(PetNotFoundException.class)
-			.hasMessage("Pet not found with ID: 1");
+			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
 		verify(petRepository, times(1)).findById(1);
 	}
@@ -133,7 +134,7 @@ public class PetServiceTest {
 
 		assertThatThrownBy(() -> petService.getPetsByOwnerId(99))
 			.isInstanceOf(InvalidOwnerException.class)
-			.hasMessage("Invalid Owner ID: 99");
+			.hasMessage(PetErrorCode.INVALID_OWNER.getDescription());
 
 		verify(ownerRepository, times(1)).findById(99);
 		verifyNoInteractions(petRepository);
@@ -165,7 +166,7 @@ public class PetServiceTest {
 
 		assertThatThrownBy(() -> petService.createPet(petRequestDto))
 			.isInstanceOf(InvalidPetTypeException.class)
-			.hasMessage("Invalid PetType ID: 99");
+			.hasMessage(PetErrorCode.INVALID_PET_TYPE.getDescription());
 
 		verify(petTypeRepository, times(1)).findById(99);
 		verifyNoInteractions(ownerRepository, petRepository);
@@ -198,7 +199,7 @@ public class PetServiceTest {
 
 		assertThatThrownBy(() -> petService.updatePet(99, petRequestDto))
 			.isInstanceOf(PetNotFoundException.class)
-			.hasMessage("Pet not found with ID: 99");
+			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
 		verify(petRepository, times(1)).findById(99);
 		verifyNoInteractions(petTypeRepository, ownerRepository);
@@ -224,7 +225,7 @@ public class PetServiceTest {
 
 		assertThatThrownBy(() -> petService.deletePet(99))
 			.isInstanceOf(PetNotFoundException.class)
-			.hasMessage("Pet not found with ID: 99");
+			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
 		verify(petRepository, times(1)).findById(99);
 		verify(petRepository, never()).deleteById(99);
