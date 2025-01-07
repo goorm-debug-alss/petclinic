@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.domain.pet.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
@@ -9,6 +10,7 @@ import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.pet.repository.PetTypeRepository;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +42,7 @@ public class PetService {
 	// 단일 Pet 조회
 	public PetResponseDto getPetById(Integer id) {
 		Pet pet = petRepository.findById(id)
-			.orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
 		return PetResponseDto.builder()
 			.id(pet.getId())
@@ -53,6 +55,9 @@ public class PetService {
 
 	// 주인의 펫 조회
 	public List<PetResponseDto> getPetsByOwnerId(Integer ownerId) {
+		ownerRepository.findById(ownerId)
+			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_OWNER));
+
 		return petRepository.findAll().stream()
 			.filter(pet -> pet.getOwnerId() != null && pet.getOwnerId().getId().equals(ownerId))
 			.map(pet -> PetResponseDto.builder()
@@ -60,7 +65,7 @@ public class PetService {
 				.name(pet.getName())
 				.birthDate(pet.getBirthDate())
 				.typeId(pet.getTypeId() != null ? pet.getTypeId().getId() : null)
-				.ownerId(pet.getOwnerId().getId())
+				.ownerId(ownerId)
 				.build())
 			.collect(Collectors.toList());
 	}
@@ -72,11 +77,11 @@ public class PetService {
 		pet.setBirthDate(request.getBirthDate());
 
 		PetType petType = petTypeRepository.findById(request.getTypeId())
-			.orElseThrow(() -> new IllegalArgumentException("Invalid PetType ID"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_PET_TYPE));
 		pet.setTypeId(petType);
 
 		Owner owner = ownerRepository.findById(request.getOwnerId())
-			.orElseThrow(() -> new IllegalArgumentException("Invalid Owner ID"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_OWNER));
 		pet.setOwnerId(owner);
 
 		Pet savedPet = petRepository.save(pet);
@@ -93,17 +98,17 @@ public class PetService {
 	// Pet 수정
 	public PetResponseDto updatePet(Integer id, PetRequestDto request) {
 		Pet pet = petRepository.findById(id)
-			.orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
 		pet.setName(request.getName());
 		pet.setBirthDate(request.getBirthDate());
 
 		PetType petType = petTypeRepository.findById(request.getTypeId())
-			.orElseThrow(() -> new IllegalArgumentException("Invalid PetType ID"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_PET_TYPE));
 		pet.setTypeId(petType);
 
 		Owner owner = ownerRepository.findById(request.getOwnerId())
-			.orElseThrow(() -> new IllegalArgumentException("Invalid Owner ID"));
+			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_OWNER));
 		pet.setOwnerId(owner);
 
 		Pet updatedPet = petRepository.save(pet);
@@ -119,6 +124,8 @@ public class PetService {
 
 	// Pet 삭제
 	public void deletePet(Integer id) {
-		petRepository.deleteById(id);
+		Pet pet = petRepository.findById(id)
+			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
+		petRepository.deleteById(pet.getId());
 	}
 }
