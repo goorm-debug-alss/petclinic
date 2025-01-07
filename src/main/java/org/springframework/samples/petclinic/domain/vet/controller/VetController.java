@@ -32,8 +32,8 @@ public class VetController {
 	}
 
 	// 특정 수의사 조회
-	@GetMapping("/{vet-id}")
-	public ResponseEntity<VetResponseDto> getVet(@PathVariable("vet-id") int vetId) {
+	@GetMapping("/{vetId}")
+	public ResponseEntity<VetResponseDto> getVet(@PathVariable("vetId") int vetId) {
 		var response = vetService.findById(vetId);
 		return ResponseEntity.ok(response);
 	}
@@ -48,16 +48,16 @@ public class VetController {
 	}
 
 	// 수의사 수정
-	@PutMapping("/{vet-id}")
+	@PutMapping("/{vetId}")
 	public ResponseEntity<VetResponseDto> update(
-			@PathVariable("vet-id") int vetId, @RequestBody VetRequestDto vetRequestDto){
+			@PathVariable("vetId") int vetId, @RequestBody VetRequestDto vetRequestDto){
 		var response = vetService.update(vetId, vetRequestDto);
 		return ResponseEntity.ok(response);
 	}
 
 	// 수의사 삭제
-	@DeleteMapping("/{vet-id}")
-	public ResponseEntity<Void> delete(@PathVariable("vet-id") int vetId) {
+	@DeleteMapping("/{vetId}")
+	public ResponseEntity<Void> delete(@PathVariable("vetId") int vetId) {
 		vetService.delete(vetId);
 		return ResponseEntity.noContent().build();
 	}
