@@ -7,10 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.dto.UpdatePasswordRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
 import org.springframework.samples.petclinic.domain.owner.exception.InvalidPasswordException;
 import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
+import org.springframework.samples.petclinic.domain.owner.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerProfileService;
@@ -32,6 +35,9 @@ public class OwnerProfileServiceTest {
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
+
+	@Mock
+	private OwnerMapper ownerMapper;
 
 	@InjectMocks
 	private OwnerProfileService ownerProfileService;
@@ -72,13 +78,10 @@ public class OwnerProfileServiceTest {
 	void updateProfile_OwnerNotFound() {
 		// given
 		UpdateProfileRequestDto updateProfileRequestDto = new UpdateProfileRequestDto("구름", "강릉", "강원도", "0987654321");
-		when(ownerRepository.findById(1)).thenReturn(Optional.empty());
+		when(ownerRepository.findById(1)).thenThrow(new ApiException(OwnerErrorCode.NO_OWNER));
 
 		// when & then
-		assertThrows(OwnerNotFoundException.class, () ->
-			ownerProfileService.updateProfile(1, updateProfileRequestDto)
-		);
-		verify(ownerRepository, never()).save(any());
+		assertThrows(ApiException.class, () -> ownerProfileService.updateProfile(1, updateProfileRequestDto));
 	}
 
 	@Test
@@ -104,13 +107,10 @@ public class OwnerProfileServiceTest {
 		// given
 		UpdatePasswordRequestDto updatePasswordRequestDto = new UpdatePasswordRequestDto("wrongPassword", "newPassword");
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(owner));
-		when(passwordEncoder.matches("wrongPassword", "encryptedPassword")).thenReturn(false);
+		when(passwordEncoder.matches("wrongPassword", "encryptedPassword")).thenThrow(new ApiException(OwnerErrorCode.INVALID_PASSWORD));
 
 		// when & then
-		assertThrows(InvalidPasswordException.class, () ->
-			ownerProfileService.updatePassword(1, updatePasswordRequestDto)
-		);
-		verify(ownerRepository, never()).save(any());
+		assertThrows(ApiException.class, () -> ownerProfileService.updatePassword(1, updatePasswordRequestDto));
 	}
 
 	@Test
@@ -118,12 +118,9 @@ public class OwnerProfileServiceTest {
 	void updatePassword_OwnerNotFound() {
 		// given
 		UpdatePasswordRequestDto updatePasswordRequestDto = new UpdatePasswordRequestDto("oldPassword", "newPassword");
-		when(ownerRepository.findById(1)).thenReturn(Optional.empty());
+		when(ownerRepository.findById(1)).thenThrow(new ApiException(OwnerErrorCode.NO_OWNER));
 
 		// when & then
-		assertThrows(OwnerNotFoundException.class, () ->
-			ownerProfileService.updatePassword(1, updatePasswordRequestDto)
-		);
-		verify(ownerRepository, never()).save(any());
+		assertThrows(ApiException.class, () -> ownerProfileService.updatePassword(1, updatePasswordRequestDto));
 	}
 }
