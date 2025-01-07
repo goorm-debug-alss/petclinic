@@ -1,10 +1,12 @@
 package org.springframework.samples.petclinic.domain.owner.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.owner.dto.OwnerResponseDto;
 import org.springframework.samples.petclinic.domain.owner.dto.UpdatePasswordRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.UpdateProfileRequestDto;
-import org.springframework.samples.petclinic.domain.owner.exception.InvalidPasswordException;
-import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
+import org.springframework.samples.petclinic.domain.owner.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,14 +18,16 @@ public class OwnerProfileService {
 
 	private final OwnerRepository ownerRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final OwnerMapper ownerMapper;
 
 	// 회원 프로필 수정
-	public void updateProfile(Integer id, UpdateProfileRequestDto updateProfileRequestDto) {
+	public OwnerResponseDto updateProfile(Integer id, UpdateProfileRequestDto updateProfileRequestDto) {
 		Owner owner = findOwnerByIdOrThrow(id);
 
 		updateOwnerProfileFields(updateProfileRequestDto, owner);
 
 		ownerRepository.save(owner);
+		return ownerMapper.toDto(owner);
 	}
 
 	// 회원 비밀번호 변경
@@ -38,7 +42,7 @@ public class OwnerProfileService {
 
 	private Owner findOwnerByIdOrThrow(Integer id) {
 		return ownerRepository.findById(id)
-			.orElseThrow(() -> new OwnerNotFoundException("Owner not found with id:" + id));
+			.orElseThrow(() -> new ApiException(OwnerErrorCode.NO_OWNER));
 	}
 
 	private static void updateOwnerProfileFields(UpdateProfileRequestDto updateProfileRequestDto, Owner owner) {
@@ -54,7 +58,7 @@ public class OwnerProfileService {
 
 	private void validateCurrentPassword(UpdatePasswordRequestDto updatePasswordRequestDto, Owner owner) {
 		if (!passwordEncoder.matches(updatePasswordRequestDto.getCurrentPassword(), owner.getPassword()))
-			throw new InvalidPasswordException("Password is not correct");
+			throw new ApiException(OwnerErrorCode.NO_OWNER);
 	}
 
 	private void updateOwnerPassword(UpdatePasswordRequestDto updatePasswordRequestDto, Owner owner) {

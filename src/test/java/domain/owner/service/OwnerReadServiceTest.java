@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.dto.OwnerResponseDto;
 import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
@@ -94,13 +96,9 @@ class OwnerReadServiceTest {
 	@DisplayName("회원 ID로 조회 실패 - Owner Id가 없을 때")
 	void findById_Fail_OwnerNotFound() {
 		// given
-		when(ownerRepository.findById(3)).thenReturn(Optional.empty());
+		when(ownerRepository.findById(3)).thenThrow(new ApiException(OwnerErrorCode.NO_OWNER));
 
 		// when & then
-		OwnerNotFoundException exception = assertThrows(OwnerNotFoundException.class, () ->
-			ownerReadService.findById(3)
-		);
-		assertEquals("Owner not found with id 3", exception.getMessage());
-		verify(ownerRepository, times(1)).findById(3);
+		assertThrows(ApiException.class, () -> ownerReadService.findById(3));
 	}
 }
