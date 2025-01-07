@@ -7,10 +7,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.dto.LoginRequestDto;
 import org.springframework.samples.petclinic.domain.owner.dto.RegisterRequestDto;
-import org.springframework.samples.petclinic.domain.owner.exception.InvalidPasswordException;
-import org.springframework.samples.petclinic.domain.owner.exception.OwnerNotFoundException;
+import org.springframework.samples.petclinic.domain.owner.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.owner.service.OwnerAuthService;
@@ -22,6 +23,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -36,6 +38,9 @@ public class OwnerAuthServiceTest {
 
 	@Mock
 	private TokenService tokenService;
+
+	@Mock
+	private OwnerMapper ownerMapper;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -75,12 +80,10 @@ public class OwnerAuthServiceTest {
 	@DisplayName("회원가입 실패 - Owner Id가 이미 존재할 때")
 	void register_UserAlreadyExists() {
 		// given
-		when(ownerRepository.existsByUserId(registerRequestDto.getUserId())).thenReturn(true);
+		when(ownerRepository.existsByUserId(registerRequestDto.getUserId())).thenThrow(new ApiException(OwnerErrorCode.NO_OWNER));
 
 		// when & then
-		OwnerNotFoundException exception = assertThrows(OwnerNotFoundException.class, () ->
-			ownerAuthService.register(registerRequestDto));
-		assertEquals("Owner already exists with userId testUser", exception.getMessage());
+		assertThrows(ApiException.class, () -> ownerAuthService.register(registerRequestDto));
 	}
 
 	@Test
@@ -104,12 +107,10 @@ public class OwnerAuthServiceTest {
 	@DisplayName("로그인 실패 - Owner ID가 존재하지 않을 때")
 	void login_UserNotFound() {
 		// given
-		when(ownerRepository.findByUserId(loginRequestDto.getUserId())).thenReturn(Optional.empty());
+		when(ownerRepository.findByUserId(loginRequestDto.getUserId())).thenThrow(new ApiException(OwnerErrorCode.NO_OWNER));
 
 		// when & then
-		OwnerNotFoundException exception = assertThrows(OwnerNotFoundException.class, () ->
-			ownerAuthService.login(loginRequestDto));
-		assertEquals("Owner not found with userId testUser", exception.getMessage());
+		assertThrows(ApiException.class, () -> ownerAuthService.login(loginRequestDto));
 	}
 
 	@Test
@@ -117,12 +118,10 @@ public class OwnerAuthServiceTest {
 	void login_InvalidPassword() {
 		// given
 		when(ownerRepository.findByUserId(loginRequestDto.getUserId())).thenReturn(Optional.of(owner));
-		when(passwordEncoder.matches(loginRequestDto.getPassword(), owner.getPassword())).thenReturn(false);
+		when(passwordEncoder.matches(loginRequestDto.getPassword(), owner.getPassword())).thenThrow(new ApiException(OwnerErrorCode.INVALID_PASSWORD));
 
 		// when & then
-		InvalidPasswordException exception = assertThrows(InvalidPasswordException.class, () ->
-			ownerAuthService.login(loginRequestDto));
-		assertEquals("Password is not correct", exception.getMessage());
+		assertThrows(ApiException.class, () -> ownerAuthService.login(loginRequestDto));
 	}
 
 	@Test

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class OwnerResponseDto {
+	private Integer id;
 	private String name;
 	private String address;
 	private String city;
