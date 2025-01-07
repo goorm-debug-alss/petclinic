@@ -1,4 +1,5 @@
 package org.springframework.samples.petclinic.domain.visit.controller;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class VisitController {
 	 * @return 추가된 방문 내역
 	 */
 	@PostMapping
-	public ResponseEntity<VisitResponseDto> createVisit(@RequestBody VisitRequestDto requestDto) {
+	public ResponseEntity<VisitResponseDto> createVisit(@Valid @RequestBody VisitRequestDto requestDto) {
 		VisitResponseDto response = visitService.createVisit(requestDto);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}

@@ -1,5 +1,6 @@
 package org.springframework.samples.petclinic.domain.history.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class HistoryController {
 	 * @return 추가된 진료 내역
 	 */
 	@PostMapping
-	public ResponseEntity<?> addHistory(@RequestBody HistoryRequestDto request) {
+	public ResponseEntity<?> addHistory(@Valid @RequestBody HistoryRequestDto request) {
 		HistoryResponseDto response = historyService.addHistory(request);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
@@ -48,7 +49,7 @@ public class HistoryController {
 	 * @return 수정된 진료 내역
 	 */
 	@PutMapping("/{historyId}")
-	public ResponseEntity<?> updateHistory(@PathVariable int historyId,@RequestBody HistoryRequestDto request) {
+	public ResponseEntity<?> updateHistory(@PathVariable int historyId,@Valid @RequestBody HistoryRequestDto request) {
 		HistoryResponseDto response = historyService.updateHistory(historyId,request);
 		return ResponseEntity.ok(response);
 	}
