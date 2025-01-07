@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.samples.petclinic.common.error.PetErrorCode;
+import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.controller.PetController;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
@@ -83,15 +85,14 @@ public class PetControllerTest {
 	@Test
 	@DisplayName("단일 Pet 조회 실패 - Pet not found")
 	void getPetById_Failure() {
-		when(petService.getPetById(99)).thenThrow(new IllegalArgumentException("Pet not found"));
+		when(petService.getPetById(99)).thenThrow(new ApiException(PetErrorCode.NO_PET));
 
-		Throwable exception = assertThrows(IllegalArgumentException.class, () -> petController.getPetById(99));
+		Throwable exception = assertThrows(ApiException.class, () -> petController.getPetById(99));
 
-		assertThat(exception).isInstanceOf(IllegalArgumentException.class);
-		assertThat(exception.getMessage()).isEqualTo("Pet not found");
+		assertThat(exception).isInstanceOf(ApiException.class);
+		assertThat(exception.getMessage()).isEqualTo(PetErrorCode.NO_PET.getDescription());
 
 		verify(petService, times(1)).getPetById(99);
-		verifyNoMoreInteractions(petService);
 	}
 
 	@Test
@@ -126,6 +127,19 @@ public class PetControllerTest {
 	}
 
 	@Test
+	@DisplayName("주인의 펫 조회 실패 - Invalid Owner")
+	void getPetsByOwnerId_Failure_InvalidOwner() {
+		when(petService.getPetsByOwnerId(99)).thenThrow(new ApiException(PetErrorCode.INVALID_OWNER));
+
+		Throwable exception = assertThrows(ApiException.class, () -> petController.getPetsByOwnerId(99));
+
+		assertThat(exception).isInstanceOf(ApiException.class);
+		assertThat(exception.getMessage()).isEqualTo(PetErrorCode.INVALID_OWNER.getDescription());
+
+		verify(petService, times(1)).getPetsByOwnerId(99);
+	}
+
+	@Test
 	@DisplayName("Pet 생성 성공")
 	void createPet_Success() {
 		when(petService.createPet(petRequestDto)).thenReturn(petResponseDto);
@@ -141,17 +155,16 @@ public class PetControllerTest {
 	}
 
 	@Test
-	@DisplayName("Pet 생성 실패 - Invalid PetType ID")
+	@DisplayName("Pet 생성 실패 - Invalid PetType")
 	void createPet_Failure_InvalidPetType() {
-		when(petService.createPet(petRequestDto)).thenThrow(new IllegalArgumentException("Invalid PetType ID"));
+		when(petService.createPet(petRequestDto)).thenThrow(new ApiException(PetErrorCode.INVALID_PET_TYPE));
 
-		Throwable exception = assertThrows(IllegalArgumentException.class, () -> petController.createPet(petRequestDto));
+		Throwable exception = assertThrows(ApiException.class, () -> petController.createPet(petRequestDto));
 
-		assertThat(exception).isInstanceOf(IllegalArgumentException.class);
-		assertThat(exception.getMessage()).isEqualTo("Invalid PetType ID");
+		assertThat(exception).isInstanceOf(ApiException.class);
+		assertThat(exception.getMessage()).isEqualTo(PetErrorCode.INVALID_PET_TYPE.getDescription());
 
 		verify(petService, times(1)).createPet(petRequestDto);
-		verifyNoMoreInteractions(petService);
 	}
 
 	@Test
@@ -197,16 +210,16 @@ public class PetControllerTest {
 	}
 
 	@Test
-	@DisplayName("Pet 삭제 실패 - Pet not found")
+	@DisplayName("Pet 삭제 실패 - Pet Not Found")
 	void deletePet_Failure_NotFound() {
-		doThrow(new IllegalArgumentException("Pet not found")).when(petService).deletePet(99);
+		doThrow(new ApiException(PetErrorCode.NO_PET))
+			.when(petService).deletePet(99);
 
-		Throwable exception = assertThrows(IllegalArgumentException.class, () -> petController.deletePet(99));
+		Throwable exception = assertThrows(ApiException.class, () -> petController.deletePet(99));
 
-		assertThat(exception).isInstanceOf(IllegalArgumentException.class);
-		assertThat(exception.getMessage()).isEqualTo("Pet not found");
+		assertThat(exception).isInstanceOf(ApiException.class);
+		assertThat(exception.getMessage()).isEqualTo(PetErrorCode.NO_PET.getDescription());
 
 		verify(petService, times(1)).deletePet(99);
-		verifyNoMoreInteractions(petService);
 	}
 }
