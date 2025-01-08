@@ -71,7 +71,6 @@ class HistoryServiceIntegrationTest {
 		visitRepository.deleteAll();
 		petRepository.deleteAll();
 
-		// 테스트를 위한 기본 데이터 생성
 		pet = petRepository.save(Pet.builder().name("Pet A").build());
 		vet = vetRepository.save(Vet.builder().name("Vet A").build());
 		visit = visitRepository.save(Visit.builder().description("Visit A").petId(pet).build());
