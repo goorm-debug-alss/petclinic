@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
+import org.springframework.samples.petclinic.domain.pet.mapper.PetMapper;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.model.PetType;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
@@ -25,17 +26,12 @@ public class PetService {
 	private final PetRepository petRepository;
 	private final PetTypeRepository petTypeRepository;
 	private final OwnerRepository ownerRepository;
+	private final PetMapper petMapper;
 
 	// 모든 Pet 조회
 	public List<PetResponseDto> getAllPets() {
 		return petRepository.findAll().stream()
-			.map(pet -> PetResponseDto.builder()
-				.id(pet.getId())
-				.name(pet.getName())
-				.birthDate(pet.getBirthDate())
-				.typeId(pet.getTypeId() != null ? pet.getTypeId().getId() : null)
-				.ownerId(pet.getOwnerId() != null ? pet.getOwnerId().getId() : null)
-				.build())
+			.map(petMapper::toDto)
 			.collect(Collectors.toList());
 	}
 
@@ -43,14 +39,7 @@ public class PetService {
 	public PetResponseDto getPetById(Integer id) {
 		Pet pet = petRepository.findById(id)
 			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
-
-		return PetResponseDto.builder()
-			.id(pet.getId())
-			.name(pet.getName())
-			.birthDate(pet.getBirthDate())
-			.typeId(pet.getTypeId() != null ? pet.getTypeId().getId() : null)
-			.ownerId(pet.getOwnerId() != null ? pet.getOwnerId().getId() : null)
-			.build();
+		return petMapper.toDto(pet);
 	}
 
 	// 주인의 펫 조회
@@ -60,39 +49,22 @@ public class PetService {
 
 		return petRepository.findAll().stream()
 			.filter(pet -> pet.getOwnerId() != null && pet.getOwnerId().getId().equals(ownerId))
-			.map(pet -> PetResponseDto.builder()
-				.id(pet.getId())
-				.name(pet.getName())
-				.birthDate(pet.getBirthDate())
-				.typeId(pet.getTypeId() != null ? pet.getTypeId().getId() : null)
-				.ownerId(ownerId)
-				.build())
+			.map(petMapper::toDto)
 			.collect(Collectors.toList());
 	}
 
 	// Pet 생성
 	public PetResponseDto createPet(PetRequestDto request) {
-		Pet pet = new Pet();
-		pet.setName(request.getName());
-		pet.setBirthDate(request.getBirthDate());
-
 		PetType petType = petTypeRepository.findById(request.getTypeId())
 			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_PET_TYPE));
-		pet.setTypeId(petType);
 
 		Owner owner = ownerRepository.findById(request.getOwnerId())
 			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_OWNER));
-		pet.setOwnerId(owner);
 
+		Pet pet = petMapper.toEntity(request, petType, owner);
 		Pet savedPet = petRepository.save(pet);
 
-		return PetResponseDto.builder()
-			.id(savedPet.getId())
-			.name(savedPet.getName())
-			.birthDate(savedPet.getBirthDate())
-			.typeId(savedPet.getTypeId().getId())
-			.ownerId(savedPet.getOwnerId().getId())
-			.build();
+		return petMapper.toDto(savedPet);
 	}
 
 	// Pet 수정
@@ -100,26 +72,20 @@ public class PetService {
 		Pet pet = petRepository.findById(id)
 			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
-		pet.setName(request.getName());
-		pet.setBirthDate(request.getBirthDate());
-
 		PetType petType = petTypeRepository.findById(request.getTypeId())
 			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_PET_TYPE));
-		pet.setTypeId(petType);
 
 		Owner owner = ownerRepository.findById(request.getOwnerId())
 			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_OWNER));
+
+		// 업데이트 반영
+		pet.setName(request.getName());
+		pet.setBirthDate(request.getBirthDate());
+		pet.setTypeId(petType);
 		pet.setOwnerId(owner);
 
 		Pet updatedPet = petRepository.save(pet);
-
-		return PetResponseDto.builder()
-			.id(updatedPet.getId())
-			.name(updatedPet.getName())
-			.birthDate(updatedPet.getBirthDate())
-			.typeId(updatedPet.getTypeId().getId())
-			.ownerId(updatedPet.getOwnerId().getId())
-			.build();
+		return petMapper.toDto(updatedPet);
 	}
 
 	// Pet 삭제
