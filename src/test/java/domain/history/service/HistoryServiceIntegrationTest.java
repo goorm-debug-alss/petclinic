@@ -73,7 +73,7 @@ class HistoryServiceIntegrationTest {
 
 		pet = petRepository.save(Pet.builder().name("Pet A").build());
 		vet = vetRepository.save(Vet.builder().name("Vet A").build());
-		visit = visitRepository.save(Visit.builder().description("Visit A").petId(pet).build());
+		visit = visitRepository.save(Visit.builder().description("Visit A").pet(pet).build());
 	}
 
 	@Test
@@ -113,8 +113,8 @@ class HistoryServiceIntegrationTest {
 		historyRepository.save(History.builder()
 			.symptoms("감기")
 			.content("감기약 처방")
-			.vetId(vet)
-			.visitId(visit)
+			.vet(vet)
+			.visit(visit)
 			.build());
 
 		// When
@@ -146,8 +146,8 @@ class HistoryServiceIntegrationTest {
 		History history = historyRepository.save(History.builder()
 			.symptoms("감기")
 			.content("감기약 처방")
-			.vetId(vet)
-			.visitId(visit)
+			.vet(vet)
+			.visit(visit)
 			.build());
 
 		HistoryRequestDto updateRequest = new HistoryRequestDto("알러지", "알러지 치료", vet.getId(), visit.getId());
@@ -171,8 +171,8 @@ class HistoryServiceIntegrationTest {
 		History history = historyRepository.save(History.builder()
 			.symptoms("감기")
 			.content("감기약 처방")
-			.vetId(vet)
-			.visitId(visit)
+			.vet(vet)
+			.visit(visit)
 			.build());
 
 		HistoryRequestDto updateRequest = new HistoryRequestDto("알러지", "알러지 치료", -1, visit.getId());
@@ -190,8 +190,8 @@ class HistoryServiceIntegrationTest {
 		History history = historyRepository.save(History.builder()
 			.symptoms("감기")
 			.content("감기약 처방")
-			.vetId(vet)
-			.visitId(visit)
+			.vet(vet)
+			.visit(visit)
 			.build());
 
 		// When

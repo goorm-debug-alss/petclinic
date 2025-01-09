@@ -194,8 +194,8 @@ public class UpdateReviewServiceTest {
 	private void createMockReviewTestData() {
 		mockReview = Review.builder()
 			.id(1)
-			.ownerId(mockOwner)
-			.vetId(mockVet)
+			.owner(mockOwner)
+			.vet(mockVet)
 			.score(1)
 			.content("Test Initial Review")
 			.build();

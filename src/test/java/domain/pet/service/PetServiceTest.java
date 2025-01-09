@@ -61,8 +61,8 @@ public class PetServiceTest {
 			.id(1)
 			.name("강아지")
 			.birthDate(LocalDate.of(2020, 1, 1))
-			.typeId(petType)
-			.ownerId(owner)
+			.type(petType)
+			.owner(owner)
 			.build();
 
 		petRequestDto = new PetRequestDto();
@@ -115,14 +115,14 @@ public class PetServiceTest {
 	@DisplayName("단일 Pet 조회 실패 - Pet Not Found")
 	void getPetById_Failure() {
 		// Given
-		when(petRepository.findById(1)).thenReturn(Optional.empty());
+		when(petRepository.findById(999)).thenReturn(Optional.empty());
 
 		// When, Then
-		assertThatThrownBy(() -> petService.getPetById(1))
+		assertThatThrownBy(() -> petService.getPetById(999))
 			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
-		verify(petRepository, times(1)).findById(1);
+		verify(petRepository, times(1)).findById(999);
 		verifyNoInteractions(petMapper);
 	}
 

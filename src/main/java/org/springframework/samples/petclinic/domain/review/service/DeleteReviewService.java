@@ -40,7 +40,7 @@ public class DeleteReviewService {
 	}
 
 	private static void validateReviewOwnership(Owner owner, Review review) {
-		if (!Objects.equals(owner.getId(), review.getOwnerId().getId()))
+		if (!Objects.equals(owner.getId(), review.getOwner().getId()))
 			throw new ApiException(ReviewErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
 	}
 }

@@ -27,7 +27,7 @@ public class VisitMapper {
 		return Visit.builder()
 			.description(requestDto.getDescription())
 			.visitDate(requestDto.getVisitDate())
-			.petId(pet)
+			.pet(pet)
 			.build();
 	}
 
@@ -43,7 +43,7 @@ public class VisitMapper {
 			.visitId(visit.getId())
 			.visitDate(visit.getVisitDate())
 			.description(visit.getDescription())
-			.petName(visit.getPetId().getName())
+			.petName(visit.getPet().getName())
 			.build();
 	}
 

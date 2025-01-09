@@ -15,8 +15,8 @@ public class PetMapper {
 			.id(pet.getId())
 			.name(pet.getName())
 			.birthDate(pet.getBirthDate())
-			.typeId(pet.getTypeId().getId())
-			.ownerId(pet.getOwnerId().getId())
+			.typeId(pet.getType().getId())
+			.ownerId(pet.getOwner().getId())
 			.build();
 	}
 
@@ -24,8 +24,8 @@ public class PetMapper {
 		return Pet.builder()
 			.name(petRequestDto.getName())
 			.birthDate(petRequestDto.getBirthDate())
-			.typeId(type)
-			.ownerId(owner)
+			.type(type)
+			.owner(owner)
 			.build();
 	}
 }

@@ -51,7 +51,7 @@ public class VisitService {
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
-        return visitRepository.findAllByPetId(pet)
+        return visitRepository.findAllByPet(pet)
                 .stream()
                 .map(visitMapper::toDto)
                 .collect(Collectors.toList());

@@ -21,8 +21,8 @@ public class HistoryMapper {
 			.historyId(history.getId())
 			.symptoms(history.getSymptoms())
 			.content(history.getContent())
-			.vetId(history.getVetId().getId())
-			.visitId(history.getVisitId().getId())
+			.vetId(history.getVet().getId())
+			.visitId(history.getVisit().getId())
 			.build();
 	}
 
@@ -38,8 +38,8 @@ public class HistoryMapper {
 		return History.builder()
 			.symptoms(requestDto.getSymptoms())
 			.content(requestDto.getContent())
-			.vetId(vet)
-			.visitId(visit)
+			.vet(vet)
+			.visit(visit)
 			.build();
 	}
 }

@@ -48,7 +48,7 @@ public class PetService {
 			.orElseThrow(() -> new ApiException(PetErrorCode.INVALID_OWNER));
 
 		return petRepository.findAll().stream()
-			.filter(pet -> pet.getOwnerId() != null && pet.getOwnerId().getId().equals(ownerId))
+			.filter(pet -> pet.getOwner() != null && pet.getOwner().getId().equals(ownerId))
 			.map(petMapper::toDto)
 			.collect(Collectors.toList());
 	}
@@ -81,8 +81,8 @@ public class PetService {
 		// 업데이트 반영
 		pet.setName(request.getName());
 		pet.setBirthDate(request.getBirthDate());
-		pet.setTypeId(petType);
-		pet.setOwnerId(owner);
+		pet.setType(petType);
+		pet.setOwner(owner);
 
 		Pet updatedPet = petRepository.save(pet);
 		return petMapper.toDto(updatedPet);

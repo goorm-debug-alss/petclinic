@@ -97,7 +97,7 @@ class VisitServiceIntegrationTest {
 		visitRepository.save(Visit.builder()
 			.description("예방 접종")
 			.visitDate(LocalDateTime.now())
-			.petId(pet)
+			.pet(pet)
 			.build());
 
 		// When

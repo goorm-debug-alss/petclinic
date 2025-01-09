@@ -77,7 +77,7 @@ class HistoryServiceTest {
 		visit = Visit.builder()
 			.id(1)
 			.description("진료")
-			.petId(pet)
+			.pet(pet)
 			.build();
 
 		requestDto = new HistoryRequestDto("감기", "감기약 처방", 1, 1);
@@ -86,16 +86,16 @@ class HistoryServiceTest {
 			.id(1)
 			.symptoms("감기")
 			.content("감기약 처방")
-			.vetId(vet)
-			.visitId(visit)
+			.vet(vet)
+			.visit(visit)
 			.build();
 
 		responseDto = HistoryResponseDto.builder()
 			.historyId(history.getId())
 			.symptoms(history.getSymptoms())
 			.content(history.getContent())
-			.vetId(history.getVetId().getId())
-			.visitId(history.getVisitId().getId())
+			.vetId(history.getVet().getId())
+			.visitId(history.getVisit().getId())
 			.build();
 	}
 

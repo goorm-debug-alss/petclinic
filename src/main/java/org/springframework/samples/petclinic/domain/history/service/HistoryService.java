@@ -93,8 +93,8 @@ public class HistoryService {
 		// 업데이트 내용 반영
 		history.setSymptoms(request.getSymptoms());
 		history.setContent(request.getContent());
-		history.setVetId(vet);
-		history.setVisitId(visit);
+		history.setVet(vet);
+		history.setVisit(visit);
 
 		//업데이트 내용 저장
 		History updateEntity = historyRepository.save(history);

@@ -65,7 +65,7 @@ class VisitServiceTest {
 			.id(1)
 			.description("건강검진")
 			.visitDate(LocalDateTime.now())
-			.petId(pet)
+			.pet(pet)
 			.build();
 
 		visitResponseDto = VisitResponseDto.builder()
@@ -121,7 +121,7 @@ class VisitServiceTest {
 	void getVisitsByPetId_Success() {
 		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
-		when(visitRepository.findAllByPetId(eq(pet))).thenReturn(List.of(visit));
+		when(visitRepository.findAllByPet(eq(pet))).thenReturn(List.of(visit));
 		when(visitMapper.toDto(any(Visit.class))).thenReturn(visitResponseDto);
 
 		// When
@@ -135,7 +135,7 @@ class VisitServiceTest {
 		assertThat(response.get(0).getDescription()).isEqualTo(visit.getDescription());
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
-		verify(visitRepository, times(1)).findAllByPetId(eq(pet));
+		verify(visitRepository, times(1)).findAllByPet(eq(pet));
 		verify(visitMapper, times(1)).toDto(any(Visit.class));
 	}
 

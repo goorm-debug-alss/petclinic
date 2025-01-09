@@ -165,8 +165,8 @@ public class ReadReviewServiceTest {
 	private void createMockReviewTestData() {
 		mockReview = Review.builder()
 			.id(1)
-			.vetId(mockVet)
-			.ownerId(mockOwner)
+			.vet(mockVet)
+			.owner(mockOwner)
 			.content("Test Review")
 			.build();
 	}
@@ -177,8 +177,8 @@ public class ReadReviewServiceTest {
 			.score(mockReview.getScore())
 			.content(mockReview.getContent())
 			.createAt(mockReview.getCreatedAt())
-			.vetId(mockReview.getVetId().getId())
-			.ownerId(mockReview.getOwnerId().getId())
+			.vetId(mockReview.getVet().getId())
+			.ownerId(mockReview.getOwner().getId())
 			.build();
 	}
 }

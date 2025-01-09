@@ -33,11 +33,11 @@ public class Review extends BaseEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "vet_id", nullable = false)
-	private Vet vetId;
+	private Vet vet;
 
 	@ManyToOne
 	@JoinColumn(name = "owner_id", nullable = false)
-	private Owner ownerId;
+	private Owner owner;
 
 	public void updateReview(Integer score, String content) {
 		this.score = score;
