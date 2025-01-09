@@ -3,7 +3,6 @@ package org.springframework.samples.petclinic.domain.review.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
 import org.springframework.samples.petclinic.common.error.ReviewErrorCode;
-import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
@@ -14,6 +13,7 @@ import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +26,7 @@ public class UpdateReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReviewMapper reviewMapper;
 	private final VetRepository vetRepository;
+	private final VetService vetService;
 
 	public ReviewResponseDto updateReview(ReviewRequestDto request, Integer ownerId, Integer reviewId) {
 		validateRequestData(request);
@@ -33,7 +34,7 @@ public class UpdateReviewService {
 		Review review = getReviewOrThrow(reviewId);
 		validateOwner(ownerId, review);
 
-		Vet vet = getVetOrThrow(review);
+		Vet vet = vetService.getVetOrThrow(review.getVet().getId());
 		updateVetRatingsIfNeeded(request, review, vet);
 
 		review.updateReview(request.getScore(), request.getContent());
@@ -74,11 +75,6 @@ public class UpdateReviewService {
 
 		if (!review.getOwner().getId().equals(owner.getId()))
 			throw new ApiException(ReviewErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
-	}
-
-	private Vet getVetOrThrow(Review review) {
-		return vetRepository.findById(review.getVet().getId())
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 
 	private void updateVetRatingsIfNeeded(ReviewRequestDto request, Review review, Vet vet) {

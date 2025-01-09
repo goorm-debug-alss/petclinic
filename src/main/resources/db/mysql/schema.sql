@@ -37,6 +37,7 @@ CREATE TABLE `vets` (
                       `name` VARCHAR(15) NOT NULL,
                       `average_ratings` DECIMAL(3,2) NULL DEFAULT 0,
                       `review_count` INT NULL DEFAULT 0,
+                      `status` ENUM('REGISTERED', 'DELETED') NOT NULL DEFAULT 'REGISTERED',
                       PRIMARY KEY (`id`)
 );
 

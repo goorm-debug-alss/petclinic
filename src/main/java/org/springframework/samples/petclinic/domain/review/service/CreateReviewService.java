@@ -3,7 +3,6 @@ package org.springframework.samples.petclinic.domain.review.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
 import org.springframework.samples.petclinic.common.error.ReviewErrorCode;
-import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
@@ -13,6 +12,7 @@ import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,13 +24,13 @@ public class CreateReviewService {
 	private final ReviewRepository reviewRepository;
 	private final OwnerRepository ownerRepository;
 	private final VetRepository vetRepository;
+	private final VetService vetService;
 	private final ReviewMapper reviewMapper;
 
 	public Review createReview(ReviewRequestDto request, Integer ownerId) {
-		validateRequestData(request);
-
+		Vet vet = vetService.getVetOrThrow(request.getVetId());
 		Owner owner = getOwnerOrThrow(ownerId);
-		Vet vet = getVetOrThrow(request);
+		validateRequestData(request);
 
 		Review review = reviewMapper.toEntity(request, owner, vet);
 		Review savedReview = reviewRepository.save(review);
@@ -42,11 +42,6 @@ public class CreateReviewService {
 	private Owner getOwnerOrThrow(Integer ownerId) {
 		return ownerRepository.findById(ownerId)
 			.orElseThrow(() -> new ApiException(OwnerErrorCode.NO_OWNER));
-	}
-
-	private Vet getVetOrThrow(ReviewRequestDto request) {
-		return vetRepository.findById(request.getVetId())
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 
 	private void validateRequestData(ReviewRequestDto request) {

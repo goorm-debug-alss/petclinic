@@ -21,6 +21,7 @@ import org.springframework.samples.petclinic.domain.review.repository.ReviewRepo
 import org.springframework.samples.petclinic.domain.review.service.UpdateReviewService;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 
 import java.util.Optional;
 
@@ -40,6 +41,9 @@ public class UpdateReviewServiceTest {
 
 	@Mock
 	private OwnerRepository ownerRepository;
+
+	@Mock
+	private VetService vetService;
 
 	@Mock
 	private VetRepository vetRepository;
@@ -68,7 +72,7 @@ public class UpdateReviewServiceTest {
 		// given
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(mockOwner));
 		when(reviewRepository.findById(1)).thenReturn(Optional.of(mockReview));
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
 		when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		when(reviewMapper.toDto(any(Review.class))).thenReturn(mockResponse);
 
@@ -121,7 +125,7 @@ public class UpdateReviewServiceTest {
 		// given
 		when(reviewRepository.findById(1)).thenReturn(Optional.of(mockReview));
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(mockOwner));
-		when(vetRepository.findById(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
+		when(vetService.getVetOrThrow(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// when & then
 		assertThrows(ApiException.class, () -> updateReviewService.updateReview(request, 1, 1));

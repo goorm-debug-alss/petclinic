@@ -17,8 +17,8 @@ import org.springframework.samples.petclinic.domain.appointment.repository.Appoi
 import org.springframework.samples.petclinic.domain.appointment.service.UpdateAppointmentService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
-import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class UpdateAppointmentServiceTest {
 	private PetRepository petRepository;
 
 	@Mock
-	private VetRepository vetRepository;
+	private VetService vetService;
 
 	@Mock
 	private AppointmentMapper appointmentMapper;
@@ -65,7 +65,7 @@ public class UpdateAppointmentServiceTest {
 		AppointmentRequestDto updateRequest = createUpdateRequest();
 		when(appointmentRepository.findById(1)).thenReturn(Optional.of(existingAppointment));
 		when(petRepository.findById(1)).thenReturn(Optional.of(existingAppointment.getPet()));
-		when(vetRepository.findById(1)).thenReturn(Optional.of(existingAppointment.getVet()));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
 		when(appointmentRepository.save(existingAppointment)).thenAnswer(invocation -> invocation.getArgument(0));
 		when(appointmentMapper.toDto(existingAppointment)).thenReturn(mockResponse);
 
@@ -104,7 +104,7 @@ public class UpdateAppointmentServiceTest {
 		// given
 		when(appointmentRepository.findById(1)).thenReturn(Optional.of(existingAppointment));
 		when(petRepository.findById(1)).thenReturn(Optional.of(mockPet));
-		when(vetRepository.findById(1)).thenThrow(IllegalArgumentException.class);
+		when(vetService.getVetOrThrow(1)).thenThrow(IllegalArgumentException.class);
 
 		// when & then
 		assertThrows(IllegalArgumentException.class, () -> updateAppointmentService.updateAppointment(1, createUpdateRequest()));

@@ -19,6 +19,7 @@ import org.springframework.samples.petclinic.domain.review.repository.ReviewRepo
 import org.springframework.samples.petclinic.domain.review.service.CreateReviewService;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 
 import java.util.Optional;
 
@@ -35,6 +36,9 @@ public class CreateReviewServiceTest {
 
 	@Mock
 	private OwnerRepository ownerRepository;
+
+	@Mock
+	private VetService vetService;
 
 	@Mock
 	private VetRepository vetRepository;
@@ -63,7 +67,7 @@ public class CreateReviewServiceTest {
 	void validRequest_createReview_createSuccessfully() {
 		// given
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(mockOwner));
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
 		when(reviewMapper.toEntity(request, mockOwner, mockVet)).thenReturn(mockReview);
 		when(reviewRepository.save(any(Review.class))).thenReturn(mockReview);
 
@@ -91,8 +95,7 @@ public class CreateReviewServiceTest {
 	@DisplayName("리뷰 생성 실패 - 유효하지 않은 수의사 ID가 제공되었을 때, 예외가 발생한다")
 	void invalidVetId_createReview_throwsException() {
 		// given
-		when(ownerRepository.findById(1)).thenReturn(Optional.of(mockOwner));
-		when(vetRepository.findById(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
+		when(vetService.getVetOrThrow(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// when & then
 		assertThrows(ApiException.class, () -> createReviewService.createReview(request, mockOwner.getId()));
