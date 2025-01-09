@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.domain.pet.mapper;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.model.PetType;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ public class PetMapper {
 			.birthDate(petRequestDto.getBirthDate())
 			.type(type)
 			.owner(owner)
+			.status(PetStatus.REGISTERED)
 			.build();
 	}
 }

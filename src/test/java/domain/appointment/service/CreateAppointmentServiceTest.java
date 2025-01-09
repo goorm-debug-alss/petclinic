@@ -16,6 +16,7 @@ import org.springframework.samples.petclinic.domain.appointment.repository.Appoi
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.junit.jupiter.api.Test;
 import org.springframework.samples.petclinic.domain.appointment.service.CreateAppointmentService;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
@@ -66,7 +67,7 @@ public class CreateAppointmentServiceTest {
 	void validRequestData_createAppointment_createSuccessfully() {
 		// given
 		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
-		when(petRepository.findById(1)).thenReturn(Optional.of(mockPet));
+		when(petRepository.findByIdAndStatus(1, PetStatus.REGISTERED)).thenReturn(Optional.of(mockPet));
 		when(appointmentMapper.toEntity(request, mockPet, mockVet)).thenReturn(mockAppointment);
 		when(appointmentRepository.save(any(Appointment.class))).thenReturn(mockAppointment);
 
@@ -97,7 +98,7 @@ public class CreateAppointmentServiceTest {
 	void invalidPetId_createAppointment_throwsException() {
 		// given
 		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
-		when(petRepository.findById(1)).thenThrow(new ApiException(PetErrorCode.NO_PET));
+		when(petRepository.findByIdAndStatus(1,PetStatus.REGISTERED)).thenThrow(new ApiException(PetErrorCode.NO_PET));
 
 		// when & then
 		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
@@ -124,7 +125,7 @@ public class CreateAppointmentServiceTest {
 	void duplicateAppointment_createAppointment_throwsException() {
 		// given
 		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
-		when(petRepository.findById(1)).thenReturn(Optional.of(mockPet));
+		when(petRepository.findByIdAndStatus(1,PetStatus.REGISTERED)).thenReturn(Optional.of(mockPet));
 		when(appointmentRepository.existsByPetAndVetAndApptDateTime(mockPet, mockVet, request.getApptDateTime()))
 			.thenReturn(true);
 

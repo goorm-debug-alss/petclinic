@@ -9,10 +9,10 @@ VALUES (1, 'goorm1', 'pw1234', '김구름', '서울 강남구', '서울', '010-1
        (2, 'goorm2', 'pw1234', '박구름', '부산 해운대구', '부산', '010-1111-2222');
 
 -- 애완동물
-INSERT INTO `pets` (`id`, `name`, `birth_date`, `type_id`, `owner_id`)
-VALUES (1, '뿡치', '2020-01-15', 1, 1),
-       (2, '부각', '2019-05-20', 2, 2),
-       (3, '돌배', '2021-03-10', 2, 1);
+INSERT INTO `pets` (`id`, `name`, `birth_date`, `type_id`, `owner_id`, `status`)
+VALUES (1, '뿡치', '2020-01-15', 1, 1, 'REGISTERED'),
+       (2, '부각', '2019-05-20', 2, 2, 'REGISTERED'),
+       (3, '돌배', '2021-03-10', 2, 1, 'REGISTERED');
 
 -- 수의사
 INSERT INTO `vets` (`id`, `name`, `average_ratings`, `review_count`, `status`)

@@ -31,6 +31,13 @@ public class Vet extends BaseEntity {
 	@Column(length = 10, nullable = false)
 	private VetStatus status;
 
+	@PrePersist
+	public void prePersist() {
+		if (this.status == null) {
+			this.status = VetStatus.REGISTERED; // 명시적으로 기본값 적용
+		}
+	}
+
 	public void updateRatings(BigDecimal newAverageRatings, Integer newReviewCount) {
 		this.averageRatings = newAverageRatings;
 		this.reviewCount = newReviewCount;

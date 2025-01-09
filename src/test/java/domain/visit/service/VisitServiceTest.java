@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
@@ -80,7 +81,7 @@ class VisitServiceTest {
 	@DisplayName("방문 내역 생성 성공")
 	void createVisit_Success() {
 		// Given
-		when(petRepository.findById(eq(visitRequestDto.getPetId()))).thenReturn(Optional.of(pet));
+		when(petRepository.findByIdAndStatus(eq(visitRequestDto.getPetId()), eq(PetStatus.REGISTERED))).thenReturn(Optional.of(pet));
 		when(visitMapper.toEntity(eq(visitRequestDto), eq(pet))).thenReturn(visit);
 		when(visitRepository.save(any(Visit.class))).thenReturn(visit);
 		when(visitMapper.toDto(any(Visit.class))).thenReturn(visitResponseDto);
@@ -94,7 +95,7 @@ class VisitServiceTest {
 		assertThat(response.getPetName()).isEqualTo(pet.getName());
 		assertThat(response.getDescription()).isEqualTo(visit.getDescription());
 
-		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
+		verify(petRepository, times(1)).findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED));
 		verify(visitMapper, times(1)).toEntity(eq(visitRequestDto), eq(pet));
 		verify(visitRepository, times(1)).save(any(Visit.class));
 		verify(visitMapper, times(1)).toDto(any(Visit.class));
@@ -104,7 +105,7 @@ class VisitServiceTest {
 	@DisplayName("방문 내역 생성 실패 - 반려동물 없음")
 	void createVisit_Fail_PetNotFound() {
 		// Given
-		when(petRepository.findById(eq(visitRequestDto.getPetId()))).thenReturn(Optional.empty());
+		when(petRepository.findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED))).thenReturn(Optional.empty());
 
 		// When, Then
 		assertThatThrownBy(() -> visitService.createVisit(visitRequestDto))
@@ -112,7 +113,7 @@ class VisitServiceTest {
 			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
-		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
+		verify(petRepository, times(1)).findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED));
 		verifyNoInteractions(visitMapper, visitRepository);
 	}
 
@@ -120,7 +121,7 @@ class VisitServiceTest {
 	@DisplayName("특정 반려동물의 방문 내역 조회 성공")
 	void getVisitsByPetId_Success() {
 		// Given
-		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
+		when(petRepository.findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED))).thenReturn(Optional.of(pet));
 		when(visitRepository.findAllByPet(eq(pet))).thenReturn(List.of(visit));
 		when(visitMapper.toDto(any(Visit.class))).thenReturn(visitResponseDto);
 
@@ -134,7 +135,7 @@ class VisitServiceTest {
 		assertThat(response.get(0).getPetName()).isEqualTo(pet.getName());
 		assertThat(response.get(0).getDescription()).isEqualTo(visit.getDescription());
 
-		verify(petRepository, times(1)).findById(eq(pet.getId()));
+		verify(petRepository, times(1)).findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED));
 		verify(visitRepository, times(1)).findAllByPet(eq(pet));
 		verify(visitMapper, times(1)).toDto(any(Visit.class));
 	}
@@ -143,7 +144,7 @@ class VisitServiceTest {
 	@DisplayName("특정 반려동물의 방문 내역 조회 실패 - 반려동물 없음")
 	void getVisitsByPetId_Fail_PetNotFound() {
 		// Given
-		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.empty());
+		when(petRepository.findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED))).thenReturn(Optional.empty());
 
 		// When, Then
 		assertThatThrownBy(() -> visitService.getVisitsByPetId(pet.getId()))
@@ -151,7 +152,7 @@ class VisitServiceTest {
 			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
-		verify(petRepository, times(1)).findById(eq(pet.getId()));
+		verify(petRepository, times(1)).findByIdAndStatus(eq(visitRequestDto.getPetId()),eq(PetStatus.REGISTERED));
 		verifyNoInteractions(visitMapper, visitRepository);
 	}
 }

@@ -9,6 +9,7 @@ import org.springframework.samples.petclinic.domain.appointment.mapper.Appointme
 import org.springframework.samples.petclinic.domain.appointment.model.Appointment;
 import org.springframework.samples.petclinic.domain.appointment.model.enums.ApptStatus;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
@@ -65,7 +66,7 @@ public class CreateAppointmentService {
 	}
 
 	private Pet getPetOrThrow(AppointmentRequestDto request) {
-		return petRepository.findById(request.getPetId())
+		return petRepository.findByIdAndStatus(request.getPetId(), PetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 	}
 

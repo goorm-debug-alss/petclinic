@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.pet.dto.PetRequestDto;
 import org.springframework.samples.petclinic.domain.pet.dto.PetResponseDto;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.mapper.PetMapper;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.model.PetType;
@@ -83,7 +84,7 @@ public class PetServiceTest {
 	@Test
 	@DisplayName("모든 Pet 조회 성공")
 	void getAllPets_Success() {
-		when(petRepository.findAll()).thenReturn(List.of(pet));
+		when(petRepository.findAllByStatusOrderById(PetStatus.REGISTERED)).thenReturn(List.of(pet));
 		when(petMapper.toDto(any(Pet.class))).thenReturn(petResponseDto);
 
 		List<PetResponseDto> result = petService.getAllPets();
@@ -92,14 +93,14 @@ public class PetServiceTest {
 		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getId()).isEqualTo(pet.getId());
 
-		verify(petRepository, times(1)).findAll();
+		verify(petRepository, times(1)).findAllByStatusOrderById(PetStatus.REGISTERED);
 		verify(petMapper, times(1)).toDto(any(Pet.class));
 	}
 
 	@Test
 	@DisplayName("단일 Pet 조회 성공")
 	void getPetById_Success() {
-		when(petRepository.findById(1)).thenReturn(Optional.of(pet));
+		when(petRepository.findByIdAndStatus(1,PetStatus.REGISTERED)).thenReturn(Optional.of(pet));
 		when(petMapper.toDto(any(Pet.class))).thenReturn(petResponseDto);
 
 		PetResponseDto result = petService.getPetById(1);
@@ -107,7 +108,7 @@ public class PetServiceTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getId()).isEqualTo(pet.getId());
 
-		verify(petRepository, times(1)).findById(1);
+		verify(petRepository, times(1)).findByIdAndStatus(1,PetStatus.REGISTERED);
 		verify(petMapper, times(1)).toDto(any(Pet.class));
 	}
 
@@ -115,14 +116,14 @@ public class PetServiceTest {
 	@DisplayName("단일 Pet 조회 실패 - Pet Not Found")
 	void getPetById_Failure() {
 		// Given
-		when(petRepository.findById(999)).thenReturn(Optional.empty());
+		when(petRepository.findByIdAndStatus(999,PetStatus.REGISTERED)).thenReturn(Optional.empty());
 
 		// When, Then
 		assertThatThrownBy(() -> petService.getPetById(999))
 			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
-		verify(petRepository, times(1)).findById(999);
+		verify(petRepository, times(1)).findByIdAndStatus(999,PetStatus.REGISTERED);
 		verifyNoInteractions(petMapper);
 	}
 
@@ -130,7 +131,7 @@ public class PetServiceTest {
 	@DisplayName("주인의 펫 조회 성공")
 	void getPetsByOwnerId_Success() {
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(owner));
-		when(petRepository.findAll()).thenReturn(List.of(pet));
+		when(petRepository.findAllByStatusOrderById(PetStatus.REGISTERED)).thenReturn(List.of(pet));
 		when(petMapper.toDto(any(Pet.class))).thenReturn(petResponseDto);
 
 		List<PetResponseDto> result = petService.getPetsByOwnerId(1);
@@ -140,7 +141,7 @@ public class PetServiceTest {
 		assertThat(result.get(0).getOwnerId()).isEqualTo(1);
 
 		verify(ownerRepository, times(1)).findById(1);
-		verify(petRepository, times(1)).findAll();
+		verify(petRepository, times(1)).findAllByStatusOrderById(PetStatus.REGISTERED);
 		verify(petMapper, times(1)).toDto(any(Pet.class));
 	}
 
@@ -213,7 +214,7 @@ public class PetServiceTest {
 	@Test
 	@DisplayName("Pet 수정 성공")
 	void updatePet_Success() {
-		when(petRepository.findById(1)).thenReturn(Optional.of(pet));
+		when(petRepository.findByIdAndStatus(1,PetStatus.REGISTERED)).thenReturn(Optional.of(pet));
 		when(petTypeRepository.findById(1)).thenReturn(Optional.of(petType));
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(owner));
 		when(petRepository.save(any(Pet.class))).thenReturn(pet);
@@ -224,7 +225,7 @@ public class PetServiceTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getId()).isEqualTo(pet.getId());
 
-		verify(petRepository, times(1)).findById(1);
+		verify(petRepository, times(1)).findByIdAndStatus(1,PetStatus.REGISTERED);
 		verify(petTypeRepository, times(1)).findById(1);
 		verify(ownerRepository, times(1)).findById(1);
 		verify(petRepository, times(1)).save(any(Pet.class));
@@ -234,20 +235,20 @@ public class PetServiceTest {
 	@Test
 	@DisplayName("Pet 수정 실패 - Pet Not Found")
 	void updatePet_Failure_NotFound() {
-		when(petRepository.findById(99)).thenReturn(Optional.empty());
+		when(petRepository.findByIdAndStatus(99,PetStatus.REGISTERED)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> petService.updatePet(99, petRequestDto))
 			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.NO_PET.getDescription());
 
-		verify(petRepository, times(1)).findById(99);
+		verify(petRepository, times(1)).findByIdAndStatus(99,PetStatus.REGISTERED);
 		verifyNoInteractions(petTypeRepository, ownerRepository, petMapper);
 	}
 
 	@Test
 	@DisplayName("Pet 수정 실패 - Invalid PetType")
 	void updatePet_Failure_InvalidPetType() {
-		when(petRepository.findById(1)).thenReturn(Optional.of(pet));
+		when(petRepository.findByIdAndStatus(1,PetStatus.REGISTERED)).thenReturn(Optional.of(pet));
 		when(petTypeRepository.findById(99)).thenReturn(Optional.empty());
 		petRequestDto.setTypeId(99);
 
@@ -255,7 +256,7 @@ public class PetServiceTest {
 			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.INVALID_PET_TYPE.getDescription());
 
-		verify(petRepository, times(1)).findById(1);
+		verify(petRepository, times(1)).findByIdAndStatus(1,PetStatus.REGISTERED);
 		verify(petTypeRepository, times(1)).findById(99);
 		verifyNoInteractions(ownerRepository, petMapper);
 	}
@@ -263,7 +264,7 @@ public class PetServiceTest {
 	@Test
 	@DisplayName("Pet 수정 실패 - Invalid Owner")
 	void updatePet_Failure_InvalidOwner() {
-		when(petRepository.findById(1)).thenReturn(Optional.of(pet));
+		when(petRepository.findByIdAndStatus(1,PetStatus.REGISTERED)).thenReturn(Optional.of(pet));
 		when(petTypeRepository.findById(1)).thenReturn(Optional.of(petType));
 		when(ownerRepository.findById(99)).thenReturn(Optional.empty());
 		petRequestDto.setOwnerId(99);
@@ -272,7 +273,7 @@ public class PetServiceTest {
 			.isInstanceOf(ApiException.class)
 			.hasMessage(PetErrorCode.INVALID_OWNER.getDescription());
 
-		verify(petRepository, times(1)).findById(1);
+		verify(petRepository, times(1)).findByIdAndStatus(1,PetStatus.REGISTERED);
 		verify(petTypeRepository, times(1)).findById(1);
 		verify(ownerRepository, times(1)).findById(99);
 		verifyNoInteractions(petMapper);

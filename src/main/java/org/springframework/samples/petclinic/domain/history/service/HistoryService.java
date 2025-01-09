@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.domain.history.model.History;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
 import org.springframework.samples.petclinic.domain.history.repository.HistoryRepository;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
@@ -60,10 +61,10 @@ public class HistoryService {
 	 */
 	public List<HistoryResponseDto> getHistoriesByPetId(int petId) {
 
-		Pet pet = petRepository.findById(petId)
+		Pet pet = petRepository.findByIdAndStatus(petId, PetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
-		return historyRepository.findAllByVisitId_PetId(pet)
+		return historyRepository.findAllByVisitId_PetId(pet.getId())
 			.stream()
 			.map(historyMapper::toDto)
 			.collect(Collectors.toList());

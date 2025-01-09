@@ -3,6 +3,7 @@ package org.springframework.samples.petclinic.domain.visit.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
@@ -33,7 +34,7 @@ public class VisitService {
      * @return VisitResponseDto 저장된 방문 정보 반환
      */
     public VisitResponseDto createVisit(VisitRequestDto requestDto) {
-		Pet pet = petRepository.findById(requestDto.getPetId())
+		Pet pet = petRepository.findByIdAndStatus(requestDto.getPetId(),PetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
 		Visit visit = visitMapper.toEntity(requestDto, pet);
@@ -48,7 +49,7 @@ public class VisitService {
      * @return 방문 내역 목록 응답 DTO
      */
     public List<VisitResponseDto> getVisitsByPetId(int petId) {
-        Pet pet = petRepository.findById(petId)
+        Pet pet = petRepository.findByIdAndStatus(petId, PetStatus.REGISTERED)
                 .orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
         return visitRepository.findAllByPet(pet)
