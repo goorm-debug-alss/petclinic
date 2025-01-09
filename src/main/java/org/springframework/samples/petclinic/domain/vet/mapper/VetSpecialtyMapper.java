@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.domain.vet.convert;
+package org.springframework.samples.petclinic.domain.vet.mapper;
 
 import org.springframework.samples.petclinic.domain.vet.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class VetSpecialtyConvert {
+public class VetSpecialtyMapper {
 
 	public List<VetSpeciality> toEntityList(Vet vet, List<Specialty> specialties) {
 		return specialties.stream()

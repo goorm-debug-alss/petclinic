@@ -1,17 +1,17 @@
-package org.springframework.samples.petclinic.domain.vet.convert;
+package org.springframework.samples.petclinic.domain.vet.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.domain.vet.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-import org.springframework.samples.petclinic.domain.vet.service.SpecialityService;
+import org.springframework.samples.petclinic.domain.vet.service.SpecialtyService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VetConvert {
+public class VetMapper {
 
 	@Autowired
-	private SpecialityService specialityService;
+	private SpecialtyService specialtyService;
 
 	public Vet toEntity(VetRequestDto vetRequestDto) {
 		return Vet.builder()
@@ -25,7 +25,7 @@ public class VetConvert {
 			.name(vet.getName())
 			.averageRatings(vet.getAverageRatings())
 			.reviewCount(vet.getReviewCount())
-			.specialties(specialityService.find(vet.getId()))
+			.specialties(specialtyService.find(vet.getId()))
 			.build();
 	}
 }
