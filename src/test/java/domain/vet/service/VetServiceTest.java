@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.SpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.mapper.VetSpecialtyMapper;
 import org.springframework.samples.petclinic.domain.vet.model.Specialty;
@@ -100,7 +101,7 @@ public class VetServiceTest {
 	}
 
 	void sampleExpectedVetResponse(){
-		expectedVetResponseDto = new VetResponseDto(vet.getId(), vet.getName(), null, null, List.of(specialty));
+		expectedVetResponseDto = new VetResponseDto(vet.getId(), vet.getName(), null, null, "REGISTERED", List.of(specialty));
 	}
 
 	void sampleSpeciality2(){
@@ -179,7 +180,7 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("수의사 전체 조회 성공")
 	void viewAllVetSuccess() {
-		when(vetRepository.findAllByOrderById()).thenReturn(List.of(vet));
+		when(vetRepository.findAllByStatusOrderById(VetStatus.REGISTERED)).thenReturn(List.of(vet));
 		when(vetMapper.toResponse(vet)).thenReturn(expectedVetResponseDto);
 
 		List<VetResponseDto> result = vetService.findAll();
@@ -191,7 +192,7 @@ public class VetServiceTest {
 		assertThat(result.get(0).getSpecialties()).isNotEmpty();
 		assertThat(result.get(0).getSpecialties().get(0).getName()).isEqualTo(specialty.getName());
 
-		verify(vetRepository, times(1)).findAllByOrderById();
+		verify(vetRepository, times(1)).findAllByStatusOrderById(VetStatus.REGISTERED);
 		verify(vetMapper, times(1)).toResponse(vet);
 
 		verifyNoMoreInteractions(vetRepository, vetMapper);
@@ -200,33 +201,33 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("수의사 전체 조회 실패 - 빈 리스트 반환")
 	void viewAllVetFailure_emptyList() {
-		when(vetRepository.findAllByOrderById()).thenReturn(List.of());
+		when(vetRepository.findAllByStatusOrderById(VetStatus.REGISTERED)).thenReturn(List.of());
 
 		List<VetResponseDto> result = vetService.findAll();
 
 		assertThat(result).isNotNull();
 		assertThat(result).isEmpty();
 
-		verify(vetRepository, times(1)).findAllByOrderById();
+		verify(vetRepository, times(1)).findAllByStatusOrderById(VetStatus.REGISTERED);
 		verifyNoInteractions(vetMapper);
 	}
 
 	@Test
 	@DisplayName("수의사 전체 조회 실패 - 예외 발생")
 	void viewAllVetFailure_exception() {
-		when(vetRepository.findAllByOrderById()).thenThrow(new RuntimeException("수의사 전체 조회 예외 발생"));
+		when(vetRepository.findAllByStatusOrderById(VetStatus.REGISTERED)).thenThrow(new RuntimeException("수의사 전체 조회 예외 발생"));
 
 		assertThatThrownBy(() -> vetService.findAll()).isInstanceOf(RuntimeException.class)
 			.hasMessage("수의사 전체 조회 예외 발생");
 
-		verify(vetRepository, times(1)).findAllByOrderById();
+		verify(vetRepository, times(1)).findAllByStatusOrderById(VetStatus.REGISTERED);
 		verifyNoInteractions(vetMapper);
 	}
 
 	@Test
 	@DisplayName("특정 수의사 조회 성공")
 	void viewVetByIdSuccess() {
-		when(vetRepository.findById(1)).thenReturn(Optional.ofNullable(vet));
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.ofNullable(vet));
 		when(vetMapper.toResponse(vet)).thenReturn(expectedVetResponseDto);
 
 		VetResponseDto result = vetService.findById(1);
@@ -237,7 +238,7 @@ public class VetServiceTest {
 		assertThat(result.getSpecialties()).isNotEmpty();
 		assertThat(result.getSpecialties().get(0).getName()).isEqualTo(specialty.getName());
 
-		verify(vetRepository, times(1)).findById(1);
+		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
 		verify(vetMapper, times(1)).toResponse(vet);
 
 		verifyNoMoreInteractions(vetRepository, vetMapper);
@@ -246,25 +247,28 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("특정 수의사 조회 실패 - 해당 아이디에 해당하는 수의사가 존재하지 않을 때")
 	void viewVetByIdFailure_notFound() {
-		when(vetRepository.findById(2)).thenReturn(Optional.empty());
+		when(vetRepository.findByIdAndStatus(111, VetStatus.REGISTERED)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> vetService.findById(2))
+		assertThatThrownBy(() -> vetService.getVetOrThrow(111))
 			.isInstanceOf(ApiException.class)
 			.hasMessageContaining("해당 수의사가 존재하지 않습니다.");
 
-		verify(vetRepository, times(1)).findById(2);
+		verify(vetRepository, times(1)).findByIdAndStatus(111, VetStatus.REGISTERED);
 		verifyNoInteractions(vetMapper);
 	}
 
 	@Test
-	@DisplayName("전문 분아별 수의사 조회 성공")
+	@DisplayName("전문 분야별 수의사 조회 성공")
 	void viewVetBySpecialtySuccess() {
+		// Given
 		when(vetSpecialtyRepository.findVetIdsBySpecialtyId_Id(1)).thenReturn(List.of(vetSpeciality));
-		when(vetRepository.findAllById(List.of(vet.getId()))).thenReturn(List.of(vet));
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.of(vet));
 		when(vetMapper.toResponse(vet)).thenReturn(expectedVetResponseDto);
 
+		// When
 		List<VetResponseDto> result = vetService.findBySpecialtyId(1);
 
+		// Then
 		assertThat(result).isNotNull();
 		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getId()).isEqualTo(expectedVetResponseDto.getId());
@@ -273,9 +277,8 @@ public class VetServiceTest {
 		assertThat(result.get(0).getSpecialties().get(0).getName()).isEqualTo(specialty.getName());
 
 		verify(vetSpecialtyRepository, times(1)).findVetIdsBySpecialtyId_Id(1);
-		verify(vetRepository, times(1)).findAllById(List.of(vet.getId()));
+		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
 		verify(vetMapper, times(1)).toResponse(vet);
-
 		verifyNoMoreInteractions(vetSpecialtyRepository, vetRepository, vetMapper);
 	}
 
@@ -295,55 +298,55 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("수의사 삭제 성공")
 	void deleteVetSuccess() {
-		when(vetRepository.findById(1)).thenReturn(Optional.of(vet));
-		doNothing().when(vetRepository).delete(vet);
+		// Given
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.of(vet));
 
+		// When
 		vetService.delete(1);
 
-		verify(vetRepository, times(1)).findById(1);
-		verify(vetRepository, times(1)).delete(vet);
-		verify(vetSpecialtyRepository, times(1)).deleteAllByVetId_Id(1);
-
-		verifyNoMoreInteractions(vetRepository);
+		// Then
+		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
+		verifyNoMoreInteractions(vetRepository, vetSpecialtyRepository);
 	}
 
 	@Test
 	@DisplayName("수의사 삭제 성공 - 관련 전공 연결 삭제 확인")
 	void deleteVetSuccess_withSpecialities() {
-		when(vetRepository.findById(1)).thenReturn(Optional.of(vet));
-		doNothing().when(vetRepository).delete(vet);
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.of(vet));
 
 		vetService.delete(1);
 
+		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
 		verify(vetSpecialtyRepository, times(1)).deleteAllByVetId_Id(1);
-		verify(vetRepository, times(1)).delete(vet);
+		assertThat(vet.getStatus()).isEqualTo(VetStatus.DELETED);
 
 		verifyNoMoreInteractions(vetRepository, vetSpecialtyRepository);
 	}
 
-
 	@Test
 	@DisplayName("수의사 삭제 실패 - 해당 아이디에 해당하는 수의사가 존재하지 않을 때")
 	void deleteVetFailure_notFound() {
-		when(vetRepository.findById(222)).thenReturn(Optional.empty());
+		// Given
+		when(vetRepository.findByIdAndStatus(222, VetStatus.REGISTERED)).thenReturn(Optional.empty());
 
+		// When & Then
 		assertThatThrownBy(() -> vetService.delete(222))
 			.isInstanceOf(ApiException.class)
 			.hasMessageContaining("해당 수의사가 존재하지 않습니다.");
 
+		verify(vetRepository, times(1)).findByIdAndStatus(222, VetStatus.REGISTERED);
 		verify(vetRepository, never()).delete(any());
-
-		verifyNoMoreInteractions(vetRepository, vetSpecialtyRepository);
+		verifyNoInteractions(vetSpecialtyRepository);
 	}
 
 	@Test
 	@DisplayName("수의사 전공 수정 성공")
 	void updateVetSuccess_Speciality() {
-		when(vetRepository.findById(1)).thenReturn(Optional.ofNullable(vet));
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.ofNullable(vet));
 		when(specialtyService.findByIds(new ArrayList<>(List.of(2)))).thenReturn(List.of(specialty2));
 		when(vetSpecialtyMapper.toEntityList(vet, List.of(specialty2))).thenReturn(List.of(vetSpeciality));
 		when(vetMapper.toResponse(vet)).thenReturn(
-			new VetResponseDto(vet.getId(), vet.getName(), null, null, List.of(specialty2)));
+			new VetResponseDto(vet.getId(), vet.getName(), null, null, "REGISTERED", List.of(specialty2)));
 
 		VetRequestDto updateDto = new VetRequestDto(null, new ArrayList<>(List.of(2)));
 
@@ -356,7 +359,7 @@ public class VetServiceTest {
 		assertThat(result.getSpecialties().get(0).getId()).isEqualTo(2);
 		assertThat(result.getSpecialties().get(0).getName()).isEqualTo("소아과");
 
-		verify(vetRepository, times(1)).findById(1);
+		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
 		verify(vetSpecialtyRepository, times(1)).deleteAllByVetId_Id(1);
 		verify(specialtyService, times(1)).findByIds(new ArrayList<>(List.of(2)));
 		verify(vetSpecialtyMapper, times(1)).toEntityList(vet, List.of(specialty2));
@@ -370,7 +373,7 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("수의사 이름 변경 성공")
 	void updateVetSuccess_Name() {
-		when(vetRepository.findById(1)).thenReturn(Optional.ofNullable(vet));
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.ofNullable(vet));
 		when(vetMapper.toResponse(vet)).thenReturn(expectedVetResponseDto);
 
 		VetRequestDto updateDto = new VetRequestDto("이름수정", null);
@@ -382,7 +385,7 @@ public class VetServiceTest {
 		assertThat(result.getSpecialties()).isNotEmpty();
 		assertThat(result.getSpecialties().size()).isEqualTo(1);
 
-		verify(vetRepository, times(1)).findById(1);
+		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
 		verify(vetRepository, times(1)).save(any(Vet.class));
 		verify(vetMapper, times(1)).toResponse(vet);
 
@@ -392,20 +395,20 @@ public class VetServiceTest {
 	@Test
 	@DisplayName("수의사 정보 변경 실패 - 해당 아이디 수의사를 찾을 수 없는 경우")
 	void updateVetFailure_notFound() {
-		when(vetRepository.findById(222)).thenReturn(Optional.empty());
+		when(vetRepository.findByIdAndStatus(222, VetStatus.REGISTERED)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> vetService.update(222, vetRequestDto))
 			.isInstanceOf(ApiException.class)
 			.hasMessageContaining("해당 수의사가 존재하지 않습니다.");
 
-		verify(vetRepository, times(1)).findById(222);
+		verify(vetRepository, times(1)).findByIdAndStatus(222, VetStatus.REGISTERED);
 		verifyNoInteractions(vetMapper);
 	}
 
 	@Test
 	@DisplayName("수의사 전공 수정 실패 - 전공이 없는 경우")
 	void updateVetFailure_NoSpeciality() {
-		when(vetRepository.findById(1)).thenReturn(Optional.ofNullable(vet));
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.ofNullable(vet));
 		when(specialtyService.findByIds(new ArrayList<>(List.of(222))))
 			.thenThrow(new ApiException(SpecialityErrorCode.NO_SPECIALITY));
 

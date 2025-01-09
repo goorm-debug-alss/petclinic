@@ -21,7 +21,9 @@ import org.springframework.samples.petclinic.domain.history.service.HistoryServi
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 
@@ -44,7 +46,7 @@ class HistoryServiceTest {
 	private HistoryRepository historyRepository;
 
 	@Mock
-	private VetRepository vetRepository;
+	private VetService vetService;
 
 	@Mock
 	private VisitRepository visitRepository;
@@ -72,6 +74,7 @@ class HistoryServiceTest {
 		vet = Vet.builder()
 			.id(1)
 			.name("Vet A")
+			.status(VetStatus.REGISTERED)
 			.build();
 
 		visit = Visit.builder()
@@ -103,7 +106,7 @@ class HistoryServiceTest {
 	@DisplayName("진료 내역 추가 성공")
 	void addHistory_Success() {
 		// Given
-		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.of(vet));
+		when(vetService.getVetOrThrow(eq(requestDto.getVetId()))).thenReturn(vet);
 		when(visitRepository.findById(eq(requestDto.getVisitId()))).thenReturn(Optional.of(visit));
 		when(historyMapper.toEntity(eq(requestDto), eq(vet), eq(visit))).thenReturn(history);
 		when(historyRepository.save(any(History.class))).thenReturn(history);
@@ -114,7 +117,7 @@ class HistoryServiceTest {
 
 		// Then
 		assertThat(result).isNotNull();
-		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
+		verify(vetService, times(1)).getVetOrThrow(eq(requestDto.getVetId()));
 		verify(visitRepository, times(1)).findById(eq(requestDto.getVisitId()));
 		verify(historyMapper, times(1)).toEntity(eq(requestDto), eq(vet), eq(visit));
 		verify(historyRepository, times(1)).save(eq(history));
@@ -126,7 +129,7 @@ class HistoryServiceTest {
 	@DisplayName("진료 내역 생성 실패 - 수의사 없음")
 	void addHistory_Fail_VetNotFound() {
 		// Given
-		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.empty());
+		when(vetService.getVetOrThrow(eq(requestDto.getVetId()))).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.addHistory(requestDto))
@@ -134,7 +137,7 @@ class HistoryServiceTest {
 			.hasFieldOrPropertyWithValue("errorCodeInterface", VetErrorCode.NO_VET)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 수의사가 존재하지 않습니다.");
 
-		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
+		verify(vetService, times(1)).getVetOrThrow(eq(requestDto.getVetId()));
 		verifyNoInteractions(visitRepository);
 		verify(historyRepository, times(0)).save(any(History.class));
 	}
@@ -143,7 +146,7 @@ class HistoryServiceTest {
 	@DisplayName("진료 내역 생성 실패 - 방문 내역 없음")
 	void addHistory_Fail_VisitNotFound() {
 		// Given
-		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.of(vet));
+		when(vetService.getVetOrThrow(eq(requestDto.getVetId()))).thenReturn(vet);
 		when(visitRepository.findById(eq(requestDto.getVisitId()))).thenReturn(Optional.empty());
 
 		// When, Then
@@ -152,7 +155,7 @@ class HistoryServiceTest {
 			.hasFieldOrPropertyWithValue("errorCodeInterface", VisitErrorCode.NO_VISIT)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 방문내역이 존재하지 않습니다.");
 
-		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
+		verify(vetService, times(1)).getVetOrThrow(eq(requestDto.getVetId()));
 		verify(visitRepository, times(1)).findById(eq(requestDto.getVisitId()));
 		verify(historyRepository, times(0)).save(any(History.class));
 	}
@@ -214,7 +217,7 @@ class HistoryServiceTest {
 	void updateHistory_Success() {
 		// Given
 		when(historyRepository.findById(eq(history.getId()))).thenReturn(Optional.of(history));
-		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.of(vet));
+		when(vetService.getVetOrThrow(eq(requestDto.getVetId()))).thenReturn(vet);
 		when(visitRepository.findById(eq(requestDto.getVisitId()))).thenReturn(Optional.of(visit));
 		when(historyRepository.save(any(History.class))).thenReturn(history);
 		when(historyMapper.toDto(eq(history))).thenReturn(responseDto);
@@ -243,7 +246,7 @@ class HistoryServiceTest {
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 진료내역이 존재하지 않습니다.");
 
 		verify(historyRepository, times(1)).findById(eq(history.getId()));
-		verifyNoInteractions(vetRepository);
+		verifyNoInteractions(vetService);
 		verifyNoInteractions(visitRepository);
 		verify(historyRepository, times(0)).save(any(History.class));
 	}
@@ -253,7 +256,7 @@ class HistoryServiceTest {
 	void updateHistory_Fail_VetNotFound() {
 		// Given
 		when(historyRepository.findById(eq(history.getId()))).thenReturn(Optional.of(history));
-		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.empty());
+		when(vetService.getVetOrThrow(eq(requestDto.getVetId()))).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.updateHistory(history.getId(), requestDto))
@@ -262,7 +265,7 @@ class HistoryServiceTest {
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 수의사가 존재하지 않습니다.");
 
 		verify(historyRepository, times(1)).findById(eq(history.getId()));
-		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
+		verify(vetService, times(1)).getVetOrThrow(eq(requestDto.getVetId()));
 		verifyNoInteractions(visitRepository);
 		verify(historyRepository, times(0)).save(any(History.class));
 	}
@@ -272,7 +275,7 @@ class HistoryServiceTest {
 	void updateHistory_Fail_VisitNotFound() {
 		// Given
 		when(historyRepository.findById(eq(history.getId()))).thenReturn(Optional.of(history));
-		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.of(vet));
+		when(vetService.getVetOrThrow(eq(requestDto.getVetId()))).thenReturn(vet);
 		when(visitRepository.findById(eq(requestDto.getVisitId()))).thenReturn(Optional.empty());
 
 		// When, Then
@@ -282,7 +285,7 @@ class HistoryServiceTest {
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 방문내역이 존재하지 않습니다.");
 
 		verify(historyRepository, times(1)).findById(eq(history.getId()));
-		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
+		verify(vetService, times(1)).getVetOrThrow(eq(requestDto.getVetId()));
 		verify(visitRepository, times(1)).findById(eq(requestDto.getVisitId()));
 		verify(historyRepository, times(0)).save(any(History.class));
 	}

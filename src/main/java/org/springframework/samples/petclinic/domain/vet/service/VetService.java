@@ -78,6 +78,7 @@ public class VetService {
 	@Transactional
 	public void delete(int vetId) {
 		Vet vet = getVetOrThrow(vetId);
+		vetSpecialtyRepository.deleteAllByVetId_Id(vetId);
 		vet.setStatus(VetStatus.DELETED);
 	}
 
