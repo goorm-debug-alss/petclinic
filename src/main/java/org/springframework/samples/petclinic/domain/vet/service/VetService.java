@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.dto.VetRequestDto;
@@ -46,16 +47,14 @@ public class VetService {
 
 	// 수의사 전체 조회
 	public List<VetResponseDto> findAll() {
-		return vetRepository.findAllByOrderById().stream()
+		return vetRepository.findAllByStatusOrderById(VetStatus.REGISTERED).stream()
 			.map(vetMapper::toResponse)
 			.collect(Collectors.toList());
 	}
 
 	// 특정 수의사 조회
 	public VetResponseDto findById(int vetId) {
-		return vetRepository.findById(vetId)
-			.map(vetMapper::toResponse)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
+		return vetMapper.toResponse(getVetOrThrow(vetId));
 	}
 
 	// 전문 분야별 수의사 조회
@@ -63,15 +62,14 @@ public class VetService {
 		var vetIds = vetSpecialtyRepository.findVetIdsBySpecialtyId_Id(specialtyId)
 			.stream()
 			.map(vs -> vs.getVet().getId())
-			.collect(Collectors.toList());
+			.toList();
 
 		if (vetIds.isEmpty()) {
 			throw new ApiException(SpecialityErrorCode.NO_SPECIALITY);
 		}
 
-		return Optional.of(vetRepository.findAllById(vetIds))
-			.orElse(Collections.emptyList())
-			.stream()
+		return vetIds.stream()
+			.map(this::getVetOrThrow)
 			.map(vetMapper::toResponse)
 			.collect(Collectors.toList());
 	}
@@ -79,18 +77,15 @@ public class VetService {
 	// 수의사 삭제
 	@Transactional
 	public void delete(int vetId) {
-		Vet vet = vetRepository.findById(vetId)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
-
+		Vet vet = getVetOrThrow(vetId);
 		vetSpecialtyRepository.deleteAllByVetId_Id(vetId);
-		vetRepository.delete(vet);
+		vet.setStatus(VetStatus.DELETED);
 	}
 
 	// 수의사 수정
 	@Transactional
 	public VetResponseDto update(int id, VetRequestDto vetRequestDto) {
-		Vet vet = vetRepository.findById(id)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
+		Vet vet = getVetOrThrow(id);
 
 		// 이름 수정
 		Optional.ofNullable(vetRequestDto.getName()).ifPresent(vet::setName);
@@ -121,5 +116,11 @@ public class VetService {
 		if (vetRequestDto.getSpecialties() == null || vetRequestDto.getSpecialties().isEmpty()) {
 			throw new ApiException(VetErrorCode.NULL_SPECIALITY);
 		}
+	}
+
+	// 수의사 등록 상태 확인
+	public Vet getVetOrThrow(int id) {
+		return vetRepository.findByIdAndStatus(id, VetStatus.REGISTERED)
+			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 }

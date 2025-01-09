@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.samples.petclinic.domain.appointment.service.CreateAppointmentService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
-import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public class CreateAppointmentServiceTest {
 	private AppointmentRepository appointmentRepository;
 
 	@Mock
-	private VetRepository vetRepository;
+	private VetService vetService;
 
 	@Mock
 	private PetRepository petRepository;
@@ -65,7 +65,7 @@ public class CreateAppointmentServiceTest {
 	@DisplayName("예약 생성 성공 - 유효한 요청 데이터를 제공하면 예약이 성공적으로 생성된다")
 	void validRequestData_createAppointment_createSuccessfully() {
 		// given
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
 		when(petRepository.findById(1)).thenReturn(Optional.of(mockPet));
 		when(appointmentMapper.toEntity(request, mockPet, mockVet)).thenReturn(mockAppointment);
 		when(appointmentRepository.save(any(Appointment.class))).thenReturn(mockAppointment);
@@ -86,7 +86,7 @@ public class CreateAppointmentServiceTest {
 	@DisplayName("예약 생성 실패 - 유효하지 않은 수의사 ID가 제공되었을 때, 에러가 발생한다")
 	void invalidVetId_createAppointment_throwsException() {
 		// given
-		when(vetRepository.findById(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
+		when(vetService.getVetOrThrow(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// when & then
 		assertThrows(ApiException.class, () -> createAppointmentService.createAppointment(request));
@@ -96,7 +96,7 @@ public class CreateAppointmentServiceTest {
 	@DisplayName("예약 생성 실패 - 유효하지 않은 동물 ID가 제공되었을 때, 에러가 발생한다")
 	void invalidPetId_createAppointment_throwsException() {
 		// given
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
 		when(petRepository.findById(1)).thenThrow(new ApiException(PetErrorCode.NO_PET));
 
 		// when & then
@@ -123,7 +123,7 @@ public class CreateAppointmentServiceTest {
 	@DisplayName("예약 생성 실패 - 동일 시간에 중복된 예약 요청이 있을 경우 예외가 발생한다")
 	void duplicateAppointment_createAppointment_throwsException() {
 		// given
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockVet);
 		when(petRepository.findById(1)).thenReturn(Optional.of(mockPet));
 		when(appointmentRepository.existsByPetAndVetAndApptDateTime(mockPet, mockVet, request.getApptDateTime()))
 			.thenReturn(true);

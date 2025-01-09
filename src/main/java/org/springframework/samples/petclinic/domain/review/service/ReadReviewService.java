@@ -8,6 +8,7 @@ import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto
 import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +54,7 @@ public class ReadReviewService {
 	}
 
 	private void validateVetExists(Integer vetId) {
-		vetRepository.findById(vetId)
+		vetRepository.findByIdAndStatus(vetId, VetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 }

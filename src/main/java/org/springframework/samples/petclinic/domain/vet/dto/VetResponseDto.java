@@ -22,5 +22,7 @@ public class VetResponseDto {
 
 	private Integer reviewCount;
 
+	private String status;
+
 	private List<Specialty> specialties;
 }
