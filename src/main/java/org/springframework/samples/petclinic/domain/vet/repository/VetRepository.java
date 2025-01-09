@@ -1,8 +1,6 @@
 package org.springframework.samples.petclinic.domain.vet.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 

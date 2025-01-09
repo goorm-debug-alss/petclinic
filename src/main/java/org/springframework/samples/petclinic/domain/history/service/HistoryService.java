@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.HistoryErrorCode;
 import org.springframework.samples.petclinic.common.error.PetErrorCode;
-import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.error.VisitErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.history.mapper.HistoryMapper;

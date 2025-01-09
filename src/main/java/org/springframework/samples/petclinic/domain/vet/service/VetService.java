@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
-import org.springframework.samples.petclinic.domain.appointment.dto.AppointmentRequestDto;
 import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;
