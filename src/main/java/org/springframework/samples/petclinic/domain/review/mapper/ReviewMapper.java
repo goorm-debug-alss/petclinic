@@ -16,8 +16,8 @@ public class ReviewMapper {
 			.score(review.getScore())
 			.content(review.getContent())
 			.createAt(review.getCreatedAt())
-			.vetId(review.getVetId().getId())
-			.ownerId(review.getOwnerId().getId())
+			.vetId(review.getVet().getId())
+			.ownerId(review.getOwner().getId())
 			.build();
 	}
 
@@ -25,8 +25,8 @@ public class ReviewMapper {
 		return Review.builder()
 			.score(request.getScore())
 			.content(request.getContent())
-			.ownerId(owner)
-			.vetId(vet)
+			.owner(owner)
+			.vet(vet)
 			.build();
 	}
 }

@@ -24,9 +24,9 @@ public class History extends BaseEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "vet_id")
-	private Vet vetId;
+	private Vet vet;
 
 	@OneToOne
 	@JoinColumn(name = "visit_id")
-	private Visit visitId;
+	private Visit visit;
 }

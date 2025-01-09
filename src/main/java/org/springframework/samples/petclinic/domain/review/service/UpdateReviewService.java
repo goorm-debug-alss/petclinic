@@ -12,7 +12,7 @@ import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto
 import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
 
@@ -72,12 +72,12 @@ public class UpdateReviewService {
 		Owner owner = ownerRepository.findById(ownerId)
 			.orElseThrow(() -> new ApiException(OwnerErrorCode.NO_OWNER));
 
-		if (!review.getOwnerId().getId().equals(owner.getId()))
+		if (!review.getOwner().getId().equals(owner.getId()))
 			throw new ApiException(ReviewErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
 	}
 
 	private Vet getVetOrThrow(Review review) {
-		return vetRepository.findById(review.getVetId().getId())
+		return vetRepository.findById(review.getVet().getId())
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 

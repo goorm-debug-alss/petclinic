@@ -14,10 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.samples.petclinic.PetClinicApplication;
 import org.springframework.samples.petclinic.domain.token.helper.JwtTokenHelper;
-import org.springframework.samples.petclinic.domain.vet.SpecialityRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
-import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
-import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
+import org.springframework.samples.petclinic.domain.vet.repository.SpecialtyRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.dto.VetRequestDto;
+import org.springframework.samples.petclinic.domain.vet.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.model.Specialty;
 import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,7 +48,7 @@ public class VetControllerTest {
 	private VetService vetService;
 
 	@Autowired
-	private SpecialityRepository specialityRepository;
+	private SpecialtyRepository specialtyRepository;
 
 	private VetRequestDto vetRequestDto;
 
@@ -66,11 +66,11 @@ public class VetControllerTest {
 	void sampleVetRequestDto() {
 		Specialty specialty1 = new Specialty();
 		specialty1.setName("외과");
-		specialityRepository.save(specialty1);
+		specialtyRepository.save(specialty1);
 
 		Specialty specialty2 = new Specialty();
 		specialty2.setName("치과");
-		specialityRepository.save(specialty2);
+		specialtyRepository.save(specialty2);
 
 		vetRequestDto = new VetRequestDto();
 		vetRequestDto.setName("테스트");

@@ -26,7 +26,7 @@ public class ReviewResponseDto {
 		this.score = review.getScore();
 		this.content = review.getContent();
 		this.createAt = LocalDateTime.now();
-		this.vetId = review.getVetId().getId();
-		this.ownerId = review.getOwnerId().getId();
+		this.vetId = review.getVet().getId();
+		this.ownerId = review.getOwner().getId();
 	}
 }
