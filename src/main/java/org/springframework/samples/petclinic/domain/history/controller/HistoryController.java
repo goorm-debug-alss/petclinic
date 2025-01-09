@@ -37,7 +37,7 @@ public class HistoryController {
 	 * @return 방문 내역 목록
 	 */
 	@GetMapping("/{petId}")
-	public ResponseEntity<List<HistoryResponseDto>> getHistoriesByPetId(@PathVariable int petId) {
+	public ResponseEntity<List<HistoryResponseDto>> getHistoriesByPetId(@PathVariable("petId") int petId) {
 		List<HistoryResponseDto> response = historyService.getHistoriesByPetId(petId);
 		return ResponseEntity.ok(response);
 	}
@@ -49,7 +49,7 @@ public class HistoryController {
 	 * @return 수정된 진료 내역
 	 */
 	@PutMapping("/{historyId}")
-	public ResponseEntity<?> updateHistory(@PathVariable int historyId,@Valid @RequestBody HistoryRequestDto request) {
+	public ResponseEntity<?> updateHistory(@PathVariable("historyId") int historyId,@Valid @RequestBody HistoryRequestDto request) {
 		HistoryResponseDto response = historyService.updateHistory(historyId,request);
 		return ResponseEntity.ok(response);
 	}
@@ -61,7 +61,7 @@ public class HistoryController {
 	 * @return 삭제 결과 메시지
 	 */
 	@DeleteMapping("/{historyId}")
-	public ResponseEntity<?> deleteHistory(@PathVariable int historyId) {
+	public ResponseEntity<?> deleteHistory(@PathVariable("historyId") int historyId) {
 		historyService.deleteHistory(historyId);
 		return ResponseEntity.ok("History deleted successfully.");
 	}

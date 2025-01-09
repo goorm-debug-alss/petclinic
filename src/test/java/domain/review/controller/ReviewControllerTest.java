@@ -15,7 +15,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.samples.petclinic.PetClinicApplication;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.token.helper.JwtTokenHelper;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;

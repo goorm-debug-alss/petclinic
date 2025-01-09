@@ -1,8 +1,8 @@
 package org.springframework.samples.petclinic.domain.vet.convert;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.domain.vet.controller.dto.VetRequestDto;
-import org.springframework.samples.petclinic.domain.vet.controller.dto.VetResponseDto;
+import org.springframework.samples.petclinic.domain.vet.dto.VetRequestDto;
+import org.springframework.samples.petclinic.domain.vet.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.domain.vet.service.SpecialityService;
 import org.springframework.stereotype.Component;

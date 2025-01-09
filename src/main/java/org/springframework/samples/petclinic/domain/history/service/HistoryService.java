@@ -7,14 +7,15 @@ import org.springframework.samples.petclinic.common.error.PetErrorCode;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.error.VisitErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.history.mapper.HistoryMapper;
 import org.springframework.samples.petclinic.domain.history.model.History;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
 import org.springframework.samples.petclinic.domain.history.repository.HistoryRepository;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,10 @@ import java.util.stream.Collectors;
 public class HistoryService {
 
 	private final HistoryRepository historyRepository;
+	private final PetRepository petRepository;
 	private final VetRepository vetRepository;
 	private final VisitRepository visitRepository;
-	private final PetRepository petRepository;
-
+	private final HistoryMapper historyMapper;
 
 	/**
 	 * 진료 내역 생성
@@ -41,50 +42,17 @@ public class HistoryService {
 	 * @return HistoryResponseDto 저장된 진료 정보 반환
 	 */
 	public HistoryResponseDto addHistory(HistoryRequestDto requestDto) {
-
-		History history = createHistoryEntity(requestDto);
-		History savedHistory = historyRepository.save(history);
-
-		return buildResponseDto(savedHistory);
-	}
-
-
-	/**
-	 * History 엔티티 생성
-	 *
-	 * @param requestDto 요청 DTO
-	 * @return 생성된 History 객체
-	 */
-	private History createHistoryEntity(HistoryRequestDto requestDto) {
 		Vet vet = vetRepository.findById(requestDto.getVetId())
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 		Visit visit = visitRepository.findById(requestDto.getVisitId())
 			.orElseThrow(() -> new ApiException(VisitErrorCode.NO_VISIT));
 
-		return History.builder()
-			.symptoms(requestDto.getSymptoms())
-			.content(requestDto.getContent())
-			.vetId(vet)
-			.visitId(visit)
-			.build();
+		History history = historyMapper.toEntity(requestDto, vet, visit);
+		History savedHistory = historyRepository.save(history);
+
+		return historyMapper.toDto(savedHistory);
 	}
 
-	/**
-	 * History 객체를 기반으로 응답 DTO 생성
-	 *
-	 * @param history 저장된 History 객체
-	 * @return HistoryResponseDto 반환
-	 */
-	private HistoryResponseDto buildResponseDto(History history) {
-
-		return HistoryResponseDto.builder()
-			.historyId(history.getId())
-			.symptoms(history.getSymptoms())
-			.content(history.getContent())
-			.vetId(history.getVetId().getId())
-			.visitId(history.getVisitId().getId())
-			.build();
-	}
 
 	/**
 	 * 특정 반려동물의 진료 내역 전체 조회
@@ -99,13 +67,7 @@ public class HistoryService {
 
 		return historyRepository.findAllByVisitId_PetId(pet)
 			.stream()
-			.map(history -> HistoryResponseDto.builder()
-				.historyId(history.getId())
-				.symptoms(history.getSymptoms())
-				.content(history.getContent())
-				.vetId(history.getVetId().getId())
-				.visitId(history.getVisitId().getId())
-				.build())
+			.map(historyMapper::toDto)
 			.collect(Collectors.toList());
 
 	}
@@ -138,7 +100,7 @@ public class HistoryService {
 		History updateEntity = historyRepository.save(history);
 
 		//응답 DTO 생성
-		HistoryResponseDto historyResponseDto = buildResponseDto(updateEntity);
+		HistoryResponseDto historyResponseDto = historyMapper.toDto(updateEntity);
 
 		return historyResponseDto;
 	}

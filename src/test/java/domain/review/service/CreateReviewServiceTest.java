@@ -17,7 +17,7 @@ import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.CreateReviewService;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.domain.vet.controller.dto;
+package org.springframework.samples.petclinic.domain.vet.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

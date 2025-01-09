@@ -17,7 +17,7 @@ import org.springframework.samples.petclinic.domain.appointment.repository.Appoi
 import org.springframework.samples.petclinic.domain.appointment.service.UpdateAppointmentService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
 import java.time.LocalDateTime;

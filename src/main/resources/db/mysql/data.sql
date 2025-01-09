@@ -46,8 +46,8 @@ VALUES (1, '기침', '감기 진단 및 처방', 1, 1),
 
 -- 예약
 INSERT INTO `appointment` (`id`, `appt_date`, `status`, `symptoms`, `pet_id`, `vet_id`)
-VALUES (1, '2025-01-11', '완료', '발열 및 기침', 1, 1),
-       (2, '2025-5-10', '취소', '다리 부상', 2, 2);
+VALUES (1, '2025-01-11', 'COMPLETE', '발열 및 기침', 1, 1),
+       (2, '2025-5-10', 'CANCEL', '다리 부상', 2, 2);
 
 -- 리뷰
 INSERT INTO `review` (`id`, `score`, `content`, `created_at`, `vet_id`, `owner_id`)

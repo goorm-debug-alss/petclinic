@@ -14,13 +14,14 @@ import org.springframework.samples.petclinic.common.error.VisitErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
+import org.springframework.samples.petclinic.domain.history.mapper.HistoryMapper;
 import org.springframework.samples.petclinic.domain.history.model.History;
 import org.springframework.samples.petclinic.domain.history.repository.HistoryRepository;
 import org.springframework.samples.petclinic.domain.history.service.HistoryService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 
@@ -51,11 +52,15 @@ class HistoryServiceTest {
 	@Mock
 	private PetRepository petRepository;
 
+	@Mock
+	private HistoryMapper historyMapper;
+
 	private HistoryRequestDto requestDto;
 	private History history;
 	private Vet vet;
 	private Visit visit;
 	private Pet pet;
+	private HistoryResponseDto responseDto;
 
 	@BeforeEach
 	void setUp() {
@@ -84,6 +89,14 @@ class HistoryServiceTest {
 			.vetId(vet)
 			.visitId(visit)
 			.build();
+
+		responseDto = HistoryResponseDto.builder()
+			.historyId(history.getId())
+			.symptoms(history.getSymptoms())
+			.content(history.getContent())
+			.vetId(history.getVetId().getId())
+			.visitId(history.getVisitId().getId())
+			.build();
 	}
 
 	@Test
@@ -92,21 +105,22 @@ class HistoryServiceTest {
 		// Given
 		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.of(vet));
 		when(visitRepository.findById(eq(requestDto.getVisitId()))).thenReturn(Optional.of(visit));
+		when(historyMapper.toEntity(eq(requestDto), eq(vet), eq(visit))).thenReturn(history);
 		when(historyRepository.save(any(History.class))).thenReturn(history);
+		when(historyMapper.toDto(eq(history))).thenReturn(responseDto);
 
 		// When
-		HistoryResponseDto response = historyService.addHistory(requestDto);
+		HistoryResponseDto result = historyService.addHistory(requestDto);
 
 		// Then
-		assertThat(response).isNotNull();
-		assertThat(response.getHistoryId()).isEqualTo(history.getId());
-		assertThat(response.getSymptoms()).isEqualTo(history.getSymptoms());
-		assertThat(response.getContent()).isEqualTo(history.getContent());
-
+		assertThat(result).isNotNull();
 		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
 		verify(visitRepository, times(1)).findById(eq(requestDto.getVisitId()));
-		verify(historyRepository, times(1)).save(any(History.class));
+		verify(historyMapper, times(1)).toEntity(eq(requestDto), eq(vet), eq(visit));
+		verify(historyRepository, times(1)).save(eq(history));
+		verify(historyMapper, times(1)).toDto(eq(history));
 	}
+
 
 	@Test
 	@DisplayName("진료 내역 생성 실패 - 수의사 없음")
@@ -149,18 +163,16 @@ class HistoryServiceTest {
 		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
 		when(historyRepository.findAllByVisitId_PetId(eq(pet))).thenReturn(List.of(history));
+		when(historyMapper.toDto(eq(history))).thenReturn(responseDto);
 
 		// When
-		List<HistoryResponseDto> response = historyService.getHistoriesByPetId(pet.getId());
+		List<HistoryResponseDto> result = historyService.getHistoriesByPetId(pet.getId());
 
 		// Then
-		assertThat(response).isNotNull();
-		assertThat(response).hasSize(1);
-		assertThat(response.get(0).getHistoryId()).isEqualTo(history.getId());
-		assertThat(response.get(0).getSymptoms()).isEqualTo(history.getSymptoms());
-
-		verify(petRepository, times(1)).findById(eq(pet.getId()));
-		verify(historyRepository, times(1)).findAllByVisitId_PetId(eq(pet));
+		assertThat(result).isNotNull();
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).getHistoryId()).isEqualTo(responseDto.getHistoryId());
+		verify(historyMapper, times(1)).toDto(eq(history));
 	}
 
 	@Test
@@ -205,21 +217,18 @@ class HistoryServiceTest {
 		when(vetRepository.findById(eq(requestDto.getVetId()))).thenReturn(Optional.of(vet));
 		when(visitRepository.findById(eq(requestDto.getVisitId()))).thenReturn(Optional.of(visit));
 		when(historyRepository.save(any(History.class))).thenReturn(history);
+		when(historyMapper.toDto(eq(history))).thenReturn(responseDto);
 
 		// When
-		HistoryResponseDto response = historyService.updateHistory(history.getId(), requestDto);
+		HistoryResponseDto result = historyService.updateHistory(history.getId(), requestDto);
 
 		// Then
-		assertThat(response).isNotNull();
-		assertThat(response.getHistoryId()).isEqualTo(history.getId());
-		assertThat(response.getSymptoms()).isEqualTo(requestDto.getSymptoms());
-		assertThat(response.getContent()).isEqualTo(requestDto.getContent());
-
-		verify(historyRepository, times(1)).findById(eq(history.getId()));
-		verify(vetRepository, times(1)).findById(eq(requestDto.getVetId()));
-		verify(visitRepository, times(1)).findById(eq(requestDto.getVisitId()));
-		verify(historyRepository, times(1)).save(any(History.class));
+		assertThat(result).isNotNull();
+		assertThat(result.getHistoryId()).isEqualTo(responseDto.getHistoryId());
+		assertThat(result.getSymptoms()).isEqualTo(requestDto.getSymptoms());
+		verify(historyMapper, times(1)).toDto(eq(history));
 	}
+
 
 	@Test
 	@DisplayName("진료 내역 수정 실패 - 진료 내역 없음")

@@ -20,8 +20,8 @@ import org.springframework.samples.petclinic.domain.history.repository.HistoryRe
 import org.springframework.samples.petclinic.domain.history.service.HistoryService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
-import org.springframework.samples.petclinic.domain.vet.VetSpecialtyRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
