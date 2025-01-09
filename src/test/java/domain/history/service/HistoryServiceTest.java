@@ -164,7 +164,7 @@ class HistoryServiceTest {
 	void getHistoriesByPetId_Success() {
 		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
-		when(historyRepository.findAllByVisitId_PetId(eq(pet))).thenReturn(List.of(history));
+		when(historyRepository.findAllByVisitId_PetId(eq(pet.getId()))).thenReturn(List.of(history));
 		when(historyMapper.toDto(eq(history))).thenReturn(responseDto);
 
 		// When
@@ -198,7 +198,7 @@ class HistoryServiceTest {
 	void getHistoriesByPetId_Fail_HistoryNotFound() {
 		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
-		when(historyRepository.findAllByVisitId_PetId(eq(pet))).thenReturn(List.of());
+		when(historyRepository.findAllByVisitId_PetId(eq(pet.getId()))).thenReturn(List.of());
 
 		// When
 		List<HistoryResponseDto> response = historyService.getHistoriesByPetId(pet.getId());
@@ -208,7 +208,7 @@ class HistoryServiceTest {
 		assertThat(response).isEmpty();
 
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
-		verify(historyRepository, times(1)).findAllByVisitId_PetId(eq(pet));
+		verify(historyRepository, times(1)).findAllByVisitId_PetId(eq(pet.getId()));
 	}
 
 	@Test

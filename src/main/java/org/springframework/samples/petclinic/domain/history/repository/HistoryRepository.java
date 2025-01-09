@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface HistoryRepository extends JpaRepository<History, Integer> {
 
-	List<History> findAllByVisitId_PetId(Pet pet);
+	List<History> findAllByVisitId_PetId(Integer petId);
 }

@@ -4,6 +4,7 @@ CREATE TABLE `pets` (
                       `birth_date` DATE NULL,
                       `type_id` INT NOT NULL,
                       `owner_id` INT NOT NULL,
+                      `status` ENUM('REGISTERED', 'DELETED') NOT NULL DEFAULT 'REGISTERED',
                       PRIMARY KEY (`id`)
 );
 
