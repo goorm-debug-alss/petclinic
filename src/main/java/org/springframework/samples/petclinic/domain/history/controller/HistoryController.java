@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryRequestDto;
 import org.springframework.samples.petclinic.domain.history.dto.HistoryResponseDto;
 import org.springframework.samples.petclinic.domain.history.service.HistoryService;
-import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

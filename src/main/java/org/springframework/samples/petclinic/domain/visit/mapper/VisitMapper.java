@@ -1,11 +1,6 @@
 package org.springframework.samples.petclinic.domain.visit.mapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.common.error.PetErrorCode;
-import org.springframework.samples.petclinic.common.exception.ApiException;
-import org.springframework.samples.petclinic.domain.pet.mapper.PetMapper;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
-import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
@@ -13,9 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class VisitMapper {
-
-	@Autowired
-	private PetRepository petRepository;
 
 	/**
 	 * Visit 엔티티 생성

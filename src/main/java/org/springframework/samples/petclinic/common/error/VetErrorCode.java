@@ -3,7 +3,6 @@ package org.springframework.samples.petclinic.common.error;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 @AllArgsConstructor
 @Getter

@@ -2,7 +2,6 @@ package org.springframework.samples.petclinic.domain.vet.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
-import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.vet.repository.SpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;

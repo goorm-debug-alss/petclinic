@@ -7,6 +7,4 @@ import java.util.List;
 
 public interface VetRepository extends JpaRepository<Vet, Integer> {
 	List<Vet> findAllByOrderById();
-
-	List<Vet> findAllByIdIn(List<Integer> ids);
 }
