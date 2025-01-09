@@ -15,6 +15,7 @@ import org.springframework.samples.petclinic.domain.history.repository.HistoryRe
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
@@ -42,7 +43,7 @@ public class HistoryService {
 	 * @return HistoryResponseDto 저장된 진료 정보 반환
 	 */
 	public HistoryResponseDto addHistory(HistoryRequestDto requestDto) {
-		Vet vet = vetRepository.findById(requestDto.getVetId())
+		Vet vet = vetRepository.findByIdAndStatus(requestDto.getVetId(), VetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 		Visit visit = visitRepository.findById(requestDto.getVisitId())
 			.orElseThrow(() -> new ApiException(VisitErrorCode.NO_VISIT));
@@ -84,7 +85,7 @@ public class HistoryService {
 		History history = historyRepository.findById(historyId)
 			.orElseThrow(() -> new ApiException(HistoryErrorCode.NO_HISTORY));
 
-		Vet vet = vetRepository.findById(request.getVetId())
+		Vet vet = vetRepository.findByIdAndStatus(request.getVetId(), VetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
 		Visit visit = visitRepository.findById(request.getVisitId())

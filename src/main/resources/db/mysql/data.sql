@@ -15,9 +15,9 @@ VALUES (1, '뿡치', '2020-01-15', 1, 1),
        (3, '돌배', '2021-03-10', 2, 1);
 
 -- 수의사
-INSERT INTO `vets` (`id`, `name`, `average_ratings`, `review_count`)
-VALUES (1, '이의사', 4.5, 10),
-       (2, '강의사', 4.8, 15);
+INSERT INTO `vets` (`id`, `name`, `average_ratings`, `review_count`, `status`)
+VALUES (1, '이의사', 4.5, 10, 'REGISTERED'),
+       (2, '강의사', 4.8, 15, 'REGISTERED');
 
 -- 전문 분야
 INSERT INTO `specialties` (`id`, `name`)

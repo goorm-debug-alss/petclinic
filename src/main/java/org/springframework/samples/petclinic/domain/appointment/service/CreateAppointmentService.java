@@ -12,6 +12,7 @@ import org.springframework.samples.petclinic.domain.appointment.model.enums.Appt
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
@@ -28,10 +29,9 @@ public class CreateAppointmentService {
 	private final AppointmentMapper appointmentMapper;
 
 	public Appointment createAppointment(AppointmentRequestDto request) {
-		validateRequestData(request);
-
 		Vet vet = getVetOrThrow(request);
 		Pet pet = getPetOrThrow(request);
+		validateRequestData(request);
 
 		validateDuplicateAppointment(request, pet, vet);
 
@@ -72,7 +72,7 @@ public class CreateAppointmentService {
 	}
 
 	private Vet getVetOrThrow(AppointmentRequestDto request) {
-		return vetRepository.findById(request.getVetId())
+		return vetRepository.findByIdAndStatus(request.getVetId(), VetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 

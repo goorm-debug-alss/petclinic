@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.domain.review.dto.ReviewRequestDto;
 import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,9 @@ public class CreateReviewService {
 	private final ReviewMapper reviewMapper;
 
 	public Review createReview(ReviewRequestDto request, Integer ownerId) {
-		validateRequestData(request);
-
-		Owner owner = getOwnerOrThrow(ownerId);
 		Vet vet = getVetOrThrow(request);
+		Owner owner = getOwnerOrThrow(ownerId);
+		validateRequestData(request);
 
 		Review review = reviewMapper.toEntity(request, owner, vet);
 		Review savedReview = reviewRepository.save(review);
@@ -45,7 +45,7 @@ public class CreateReviewService {
 	}
 
 	private Vet getVetOrThrow(ReviewRequestDto request) {
-		return vetRepository.findById(request.getVetId())
+		return vetRepository.findByIdAndStatus(request.getVetId(), VetStatus.REGISTERED)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 

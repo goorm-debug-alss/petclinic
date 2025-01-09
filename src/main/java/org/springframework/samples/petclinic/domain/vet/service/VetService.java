@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.dto.VetRequestDto;
@@ -46,14 +47,14 @@ public class VetService {
 
 	// 수의사 전체 조회
 	public List<VetResponseDto> findAll() {
-		return vetRepository.findAllByOrderById().stream()
+		return vetRepository.findAllByStatusOrderById(VetStatus.REGISTERED).stream()
 			.map(vetMapper::toResponse)
 			.collect(Collectors.toList());
 	}
 
 	// 특정 수의사 조회
 	public VetResponseDto findById(int vetId) {
-		return vetRepository.findById(vetId)
+		return vetRepository.findByIdAndStatus(vetId, VetStatus.REGISTERED)
 			.map(vetMapper::toResponse)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
@@ -72,6 +73,7 @@ public class VetService {
 		return Optional.of(vetRepository.findAllById(vetIds))
 			.orElse(Collections.emptyList())
 			.stream()
+			.filter(Vet::isRegistered)
 			.map(vetMapper::toResponse)
 			.collect(Collectors.toList());
 	}
@@ -80,16 +82,17 @@ public class VetService {
 	@Transactional
 	public void delete(int vetId) {
 		Vet vet = vetRepository.findById(vetId)
+			.filter(Vet::isRegistered)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
-		vetSpecialtyRepository.deleteAllByVetId_Id(vetId);
-		vetRepository.delete(vet);
+		vet.setStatus(VetStatus.DELETED);
 	}
 
 	// 수의사 수정
 	@Transactional
 	public VetResponseDto update(int id, VetRequestDto vetRequestDto) {
 		Vet vet = vetRepository.findById(id)
+			.filter(Vet::isRegistered)
 			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 
 		// 이름 수정
