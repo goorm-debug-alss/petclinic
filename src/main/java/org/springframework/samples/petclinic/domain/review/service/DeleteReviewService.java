@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,7 +24,7 @@ public class DeleteReviewService {
 	private final OwnerRepository ownerRepository;
 	private final ReviewRepository reviewRepository;
 	private final VetRepository vetRepository;
-
+	private  final VetService vetService;
 
 	public void deleteReview(Integer reviewId, Integer ownerId) {
 		Owner owner = getOwnerOrThrow(ownerId);
@@ -31,7 +32,7 @@ public class DeleteReviewService {
 
 		validateReviewOwnership(owner, review);
 
-		Vet vet = getVetOrThrow(review.getVet().getId());
+		Vet vet = vetService.getVetOrThrow(review.getVet().getId());
 
 		reviewRepository.delete(review);
 
@@ -47,10 +48,7 @@ public class DeleteReviewService {
 		return reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new ApiException(ReviewErrorCode.NO_REVIEW));
 	}
-	private Vet getVetOrThrow(Integer vetId) {
-		return vetRepository.findById(vetId)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
-	}
+
 	private static void validateReviewOwnership(Owner owner, Review review) {
 		if (!Objects.equals(owner.getId(), review.getOwner().getId()))
 			throw new ApiException(ReviewErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
