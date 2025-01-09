@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.domain.vet.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
 import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.vet.repository.SpecialtyRepository;
@@ -30,7 +31,7 @@ public class SpecialtyService {
 	public List<Specialty> findByIds(List<Integer> specialtyIds) {
 		return specialtyIds.stream()
 			.map(specialtyId -> specialtyRepository.findById(specialtyId)
-				.orElseThrow(() -> new ApiException(VetErrorCode.NO_SPECIALITY)))
+				.orElseThrow(() -> new ApiException(SpecialityErrorCode.NO_SPECIALITY)))
 			.collect(Collectors.toList());
 	}
 }
