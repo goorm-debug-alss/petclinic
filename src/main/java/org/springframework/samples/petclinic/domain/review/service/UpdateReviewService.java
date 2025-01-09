@@ -15,6 +15,7 @@ import org.springframework.samples.petclinic.domain.review.repository.ReviewRepo
 import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,6 +28,7 @@ public class UpdateReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReviewMapper reviewMapper;
 	private final VetRepository vetRepository;
+	private final VetService vetService;
 
 	public ReviewResponseDto updateReview(ReviewRequestDto request, Integer ownerId, Integer reviewId) {
 		validateRequestData(request);
@@ -34,7 +36,7 @@ public class UpdateReviewService {
 		Review review = getReviewOrThrow(reviewId);
 		validateOwner(ownerId, review);
 
-		Vet vet = getVetOrThrow(review);
+		Vet vet = vetService.getVetOrThrow(review.getVet().getId());
 		updateVetRatingsIfNeeded(request, review, vet);
 
 		review.updateReview(request.getScore(), request.getContent());
@@ -75,11 +77,6 @@ public class UpdateReviewService {
 
 		if (!review.getOwner().getId().equals(owner.getId()))
 			throw new ApiException(ReviewErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
-	}
-
-	private Vet getVetOrThrow(Review review) {
-		return vetRepository.findByIdAndStatus(review.getVet().getId(), VetStatus.REGISTERED)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 
 	private void updateVetRatingsIfNeeded(ReviewRequestDto request, Review review, Vet vet) {

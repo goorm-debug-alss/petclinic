@@ -14,6 +14,7 @@ import org.springframework.samples.petclinic.domain.review.repository.ReviewRepo
 import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,10 +26,11 @@ public class CreateReviewService {
 	private final ReviewRepository reviewRepository;
 	private final OwnerRepository ownerRepository;
 	private final VetRepository vetRepository;
+	private final VetService vetService;
 	private final ReviewMapper reviewMapper;
 
 	public Review createReview(ReviewRequestDto request, Integer ownerId) {
-		Vet vet = getVetOrThrow(request);
+		Vet vet = vetService.getVetOrThrow(request.getVetId());
 		Owner owner = getOwnerOrThrow(ownerId);
 		validateRequestData(request);
 
@@ -42,11 +44,6 @@ public class CreateReviewService {
 	private Owner getOwnerOrThrow(Integer ownerId) {
 		return ownerRepository.findById(ownerId)
 			.orElseThrow(() -> new ApiException(OwnerErrorCode.NO_OWNER));
-	}
-
-	private Vet getVetOrThrow(ReviewRequestDto request) {
-		return vetRepository.findByIdAndStatus(request.getVetId(), VetStatus.REGISTERED)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
 	}
 
 	private void validateRequestData(ReviewRequestDto request) {

@@ -15,8 +15,7 @@ import org.springframework.samples.petclinic.domain.history.repository.HistoryRe
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
-import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
-import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class HistoryService {
 
 	private final HistoryRepository historyRepository;
 	private final PetRepository petRepository;
-	private final VetRepository vetRepository;
+	private final VetService vetService;
 	private final VisitRepository visitRepository;
 	private final HistoryMapper historyMapper;
 
@@ -43,8 +42,7 @@ public class HistoryService {
 	 * @return HistoryResponseDto 저장된 진료 정보 반환
 	 */
 	public HistoryResponseDto addHistory(HistoryRequestDto requestDto) {
-		Vet vet = vetRepository.findByIdAndStatus(requestDto.getVetId(), VetStatus.REGISTERED)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
+		Vet vet = vetService.getVetOrThrow(requestDto.getVetId());
 		Visit visit = visitRepository.findById(requestDto.getVisitId())
 			.orElseThrow(() -> new ApiException(VisitErrorCode.NO_VISIT));
 
@@ -70,7 +68,6 @@ public class HistoryService {
 			.stream()
 			.map(historyMapper::toDto)
 			.collect(Collectors.toList());
-
 	}
 
 	/**
@@ -85,8 +82,7 @@ public class HistoryService {
 		History history = historyRepository.findById(historyId)
 			.orElseThrow(() -> new ApiException(HistoryErrorCode.NO_HISTORY));
 
-		Vet vet = vetRepository.findByIdAndStatus(request.getVetId(), VetStatus.REGISTERED)
-			.orElseThrow(() -> new ApiException(VetErrorCode.NO_VET));
+		Vet vet = vetService.getVetOrThrow(request.getVetId());
 
 		Visit visit = visitRepository.findById(request.getVisitId())
 			.orElseThrow(() -> new ApiException(VisitErrorCode.NO_VISIT));
