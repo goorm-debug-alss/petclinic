@@ -20,6 +20,7 @@ import org.springframework.samples.petclinic.domain.history.repository.HistoryRe
 import org.springframework.samples.petclinic.domain.history.service.HistoryService;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
+import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
@@ -58,12 +59,16 @@ class HistoryServiceIntegrationTest {
 	@Autowired
 	private AppointmentRepository appointmentRepository;
 
+	@Autowired
+	private ReviewRepository reviewRepository;
+
 	private Pet pet;
 	private Vet vet;
 	private Visit visit;
 
 	@BeforeEach
 	void setUp() {
+		reviewRepository.deleteAll();
 		appointmentRepository.deleteAll();
 		vetSpecialtyRepository.deleteAll();
 		vetRepository.deleteAll();

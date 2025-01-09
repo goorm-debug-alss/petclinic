@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +22,8 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "pets")
 public class Pet extends BaseEntity {
+
+
 	@Column(length = 15, nullable = false)
 	private String name;
 
@@ -33,4 +37,19 @@ public class Pet extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "owner_id")
 	private Owner owner;
+
+	@Enumerated(EnumType.STRING)
+	@Column(length = 10, nullable = false)
+	private PetStatus status;
+
+	@PrePersist
+	public void prePersist() {
+		if (this.status == null) {
+			this.status = PetStatus.REGISTERED; // 명시적으로 기본값 적용
+		}
+	}
+
+	public boolean isRegistered() {
+		return Objects.equals(this.status, PetStatus.REGISTERED);
+	}
 }

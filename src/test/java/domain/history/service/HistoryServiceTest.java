@@ -18,6 +18,7 @@ import org.springframework.samples.petclinic.domain.history.mapper.HistoryMapper
 import org.springframework.samples.petclinic.domain.history.model.History;
 import org.springframework.samples.petclinic.domain.history.repository.HistoryRepository;
 import org.springframework.samples.petclinic.domain.history.service.HistoryService;
+import org.springframework.samples.petclinic.domain.pet.enums.PetStatus;
 import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
@@ -163,8 +164,8 @@ class HistoryServiceTest {
 	@DisplayName("특정 반려동물의 진료 내역 조회 성공")
 	void getHistoriesByPetId_Success() {
 		// Given
-		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
-		when(historyRepository.findAllByVisitId_PetId(eq(pet))).thenReturn(List.of(history));
+		when(petRepository.findByIdAndStatus(eq(pet.getId()),eq(PetStatus.REGISTERED))).thenReturn(Optional.of(pet));
+		when(historyRepository.findAllByVisitId_PetId(eq(pet.getId()))).thenReturn(List.of(history));
 		when(historyMapper.toDto(eq(history))).thenReturn(responseDto);
 
 		// When
@@ -181,7 +182,7 @@ class HistoryServiceTest {
 	@DisplayName("특정 반려동물의 진료 내역 조회 실패 - 반려동물 없음")
 	void getHistoriesByPetId_Fail_PetNotFound() {
 		// Given
-		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.empty());
+		when(petRepository.findByIdAndStatus(eq(pet.getId()),eq(PetStatus.REGISTERED))).thenReturn(Optional.empty());
 
 		// When, Then
 		assertThatThrownBy(() -> historyService.getHistoriesByPetId(pet.getId()))
@@ -189,7 +190,7 @@ class HistoryServiceTest {
 			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
-		verify(petRepository, times(1)).findById(eq(pet.getId()));
+		verify(petRepository, times(1)).findByIdAndStatus(eq(pet.getId()),eq(PetStatus.REGISTERED));
 		verifyNoInteractions(historyRepository);
 	}
 
@@ -197,8 +198,8 @@ class HistoryServiceTest {
 	@DisplayName("특정 반려동물의 진료 내역 조회 실패 - 진료 내역 없음")
 	void getHistoriesByPetId_Fail_HistoryNotFound() {
 		// Given
-		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
-		when(historyRepository.findAllByVisitId_PetId(eq(pet))).thenReturn(List.of());
+		when(petRepository.findByIdAndStatus(eq(pet.getId()),eq(PetStatus.REGISTERED))).thenReturn(Optional.of(pet));
+		when(historyRepository.findAllByVisitId_PetId(eq(pet.getId()))).thenReturn(List.of());
 
 		// When
 		List<HistoryResponseDto> response = historyService.getHistoriesByPetId(pet.getId());
@@ -207,8 +208,8 @@ class HistoryServiceTest {
 		assertThat(response).isNotNull();
 		assertThat(response).isEmpty();
 
-		verify(petRepository, times(1)).findById(eq(pet.getId()));
-		verify(historyRepository, times(1)).findAllByVisitId_PetId(eq(pet));
+		verify(petRepository, times(1)).findByIdAndStatus(eq(pet.getId()),eq(PetStatus.REGISTERED));
+		verify(historyRepository, times(1)).findAllByVisitId_PetId(eq(pet.getId()));
 	}
 
 	@Test

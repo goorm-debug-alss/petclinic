@@ -15,6 +15,9 @@ import org.springframework.samples.petclinic.domain.owner.repository.OwnerReposi
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.DeleteReviewService;
+import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 
 import java.util.Optional;
 
@@ -32,7 +35,13 @@ public class DeleteReviewServiceTest {
 	private ReviewRepository reviewRepository;
 
 	@Mock
+	private VetService vetService;
+
+	@Mock
 	private OwnerRepository ownerRepository;
+
+	@Mock
+	private VetRepository vetRepository;
 
 	private Review mockReview;
 	private Owner mockOwner;
@@ -50,6 +59,7 @@ public class DeleteReviewServiceTest {
 		// given
 		when(ownerRepository.findById(1)).thenReturn(Optional.of(mockOwner));
 		when(reviewRepository.findById(1)).thenReturn(Optional.of(mockReview));
+		when(vetService.getVetOrThrow(1)).thenReturn(mockReview.getVet());
 
 		// when
 		deleteReviewService.deleteReview(1, 1);
@@ -58,6 +68,7 @@ public class DeleteReviewServiceTest {
 		verify(ownerRepository, times(1)).findById(1);
 		verify(reviewRepository, times(1)).findById(1);
 		verify(reviewRepository, times(1)).delete(mockReview);
+		verify(vetService, times(1)).getVetOrThrow(1);
 	}
 
 	@Test
@@ -103,9 +114,15 @@ public class DeleteReviewServiceTest {
 	}
 
 	private void createMockReviewTestData() {
+		Vet mockVet = Vet.builder()
+			.id(1)
+			.build();
+
 		mockReview = Review.builder()
 			.id(1)
 			.owner(mockOwner)
+			.vet(mockVet)
+			.score(5) // score 필드 초기화
 			.build();
 	}
 }

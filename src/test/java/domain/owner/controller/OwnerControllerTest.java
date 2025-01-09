@@ -13,12 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.samples.petclinic.PetClinicApplication;
 import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
+import org.springframework.samples.petclinic.domain.history.repository.HistoryRepository;
 import org.springframework.samples.petclinic.domain.owner.dto.*;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.token.dto.TokenResponseDto;
 import org.springframework.samples.petclinic.domain.token.helper.JwtTokenHelper;
+import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,11 +56,19 @@ public class OwnerControllerTest {
 	@Autowired
 	private OwnerRepository ownerRepository;
 
+	@Autowired
+	private VisitRepository visitRepository;
+
+	@Autowired
+	private HistoryRepository historyRepository;
+
 	private String token;
 
 	@BeforeEach
 	void setUp() {
 		// given: 데이터 초기화
+		historyRepository.deleteAll();
+		visitRepository.deleteAll();
 		reviewRepository.deleteAll();
 		appointmentRepository.deleteAll();
 		petRepository.deleteAll();

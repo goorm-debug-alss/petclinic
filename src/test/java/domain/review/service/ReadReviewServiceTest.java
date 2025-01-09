@@ -16,6 +16,7 @@ import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.ReadReviewService;
+import org.springframework.samples.petclinic.domain.vet.model.enums.VetStatus;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
@@ -114,7 +115,7 @@ public class ReadReviewServiceTest {
 	@DisplayName("수의사 리뷰 조회 성공 - 유효한 Vet ID로 리뷰를 조회하면 해당 리뷰 목록을 반환한다")
 	void validVetId_findVetReviews_returnReviewList() {
 		// given
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetRepository.findByIdAndStatus(1, VetStatus.REGISTERED)).thenReturn(Optional.of(mockVet));
 		when(reviewRepository.findByVetId(1)).thenReturn(Optional.of(List.of(mockReview)));
 		when(reviewMapper.toDto(mockReview)).thenReturn(mockResponse);
 
@@ -131,7 +132,7 @@ public class ReadReviewServiceTest {
 	@DisplayName("수의사 리뷰 조회 실패 - 존재하지 않는 Vet ID로 조회 시 예외가 발생한다")
 	void invalidVetId_findVetReviews_throwApiException() {
 		// given
-		when(vetRepository.findById(1)).thenThrow(new ApiException(VetErrorCode.NO_VET));
+		when(vetRepository.findByIdAndStatus(1,VetStatus.REGISTERED)).thenThrow(new ApiException(VetErrorCode.NO_VET));
 
 		// when & then
 		assertThrows(ApiException.class, () -> readReviewService.findVetReviews(1));
@@ -141,7 +142,7 @@ public class ReadReviewServiceTest {
 	@DisplayName("수의사 리뷰 조회 실패 - 유효한 Vet ID지만 리뷰가 없으면 예외가 발생한다")
 	void validVetIdNoReviews_findVetReviews_throwApiException() {
 		// given
-		when(vetRepository.findById(1)).thenReturn(Optional.of(mockVet));
+		when(vetRepository.findByIdAndStatus(1,VetStatus.REGISTERED)).thenReturn(Optional.of(mockVet));
 		when(reviewRepository.findByVetId(1)).thenThrow(new ApiException(ReviewErrorCode.NO_REVIEW));
 
 		// when & then

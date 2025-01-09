@@ -13,12 +13,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.samples.petclinic.PetClinicApplication;
+import org.springframework.samples.petclinic.domain.appointment.repository.AppointmentRepository;
+import org.springframework.samples.petclinic.domain.history.repository.HistoryRepository;
+import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.token.helper.JwtTokenHelper;
 import org.springframework.samples.petclinic.domain.vet.repository.SpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.dto.VetRequestDto;
 import org.springframework.samples.petclinic.domain.vet.dto.VetResponseDto;
 import org.springframework.samples.petclinic.domain.vet.model.Specialty;
+import org.springframework.samples.petclinic.domain.vet.repository.VetSpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +54,18 @@ public class VetControllerTest {
 	@Autowired
 	private SpecialtyRepository specialtyRepository;
 
+	@Autowired
+	private VetSpecialtyRepository vetSpecialtyRepository;
+
+	@Autowired
+	private HistoryRepository historyRepository;
+
+	@Autowired
+	private ReviewRepository reviewRepository;
+
+	@Autowired
+	private AppointmentRepository appointmentRepository;
+
 	private VetRequestDto vetRequestDto;
 
 	private String token;
@@ -58,9 +74,16 @@ public class VetControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		sampleVetRequestDto();
+
+		appointmentRepository.deleteAll();
+		reviewRepository.deleteAll();
+		historyRepository.deleteAll();
+		vetSpecialtyRepository.deleteAll();
+		specialtyRepository.deleteAll();
 		vetRepository.deleteAll();
+
 		token = generateTestToken();
+		sampleVetRequestDto();
 	}
 
 	void sampleVetRequestDto() {
@@ -72,9 +95,11 @@ public class VetControllerTest {
 		specialty2.setName("치과");
 		specialtyRepository.save(specialty2);
 
+
 		vetRequestDto = new VetRequestDto();
 		vetRequestDto.setName("테스트");
 		vetRequestDto.setSpecialties(List.of(specialty1.getId(), specialty2.getId()));
+
 	}
 
 	@Test
@@ -143,10 +168,11 @@ public class VetControllerTest {
 	void updateVet_shouldSucceed() throws Exception {
 		// given
 		VetResponseDto savedVet = vetService.register(vetRequestDto);
+		Integer specialtyId = specialtyRepository.findAll().get(0).getId();
 
 		VetRequestDto updateRequest = new VetRequestDto();
 		updateRequest.setName("수정수의사");
-		updateRequest.setSpecialties(List.of(1));
+		updateRequest.setSpecialties(List.of(specialtyId));
 
 		// when
 		MockHttpServletResponse response = performRequest("/vets/" + savedVet.getId(), updateRequest, HttpMethod.PUT);

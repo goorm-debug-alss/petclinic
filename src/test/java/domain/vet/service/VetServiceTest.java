@@ -289,7 +289,7 @@ public class VetServiceTest {
 
 		assertThatThrownBy(() -> vetService.findBySpecialtyId(123))
 			.isInstanceOf(ApiException.class)
-			.hasMessageContaining("해당 전공분야가 존재하지 않습니다.");
+			.hasMessageContaining("해당 전공분야를 찾을 수 없습니다.");
 
 		verify(vetSpecialtyRepository, times(1)).findVetIdsBySpecialtyId_Id(123);
 		verifyNoMoreInteractions(vetSpecialtyRepository, vetRepository, vetMapper);
@@ -306,6 +306,7 @@ public class VetServiceTest {
 
 		// Then
 		verify(vetRepository, times(1)).findByIdAndStatus(1, VetStatus.REGISTERED);
+		verify(vetSpecialtyRepository, times(1)).deleteAllByVetId_Id(1);
 		verifyNoMoreInteractions(vetRepository, vetSpecialtyRepository);
 	}
 
