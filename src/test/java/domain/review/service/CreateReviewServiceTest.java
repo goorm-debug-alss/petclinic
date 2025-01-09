@@ -17,7 +17,7 @@ import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.CreateReviewService;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
 import java.util.Optional;
@@ -73,8 +73,8 @@ public class CreateReviewServiceTest {
 		// then
 		assertThat(review.getScore()).isEqualTo(5);
 		assertThat(review.getContent()).isEqualTo("Test Review");
-		assertThat(review.getOwnerId()).isEqualTo(mockOwner);
-		assertThat(review.getVetId()).isEqualTo(mockVet);
+		assertThat(review.getOwner()).isEqualTo(mockOwner);
+		assertThat(review.getVet()).isEqualTo(mockVet);
 	}
 
 	@Test
@@ -206,8 +206,8 @@ public class CreateReviewServiceTest {
 		mockReview = Review.builder()
 			.score(request.getScore())
 			.content(request.getContent())
-			.ownerId(mockOwner)
-			.vetId(mockVet)
+			.owner(mockOwner)
+			.vet(mockVet)
 			.build();
 	}
 }

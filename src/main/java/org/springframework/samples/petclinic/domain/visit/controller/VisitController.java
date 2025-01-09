@@ -35,7 +35,7 @@ public class VisitController {
 	 * @return 방문 내역 목록
 	 */
 	@GetMapping("/{petId}")
-	public ResponseEntity<List<VisitResponseDto>> getVisitsByPetId(@PathVariable int petId) {
+	public ResponseEntity<List<VisitResponseDto>> getVisitsByPetId(@PathVariable("petId") int petId) {
 		List<VisitResponseDto> response = visitService.getVisitsByPetId(petId);
 		return ResponseEntity.ok(response);
 	}

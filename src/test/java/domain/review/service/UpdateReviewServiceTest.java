@@ -19,7 +19,7 @@ import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
 import org.springframework.samples.petclinic.domain.review.service.UpdateReviewService;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.samples.petclinic.domain.vet.model.Vet;
 
 import java.util.Optional;
@@ -194,8 +194,8 @@ public class UpdateReviewServiceTest {
 	private void createMockReviewTestData() {
 		mockReview = Review.builder()
 			.id(1)
-			.ownerId(mockOwner)
-			.vetId(mockVet)
+			.owner(mockOwner)
+			.vet(mockVet)
 			.score(1)
 			.content("Test Initial Review")
 			.build();

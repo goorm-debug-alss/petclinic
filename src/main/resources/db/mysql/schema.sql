@@ -65,7 +65,7 @@ CREATE TABLE `history` (
 CREATE TABLE `appointment` (
                              `id` INT NOT NULL AUTO_INCREMENT,
                              `appt_date` DATE NOT NULL,
-                             `status` enum('완료', '취소') NULL,
+                             `status` enum('COMPLETE', 'CANCEL') NULL,
                              `symptoms` VARCHAR(255) NULL,
                              `pet_id` INT NOT NULL,
                              `vet_id` INT NOT NULL,

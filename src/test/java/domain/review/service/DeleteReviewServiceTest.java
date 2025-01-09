@@ -105,7 +105,7 @@ public class DeleteReviewServiceTest {
 	private void createMockReviewTestData() {
 		mockReview = Review.builder()
 			.id(1)
-			.ownerId(mockOwner)
+			.owner(mockOwner)
 			.build();
 	}
 }

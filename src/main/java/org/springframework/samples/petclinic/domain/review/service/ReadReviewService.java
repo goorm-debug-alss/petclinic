@@ -8,7 +8,7 @@ import org.springframework.samples.petclinic.domain.review.dto.ReviewResponseDto
 import org.springframework.samples.petclinic.domain.review.mapper.ReviewMapper;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
-import org.springframework.samples.petclinic.domain.vet.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

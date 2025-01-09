@@ -13,6 +13,7 @@ import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
+import org.springframework.samples.petclinic.domain.visit.mapper.VisitMapper;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
 import org.springframework.samples.petclinic.domain.visit.service.VisitService;
@@ -39,7 +40,11 @@ class VisitServiceTest {
 	@Mock
 	private PetRepository petRepository;
 
+	@Mock
+	private VisitMapper visitMapper;
+
 	private VisitRequestDto visitRequestDto;
+	private VisitResponseDto visitResponseDto;
 	private Visit visit;
 	private Pet pet;
 
@@ -60,17 +65,25 @@ class VisitServiceTest {
 			.id(1)
 			.description("건강검진")
 			.visitDate(LocalDateTime.now())
-			.petId(pet)
+			.pet(pet)
+			.build();
+
+		visitResponseDto = VisitResponseDto.builder()
+			.visitId(1)
+			.description("건강검진")
+			.visitDate(visit.getVisitDate())
+			.petName(pet.getName())
 			.build();
 	}
 
 	@Test
 	@DisplayName("방문 내역 생성 성공")
 	void createVisit_Success() {
-
 		// Given
 		when(petRepository.findById(eq(visitRequestDto.getPetId()))).thenReturn(Optional.of(pet));
+		when(visitMapper.toEntity(eq(visitRequestDto), eq(pet))).thenReturn(visit);
 		when(visitRepository.save(any(Visit.class))).thenReturn(visit);
+		when(visitMapper.toDto(any(Visit.class))).thenReturn(visitResponseDto);
 
 		// When
 		VisitResponseDto response = visitService.createVisit(visitRequestDto);
@@ -82,7 +95,9 @@ class VisitServiceTest {
 		assertThat(response.getDescription()).isEqualTo(visit.getDescription());
 
 		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
+		verify(visitMapper, times(1)).toEntity(eq(visitRequestDto), eq(pet));
 		verify(visitRepository, times(1)).save(any(Visit.class));
+		verify(visitMapper, times(1)).toDto(any(Visit.class));
 	}
 
 	@Test
@@ -91,23 +106,23 @@ class VisitServiceTest {
 		// Given
 		when(petRepository.findById(eq(visitRequestDto.getPetId()))).thenReturn(Optional.empty());
 
-		// When,Then
+		// When, Then
 		assertThatThrownBy(() -> visitService.createVisit(visitRequestDto))
 			.isInstanceOf(ApiException.class)
 			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
 		verify(petRepository, times(1)).findById(eq(visitRequestDto.getPetId()));
-		verifyNoInteractions(visitRepository);
+		verifyNoInteractions(visitMapper, visitRepository);
 	}
 
 	@Test
 	@DisplayName("특정 반려동물의 방문 내역 조회 성공")
 	void getVisitsByPetId_Success() {
-
 		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.of(pet));
-		when(visitRepository.findAllByPetId(eq(pet))).thenReturn(List.of(visit));
+		when(visitRepository.findAllByPet(eq(pet))).thenReturn(List.of(visit));
+		when(visitMapper.toDto(any(Visit.class))).thenReturn(visitResponseDto);
 
 		// When
 		List<VisitResponseDto> response = visitService.getVisitsByPetId(pet.getId());
@@ -119,9 +134,9 @@ class VisitServiceTest {
 		assertThat(response.get(0).getPetName()).isEqualTo(pet.getName());
 		assertThat(response.get(0).getDescription()).isEqualTo(visit.getDescription());
 
-
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
-		verify(visitRepository, times(1)).findAllByPetId(eq(pet));
+		verify(visitRepository, times(1)).findAllByPet(eq(pet));
+		verify(visitMapper, times(1)).toDto(any(Visit.class));
 	}
 
 	@Test
@@ -130,17 +145,13 @@ class VisitServiceTest {
 		// Given
 		when(petRepository.findById(eq(pet.getId()))).thenReturn(Optional.empty());
 
-		// When
-		// Then
+		// When, Then
 		assertThatThrownBy(() -> visitService.getVisitsByPetId(pet.getId()))
 			.isInstanceOf(ApiException.class)
 			.hasFieldOrPropertyWithValue("errorCodeInterface", PetErrorCode.NO_PET)
 			.hasFieldOrPropertyWithValue("errorDescription", "해당 반려동물이 존재하지 않습니다.");
 
-
-
-		// Then
 		verify(petRepository, times(1)).findById(eq(pet.getId()));
-		verifyNoInteractions(visitRepository);
+		verifyNoInteractions(visitMapper, visitRepository);
 	}
 }
