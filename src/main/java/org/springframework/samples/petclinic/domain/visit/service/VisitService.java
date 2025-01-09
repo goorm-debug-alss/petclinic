@@ -7,6 +7,7 @@ import org.springframework.samples.petclinic.domain.pet.model.Pet;
 import org.springframework.samples.petclinic.domain.pet.repository.PetRepository;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitRequestDto;
 import org.springframework.samples.petclinic.domain.visit.dto.VisitResponseDto;
+import org.springframework.samples.petclinic.domain.visit.mapper.VisitMapper;
 import org.springframework.samples.petclinic.domain.visit.model.Visit;
 
 import org.springframework.samples.petclinic.domain.visit.repository.VisitRepository;
@@ -23,6 +24,7 @@ public class VisitService {
 
     private final VisitRepository visitRepository;
     private final PetRepository petRepository;
+	private final VisitMapper visitMapper;
 
     /**
      * 방문 내역 생성
@@ -31,44 +33,12 @@ public class VisitService {
      * @return VisitResponseDto 저장된 방문 정보 반환
      */
     public VisitResponseDto createVisit(VisitRequestDto requestDto) {
+		Pet pet = petRepository.findById(requestDto.getPetId())
+			.orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
-        Visit visit = createVisitEntity(requestDto);
+		Visit visit = visitMapper.toEntity(requestDto, pet);
         Visit savedVisit = visitRepository.save(visit);
-        return buildResponseDto(savedVisit);
-    }
-
-    /**
-     * Visit 엔티티 생성
-     *
-     * @param requestDto 요청 DTO
-     * @return 생성된 Visit 객체
-     */
-    private Visit createVisitEntity(VisitRequestDto requestDto) {
-
-        Pet pet = petRepository.findById(requestDto.getPetId())
-                .orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
-
-        return Visit.builder()
-                .description(requestDto.getDescription())
-                .visitDate(requestDto.getVisitDate())
-                .petId(pet)
-                .build();
-    }
-
-    /**
-     * Visit 객체를 기반으로 응답 DTO 생성
-     *
-     * @param visit 저장된 Visit 객체
-     * @return VisitResponseDto 반환
-     */
-    private VisitResponseDto buildResponseDto(Visit visit) {
-
-        return VisitResponseDto.builder()
-                .visitId(visit.getId())
-                .visitDate(visit.getVisitDate())
-                .description(visit.getDescription())
-                .petName(visit.getPetId().getName())
-                .build();
+        return visitMapper.toDto(savedVisit);
     }
 
     /**
@@ -78,19 +48,12 @@ public class VisitService {
      * @return 방문 내역 목록 응답 DTO
      */
     public List<VisitResponseDto> getVisitsByPetId(int petId) {
-
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new ApiException(PetErrorCode.NO_PET));
 
         return visitRepository.findAllByPetId(pet)
                 .stream()
-                .map(visit -> VisitResponseDto.builder()
-                        .visitId(visit.getId())
-                        .petName(pet.getName())
-                        .visitDate(visit.getVisitDate())
-                        .description(visit.getDescription())
-                        .build())
+                .map(visitMapper::toDto)
                 .collect(Collectors.toList());
-
     }
 }
