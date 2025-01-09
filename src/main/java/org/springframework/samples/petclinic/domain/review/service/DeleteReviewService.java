@@ -3,13 +3,18 @@ package org.springframework.samples.petclinic.domain.review.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.samples.petclinic.common.error.OwnerErrorCode;
 import org.springframework.samples.petclinic.common.error.ReviewErrorCode;
+import org.springframework.samples.petclinic.common.error.VetErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.owner.model.Owner;
 import org.springframework.samples.petclinic.domain.owner.repository.OwnerRepository;
 import org.springframework.samples.petclinic.domain.review.model.Review;
 import org.springframework.samples.petclinic.domain.review.repository.ReviewRepository;
+import org.springframework.samples.petclinic.domain.vet.model.Vet;
+import org.springframework.samples.petclinic.domain.vet.repository.VetRepository;
+import org.springframework.samples.petclinic.domain.vet.service.VetService;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Service
@@ -18,15 +23,20 @@ public class DeleteReviewService {
 
 	private final OwnerRepository ownerRepository;
 	private final ReviewRepository reviewRepository;
+	private final VetRepository vetRepository;
+	private  final VetService vetService;
 
 	public void deleteReview(Integer reviewId, Integer ownerId) {
 		Owner owner = getOwnerOrThrow(ownerId);
-
 		Review review = getReviewOrThrow(reviewId);
 
 		validateReviewOwnership(owner, review);
 
+		Vet vet = vetService.getVetOrThrow(review.getVet().getId());
+
 		reviewRepository.delete(review);
+
+		updateVetRatingAndReviewCount(vet, review.getScore());
 	}
 
 	private Owner getOwnerOrThrow(Integer ownerId) {
@@ -43,4 +53,26 @@ public class DeleteReviewService {
 		if (!Objects.equals(owner.getId(), review.getOwner().getId()))
 			throw new ApiException(ReviewErrorCode.UNAUTHORIZED_REVIEW_ACCESS);
 	}
+
+	private void updateVetRatingAndReviewCount(Vet vet, int removedScore) {
+		int currentReviewCount = vet.getReviewCount() != null ? vet.getReviewCount() : 0;
+		BigDecimal currentAverageRating = vet.getAverageRatings() != null ? vet.getAverageRatings() : BigDecimal.ZERO;
+
+		// 리뷰 삭제에 따른 총 점수 업데이트
+		BigDecimal updatedTotalScore = currentAverageRating.multiply(BigDecimal.valueOf(currentReviewCount))
+			.subtract(BigDecimal.valueOf(removedScore));
+
+		// 리뷰 수 감소
+		int updatedReviewCount = Math.max(currentReviewCount - 1, 0);
+
+		// 평균 평점 계산
+		BigDecimal updatedAverageRating = updatedReviewCount > 0
+			? updatedTotalScore.divide(BigDecimal.valueOf(updatedReviewCount), 2, BigDecimal.ROUND_HALF_UP)
+			: BigDecimal.ZERO;
+
+		// 수의사 객체 업데이트
+		vet.updateRatings(updatedAverageRating, updatedReviewCount);
+		vetRepository.save(vet);
+	}
 }
+
