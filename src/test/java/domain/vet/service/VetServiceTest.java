@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.samples.petclinic.common.error.VetErrorCode;
+import org.springframework.samples.petclinic.common.error.SpecialityErrorCode;
 import org.springframework.samples.petclinic.common.exception.ApiException;
 import org.springframework.samples.petclinic.domain.vet.repository.SpecialtyRepository;
 import org.springframework.samples.petclinic.domain.vet.mapper.VetSpecialtyMapper;
@@ -166,11 +166,11 @@ public class VetServiceTest {
 	void registerVetFailure_noSpecialties() {
 		vetRequestDto.setSpecialties(new ArrayList<>(List.of(222)));
 		when(specialtyService.findByIds(new ArrayList<>(List.of(222))))
-			.thenThrow(new ApiException(VetErrorCode.NO_SPECIALITY));
+			.thenThrow(new ApiException(SpecialityErrorCode.NO_SPECIALITY));
 
 		assertThatThrownBy(() -> vetService.register(vetRequestDto))
 			.isInstanceOf(ApiException.class)
-			.hasMessageContaining("해당 전공분야가 존재하지 않습니다.");
+			.hasMessageContaining("해당 전공분야를 찾을 수 없습니다.");
 
 		verify(vetRepository, never()).save(any());
 		verify(specialtyRepository, never()).save(any());
@@ -407,11 +407,11 @@ public class VetServiceTest {
 	void updateVetFailure_NoSpeciality() {
 		when(vetRepository.findById(1)).thenReturn(Optional.ofNullable(vet));
 		when(specialtyService.findByIds(new ArrayList<>(List.of(222))))
-			.thenThrow(new ApiException(VetErrorCode.NO_SPECIALITY));
+			.thenThrow(new ApiException(SpecialityErrorCode.NO_SPECIALITY));
 
 		assertThatThrownBy(() -> vetService.update(1, new VetRequestDto(null, List.of(222))))
 			.isInstanceOf(ApiException.class)
-			.hasMessageContaining("해당 전공분야가 존재하지 않습니다.");
+			.hasMessageContaining("해당 전공분야를 찾을 수 없습니다.");
 
 		verify(vetSpecialtyRepository, never()).deleteAllByVetId_Id(anyInt());
 		verify(vetRepository, never()).save(any());
