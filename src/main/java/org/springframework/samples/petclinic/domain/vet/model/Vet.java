@@ -35,8 +35,4 @@ public class Vet extends BaseEntity {
 		this.averageRatings = newAverageRatings;
 		this.reviewCount = newReviewCount;
 	}
-
-	public boolean isRegistered() {
-		return Objects.equals(this.status, VetStatus.REGISTERED);
-	}
 }
