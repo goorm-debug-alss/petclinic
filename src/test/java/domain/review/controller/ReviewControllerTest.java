@@ -244,7 +244,7 @@ public class ReviewControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 			.andReturn().getResponse();
 
-		// then: 응답 상태 코드가 200이어야 한다
-		assertThat(deleteResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
+		// then: 응답 상태 코드가 204이어야 한다
+		assertThat(deleteResponse.getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
 	}
 }
