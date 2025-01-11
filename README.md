@@ -16,7 +16,7 @@
 - [프로젝트 노션 링크](https://goormkdx.notion.site/4-159c0ff4ce3180249c51e3a87d19d9cf)
 - [API 명세](https://www.notion.so/goormkdx/cc89244e7aa0442aa72238f6564b0863?v=06acc662c9d241d7a891252828740036)
 - [단위 테스트 명세](https://goormkdx.notion.site/fe1795ab4ef14e7a9c541e1c4b715127?v=c9dfe9f1ad9c4173949554f2124c73a4)
-
+- [PetClinic-프로젝트 소개.pdf](https://github.com/user-attachments/files/18386006/PetClinic-.pdf)
 
 ## 0. 목차
 
@@ -44,18 +44,24 @@
 
 <br>
 
-## <span id="2">📌 2. 사용 기술</span>
+## <span id="2">📌 2. 사용 기술
 
+### 💻 기술 스택
+- **Java 17**: 최신 장기 지원(LTS) 버전으로, 향상된 성능과 새로운 기능 활용
+- **Spring Boot 3.4.0**: 애플리케이션 개발을 간소화하기 위한 프레임워크로 데이터베이스와의 통합, RESTful API 설계에 활용
+- **Spring Security**: 애플리케이션 보안을 위한 인증 및 권한 관리
+- **JPA (Java Persistence API)**: 데이터베이스와의 상호작용을 간단하게 처리
+- **MySQL**: 관계형 데이터베이스 관리 시스템(RDBMS)으로 데이터 저장 및 관리
+- **JUnit 5**: 테스트 자동화를 위한 프레임워크
+- **Mockito**: 단위 테스트에서 객체의 동작을 모킹(mocking)하기 위한 라이브러리
+- **Swagger UI**: API 문서화 및 테스트를 위한 도구
 
+### ⚙️ 개발 환경
+- **Gradle**: 프로젝트 빌드 및 의존성 관리를 위한 도구
+- **SpringBootTest**: Spring Boot 애플리케이션의 통합 테스트를 지원
+- **Notion**: 프로젝트 관리와 협업 도구로 사용
 
-- **Java 17**: 최신 장기 지원(LTS) 버전으로, 향상된 성능과 새로운 기능 활용.
-- **Spring Boot 3.4.0**: 애플리케이션 개발을 간소화하기 위한 프레임워크로, 데이터베이스와의 통합, RESTful API 설계에 활용.
-- **Spring Security**: 애플리케이션 보안을 위한 인증 및 권한 관리.
-- **JPA (Java Persistence API)**: ORM 기술로, 데이터베이스와의 상호작용을 간단하게 처리.
-- **H2 Database**: 로컬 개발 및 테스트를 위한 인메모리 데이터베이스.
-- **JUnit 5**: 테스트 자동화를 위한 프레임워크.
-- **Swagger UI**: API 문서화 및 테스트를 위한 도구.
-- **Gradle 7.6.1**: 프로젝트 빌드 및 의존성 관리를 위한 도구.
+<br>
 
 
 ## <span id="3">🗂️ 3. 디렉토리 구조</span>
@@ -127,15 +133,13 @@ project-root/
 <br>
 
 ## <span id="5">🚀 5. 개선 사항</span>
-* 추가예정!!!!
-1. **API 속도 개선**:
-    - 데이터베이스 쿼리 최적화 및 캐싱 도입으로 평균 응답 시간을 40% 단축.
+1. 데이터베이스 수정
 
-2. **테스트 커버리지 확대**:
-    - 단위 테스트와 통합 테스트 추가 작성으로 커버리지 85% 달성.
+2. RESTful API로 변경
 
-3. **CI/CD 파이프라인 구축**:
- 
+3. 보안 강화
+
+4. CI/CD 파이프라인 구축
 
 <br>
 
